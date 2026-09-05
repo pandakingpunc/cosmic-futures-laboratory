@@ -31,7 +31,7 @@ The decaying-matter radiation comparison has maximum absolute log-density differ
 - The layout was inspected at the default desktop viewport and 390×844 CSS pixels. Mobile configuration controls and the run button remain accessible, with no horizontal document overflow. Screenshots are in `docs/media/`.
 - No warning/error console messages were observed in the inspected production session. Browser download controls were exercised; the embedded browser did not expose a completed download event, so saving files to disk from that browser is not certified by this record. Export serialization is tested, and generated result files are included under `examples/`.
 
-GitHub Actions workflows are supplied but have not been claimed to have run on an external GitHub repository. The public-release metadata check intentionally remains blocked until the owner replaces the author placeholders.
+GitHub Actions workflows are supplied but have not been claimed to have run on an external GitHub repository. The owner subsequently supplied the author name Mustafa Karatum; citation placeholders were replaced and the local public-release metadata check passed. This check does not establish that GitHub publication or Zenodo archival has occurred.
 
 ## Validation boundaries
 

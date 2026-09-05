@@ -91,7 +91,7 @@ docs/                   Methodology, limits, provenance, publication guide
 
 ## GitHub and Zenodo release
 
-The repository includes MIT licensing, `CITATION.cff`, `.zenodo.json`, CI, release notes and a publication checklist. **Replace the marked author placeholders** with the owner's chosen names and any verified affiliations/ORCIDs. No identity, DOI, affiliation or public repository URL has been invented. Run `node scripts/release-check.mjs` before tagging a public release; it intentionally refuses publication metadata containing placeholders.
+The repository includes MIT licensing, `CITATION.cff`, `.zenodo.json`, CI, release notes and a publication checklist. Author metadata records **Mustafa Karatum**, supplied by the project owner, whose GitHub username is **pandakingpunc**. Add any other authors and optional verified affiliations/ORCIDs before publication. No DOI, affiliation or public repository URL has been invented. Run `node scripts/release-check.mjs` before tagging a public release; it refuses publication metadata containing placeholders.
 
 Follow [the release guide](docs/releasing.md). Publication to GitHub or Zenodo is an owner action; creating the project does not itself mint a DOI. After archival, cite the exact software version and assigned version DOI. A recommended citation template appears in `CITATION.cff`.
 

@@ -1,14 +1,15 @@
 cff-version: 1.2.0
 message: >-
-  Cite the specific archived software version after replacing the release
-  author placeholder and adding the Zenodo-assigned DOI. No DOI has been minted.
+  Cite the specific software version. Add the Zenodo-assigned DOI after
+  archival; no DOI has been minted yet.
 title: 'Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures'
 type: software
 version: 0.1.0
 date-released: '2026-09-05'
 license: MIT
 authors:
-  - family-names: REPLACE_WITH_RELEASE_AUTHOR
+  - family-names: Karatum
+    given-names: Mustafa
 abstract: >-
   An interactive FLRW background simulator with adaptive numerical integration,
   conservative dark-matter transfers, conditional asymptotic continuation,
