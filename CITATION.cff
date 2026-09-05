@@ -1,11 +1,11 @@
 cff-version: 1.2.0
 message: >-
-  Cite the specific software version. Add the Zenodo-assigned DOI after
-  archival; no DOI has been minted yet.
+  Cite the archived software version using the version-specific Zenodo DOI below.
 title: 'Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures'
 type: software
 repository-code: 'https://github.com/pandakingpunc/cosmic-futures-laboratory'
 version: 0.1.0
+doi: 10.5281/zenodo.22343412
 date-released: '2026-09-05'
 license: MIT
 authors:

@@ -1,6 +1,7 @@
 # Cosmic Futures Laboratory
 
 [![Scientific and software validation](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/workflows/ci.yml/badge.svg)](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/workflows/ci.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22343412.svg)](https://doi.org/10.5281/zenodo.22343412)
 
 A numerical laboratory for exploring **conditional futures of the Universe**. Configure cosmological fluids, calculate their evolution, inspect assumptions and compare the results. The application and publication materials are in English.
 
@@ -95,9 +96,13 @@ docs/                   Methodology, limits, provenance, publication guide
 
 ## GitHub and Zenodo release
 
-The repository includes MIT licensing, `CITATION.cff`, `.zenodo.json`, CI, release notes and a publication checklist. Author metadata records **Mustafa Karatum — Independent researcher**, supplied by the project owner, whose GitHub username is **pandakingpunc**. No institution or ORCID is claimed. Add any other authors before publication. The public repository URL is recorded in both citation files; no DOI has been assigned. Run `node scripts/release-check.mjs` before tagging a public release; it refuses publication metadata containing placeholders.
+Version **0.1.0** was archived on Zenodo on **2026-09-05**, with version DOI [10.5281/zenodo.22343412](https://doi.org/10.5281/zenodo.22343412). The archive corresponds to GitHub tag [`v0.1.0.0`](https://github.com/pandakingpunc/cosmic-futures-laboratory/releases/tag/v0.1.0.0), source revision `eaeedceceff2856f9c70743eb538c28dc10e9cde`. Tags `v0.1.0` and `v0.1.0.0` contain the same source; the software version is `0.1.0`.
 
-Follow [the release guide](docs/releasing.md). Publication to GitHub or Zenodo is an owner action; creating the project does not itself mint a DOI. After archival, cite the exact software version and assigned version DOI. A recommended citation template appears in `CITATION.cff`.
+Recommended citation:
+
+> Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22343412
+
+Author metadata records **Mustafa Karatum — Independent researcher**. The repository includes MIT licensing, `CITATION.cff`, `.zenodo.json`, CI, release notes and a publication checklist. Follow [the release guide](docs/releasing.md) for subsequent versions and DOI handling. Run `node scripts/release-check.mjs` before tagging a release.
 
 ## Contributing and license
 

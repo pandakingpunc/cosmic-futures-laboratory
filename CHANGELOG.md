@@ -12,4 +12,6 @@ Initial research software preview.
 - Versioned September 2026 research sources, reproducible examples and JSON/CSV/SVG/Markdown exports.
 - Analytic regression suite, independent SciPy validation, CI and owner-completed publication metadata.
 
-See `docs/scope.md` for supported boundaries. This release has not undergone external scientific peer review and does not mint or claim a Zenodo DOI.
+Archived on Zenodo: [10.5281/zenodo.22343412](https://doi.org/10.5281/zenodo.22343412). The archived GitHub tag is `v0.1.0.0`; it contains the same source as `v0.1.0`.
+
+See `docs/scope.md` for supported boundaries. This release has not undergone external scientific peer review.

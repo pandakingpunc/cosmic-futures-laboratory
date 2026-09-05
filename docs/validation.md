@@ -33,7 +33,7 @@ The decaying-matter radiation comparison has maximum absolute log-density differ
 
 The [first GitHub Actions validation run](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/runs/33964495365) passed on Linux for source revision `64a8d95ddfdcfd7bf57be425b6d537a570dfdd28`. Dependency installation, scientific tests, type checking, linting, example generation, production build and dependency audit all completed successfully. This supplements the local Windows checks above.
 
-The owner supplied the author name Mustafa Karatum and affiliation Independent researcher; citation placeholders were replaced and the local public-release metadata check passed. GitHub renders the software citation using the supplied name and verified public repository URL. No Zenodo archival or DOI assignment is claimed.
+The owner supplied the author name Mustafa Karatum and affiliation Independent researcher; citation placeholders were replaced and the local public-release metadata check passed. Version 0.1.0 was published on Zenodo on 2026-09-05 with DOI [10.5281/zenodo.22343412](https://doi.org/10.5281/zenodo.22343412). The public record metadata confirms the author, affiliation, software version and MIT license. Its source archive comes from GitHub tag `v0.1.0.0`, revision `eaeedceceff2856f9c70743eb538c28dc10e9cde`, which is also tagged `v0.1.0`. DOI registration documents archival; the numerical validation evidence is the set of checks reported above.
 
 ## Validation boundaries
 
