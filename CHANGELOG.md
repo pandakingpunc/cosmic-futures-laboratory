@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add a separate Vinext/Nitro Vercel build with server functions, static assets and routing configuration.
+- Verify the packaged Vercel homepage and scientific APIs in CI while preserving the existing Cloudflare/Sites build.
+
 ## 0.1.0 — 2026-09-05
 
 Initial research software preview.

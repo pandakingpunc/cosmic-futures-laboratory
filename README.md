@@ -13,7 +13,7 @@ This is version **0.1.0, a research software preview**. Its core has analytic re
 
 ## Quick start
 
-Requirements: Node.js 22.13+ (Node 24 recommended) and npm. No API key, Python installation, or database is needed to use the web application.
+Requirements: Node.js 24.x and npm. No API key, Python installation, or database is needed to use the web application.
 
 ```sh
 npm ci
@@ -31,6 +31,19 @@ npm run build
 ```
 
 The production build targets Cloudflare Workers through Vinext and Sites. `npm start` serves the built Worker locally. Sites hosting metadata contains this project's deployment ID; a fork must remove that ID before registering a separate deployment. Scientific calculations and local development do not require a Sites account.
+
+## Deploy to Vercel
+
+Import this GitHub repository into Vercel with the repository root as **Root Directory** and **Node.js 24.x**. The committed `vercel.json` selects the Vercel build automatically: **Framework Preset: Other**, **Build Command: `npm run build:vercel`**, **Install Command: `npm ci`**, and **Output Directory: automatic**. No environment variables are required.
+
+The Vercel build uses Vinext and Nitro to emit both static assets and the server function under `.vercel/output`. This serves the observatory and `/api/simulate` / `/api/observations`. A Cloudflare `dist` folder by itself is not a Vercel deployment and can produce `404: NOT_FOUND`.
+
+```sh
+npm run build:vercel
+npm run validate:vercel
+```
+
+See [the Vercel deployment guide](docs/vercel.md) for updating an existing deployment that returned 404. The archived version 0.1.0 predates this deployment adapter; deploy the current `main` branch to use it.
 
 ## Scientific scope
 
