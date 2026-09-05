@@ -7,6 +7,7 @@
   "publication_date": "2026-09-05",
   "license": "mit",
   "access_right": "open",
+  "related_identifiers": [{"identifier":"https://github.com/pandakingpunc/cosmic-futures-laboratory","relation":"isSupplementTo","resource_type":"software"}],
   "keywords": ["cosmology","FLRW","dark energy","numerical simulation","reproducibility","scientific visualization"],
   "language": "eng"
 }

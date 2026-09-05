@@ -4,6 +4,7 @@ message: >-
   archival; no DOI has been minted yet.
 title: 'Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures'
 type: software
+repository-code: 'https://github.com/pandakingpunc/cosmic-futures-laboratory'
 version: 0.1.0
 date-released: '2026-09-05'
 license: MIT

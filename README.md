@@ -2,6 +2,8 @@
 
 A numerical laboratory for exploring **conditional futures of the Universe**. Configure cosmological fluids, calculate their evolution, inspect assumptions and compare the results. The application and publication materials are in English.
 
+Source repository: [pandakingpunc/cosmic-futures-laboratory](https://github.com/pandakingpunc/cosmic-futures-laboratory).
+
 This is version **0.1.0, a research software preview**. Its core has analytic regression tests and an independent SciPy comparison. It has not undergone external scientific peer review. It does not calculate a unique or observationally measured probability for the ultimate cosmic fate.
 
 ![The observatory with a calculated Lambda reference universe](docs/media/observatory.png)
@@ -91,7 +93,7 @@ docs/                   Methodology, limits, provenance, publication guide
 
 ## GitHub and Zenodo release
 
-The repository includes MIT licensing, `CITATION.cff`, `.zenodo.json`, CI, release notes and a publication checklist. Author metadata records **Mustafa Karatum**, supplied by the project owner, whose GitHub username is **pandakingpunc**. Add any other authors and optional verified affiliations/ORCIDs before publication. No DOI, affiliation or public repository URL has been invented. Run `node scripts/release-check.mjs` before tagging a public release; it refuses publication metadata containing placeholders.
+The repository includes MIT licensing, `CITATION.cff`, `.zenodo.json`, CI, release notes and a publication checklist. Author metadata records **Mustafa Karatum — Independent researcher**, supplied by the project owner, whose GitHub username is **pandakingpunc**. No institution or ORCID is claimed. Add any other authors before publication. The public repository URL is recorded in both citation files; no DOI has been assigned. Run `node scripts/release-check.mjs` before tagging a public release; it refuses publication metadata containing placeholders.
 
 Follow [the release guide](docs/releasing.md). Publication to GitHub or Zenodo is an owner action; creating the project does not itself mint a DOI. After archival, cite the exact software version and assigned version DOI. A recommended citation template appears in `CITATION.cff`.
 

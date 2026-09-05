@@ -1,6 +1,6 @@
 # GitHub and Zenodo release guide
 
-The project structure is ready for owner review and publication. The owner supplied the name **Mustafa Karatum**, GitHub username **pandakingpunc**, and affiliation **Independent researcher**, with no institutional affiliation or ORCID. Both citation files contain the supplied name and independent-researcher designation; ORCID is omitted. The selected GitHub repository name is **cosmic-futures-laboratory**, under **pandakingpunc**. Repository creation and public upload remain to be verified before treating the target URL as a published source location. No DOI has been assigned. Review any additional authors and update the actual release date before publication.
+The project owner is **Mustafa Karatum**, GitHub username **pandakingpunc**, an **Independent researcher** with no institutional affiliation or ORCID declared. Both citation files contain this supplied metadata; ORCID is omitted. The owner created the public repository [pandakingpunc/cosmic-futures-laboratory](https://github.com/pandakingpunc/cosmic-futures-laboratory), and its URL is recorded in both citation files. No DOI has been assigned. Review any additional authors and update the actual release date before publication.
 
 ## Where to enter publication information
 
@@ -10,7 +10,7 @@ All files below are in the repository root unless a directory is stated.
 | --- | --- | --- |
 | Author name | `CITATION.cff`: `authors[].given-names` and `family-names`; `.zenodo.json`: `creators[].name` in `Family, Given` order | Already entered as Mustafa Karatum |
 | GitHub account | Owner account `pandakingpunc`; recorded here and in README | Supplied by the owner |
-| Public repository URL | Add `repository-code` to `CITATION.cff`; update README; add an appropriate `related_identifiers` entry to `.zenodo.json` | Set after the repository name and actual URL are established |
+| Public repository URL | `repository-code` in `CITATION.cff`; README; `related_identifiers` in `.zenodo.json` | Set to the verified pandakingpunc/cosmic-futures-laboratory repository |
 | ORCID | Add `orcid` to the corresponding author/creator entry in both files | Optional; use an existing verified identifier |
 | Affiliation | `affiliation` in the corresponding author/creator entry in both files | Entered as Independent researcher; no institution claimed |
 | Other authors | Add entries to both author/creator arrays | Include if applicable |
@@ -26,7 +26,7 @@ These fields are publication metadata, not simulator settings. When both files a
 3. Run `npm ci`, `npm test`, `npm run typecheck`, `npm run lint`, `npm run examples`, `npm run build`, and the optional SciPy reference suite.
 4. Review the author metadata and run `node scripts/release-check.mjs`. The check fails if placeholders remain; it does not create a GitHub repository or publish a Zenodo record.
 5. For a public fork, review `.openai/hosting.json`: its deployment ID belongs to the original private site. Remove that ID before registering a distinct hosted instance. Do not archive credentials or `.env` files.
-6. Initialize/create the intended public GitHub repository, commit the reviewed source, and tag the exact release as `v0.1.0` (or update all version fields consistently).
+6. Commit the reviewed source to the existing GitHub repository and verify the validation workflow. Enable the repository in the intended Zenodo account before publishing its first GitHub release. Then tag the exact release as `v0.1.0` (or update all version fields consistently).
 
 ## Archive
 
