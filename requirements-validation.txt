@@ -1,0 +1,3 @@
+# Optional independent reference suite; not required to run the application.
+numpy==2.3.5
+scipy==1.18.1

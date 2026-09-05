@@ -1,0 +1,130 @@
+[
+  {
+    "id": "observational-baseline",
+    "status": "complete",
+    "classification": "Asymptotic de Sitter expansion",
+    "samples": 201,
+    "configurationHash": "eac426f0",
+    "reason": ""
+  },
+  {
+    "id": "desi-2026-cpl",
+    "status": "limited",
+    "classification": "Undetermined · numerical/model boundary",
+    "samples": 101,
+    "configurationHash": "002255dc",
+    "reason": "Dark-energy equation exceeded its supported finite range. Explicit solver reached minimum step; possible stiffness or a singular branch. No data invented beyond this point."
+  },
+  {
+    "id": "mild-phantom",
+    "status": "terminated",
+    "classification": "Big Rip",
+    "samples": 101,
+    "configurationHash": "4025106b",
+    "reason": "Finite future-time integral; singularity boundary reached."
+  },
+  {
+    "id": "strong-phantom",
+    "status": "terminated",
+    "classification": "Big Rip",
+    "samples": 101,
+    "configurationHash": "70c7e416",
+    "reason": "Finite future-time integral; singularity boundary reached."
+  },
+  {
+    "id": "decaying-dark-matter",
+    "status": "complete",
+    "classification": "Asymptotic de Sitter expansion",
+    "samples": 201,
+    "configurationHash": "7dd1d0d4",
+    "reason": ""
+  },
+  {
+    "id": "annihilating-dark-matter",
+    "status": "complete",
+    "classification": "Asymptotic de Sitter expansion",
+    "samples": 201,
+    "configurationHash": "74dac157",
+    "reason": ""
+  },
+  {
+    "id": "interacting-dark-matter",
+    "status": "complete",
+    "classification": "Asymptotic de Sitter expansion",
+    "samples": 201,
+    "configurationHash": "8213e353",
+    "reason": ""
+  },
+  {
+    "id": "bounded-quintessence",
+    "status": "complete",
+    "classification": "Eternal accelerated power-law expansion",
+    "samples": 201,
+    "configurationHash": "acf32d83",
+    "reason": ""
+  },
+  {
+    "id": "closed-matter-recollapse",
+    "status": "terminated",
+    "classification": "Big Crunch approach",
+    "samples": 102,
+    "configurationHash": "8cfd8827",
+    "reason": "Contracting scale factor reached a=10⁻⁴. The singularity itself and quantum-gravity regime are not integrated."
+  },
+  {
+    "id": "negative-vacuum-recollapse",
+    "status": "terminated",
+    "classification": "Big Crunch approach",
+    "samples": 102,
+    "configurationHash": "9d19b9d2",
+    "reason": "Contracting scale factor reached a=10⁻⁴. The singularity itself and quantum-gravity regime are not integrated."
+  },
+  {
+    "id": "stable-proton-extreme-future",
+    "status": "complete",
+    "classification": "Asymptotic de Sitter expansion",
+    "samples": 201,
+    "configurationHash": "e5be733a",
+    "reason": ""
+  },
+  {
+    "id": "hypothetical-proton-decay",
+    "status": "complete",
+    "classification": "Asymptotic de Sitter expansion",
+    "samples": 201,
+    "configurationHash": "beb79788",
+    "reason": ""
+  },
+  {
+    "id": "black-hole-remnants",
+    "status": "complete",
+    "classification": "Asymptotic de Sitter expansion",
+    "samples": 201,
+    "configurationHash": "b9a3e56c",
+    "reason": ""
+  },
+  {
+    "id": "nonstandard-w-event",
+    "status": "complete",
+    "classification": "Custom / nonstandard evolution",
+    "samples": 202,
+    "configurationHash": "fb5f03a1",
+    "reason": ""
+  },
+  {
+    "id": "matter-analytic-benchmark",
+    "status": "complete",
+    "classification": "Long-lived decelerating expansion",
+    "samples": 101,
+    "configurationHash": "14ee1b11",
+    "reason": ""
+  },
+  {
+    "id": "radiation-analytic-benchmark",
+    "status": "complete",
+    "classification": "Long-lived decelerating expansion",
+    "samples": 101,
+    "configurationHash": "1c901dfb",
+    "reason": ""
+  }
+]

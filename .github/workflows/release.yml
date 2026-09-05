@@ -1,0 +1,25 @@
+name: Validate a release tag
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  release-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npm test
+      - run: node scripts/release-check.mjs
+      - run: npm run build
+      - name: Verify tag matches package version
+        run: node -e "if(process.env.GITHUB_REF_NAME !== 'v'+require('./package.json').version)process.exit(1)"
+      - name: Check source archive can be produced
+        run: git archive --format=tar.gz --output=cosmic-futures-source.tar.gz HEAD

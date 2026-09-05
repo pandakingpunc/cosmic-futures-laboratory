@@ -1,0 +1,38 @@
+{
+  "software_version": "0.1.0",
+  "checks": [
+    {
+      "case": "observational-baseline",
+      "samples": 82,
+      "max_absolute_log10a_error": 4.362282757242042e-11,
+      "reference": "SciPy DOP853, cosmic-time a/C/R variables",
+      "rtol": 2e-12,
+      "atol": 1e-14
+    },
+    {
+      "case": "decaying-dark-matter",
+      "samples": 82,
+      "max_absolute_log10a_error": 4.221006877358491e-11,
+      "reference": "SciPy DOP853, cosmic-time a/C/R variables",
+      "rtol": 2e-12,
+      "atol": 1e-14,
+      "max_absolute_log10_radiation_error": 1.0481571166565118e-10
+    },
+    {
+      "case": "matter-analytic-benchmark",
+      "samples": 90,
+      "max_absolute_log10a_error": 2.7087887488619344e-11,
+      "reference": "SciPy DOP853, cosmic-time a/C/R variables",
+      "rtol": 2e-12,
+      "atol": 1e-14
+    },
+    {
+      "case": "radiation-analytic-benchmark",
+      "samples": 90,
+      "max_absolute_log10a_error": 7.65689733839281e-11,
+      "reference": "SciPy DOP853, cosmic-time a/C/R variables",
+      "rtol": 2e-12,
+      "atol": 1e-14
+    }
+  ]
+}

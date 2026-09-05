@@ -1,0 +1,22 @@
+{
+  "time_origin": "Elapsed proper time from the initial a=1 state. isPresent=true identifies t=0; its chart coordinate logYears=0 is a plotting sentinel, not log10(0). Other rows use logYears=log10(elapsed years).",
+  "logYears": "log10(elapsed yr); plotting sentinel 0 at t=0 when isPresent=true",
+  "logA": "log10(scale factor). Null if this logarithm itself exceeds numeric range.",
+  "expansionIndex": "sign(log10a) * log10(1+abs(log10a)). Retained at enormous expansion.",
+  "logH": "log10(abs(H)/(km s^-1 Mpc^-1)); contraction sign is encoded by regime=contraction",
+  "logRhoB": "log10(rho_b/rho_critical_today); null for absent or unrepresentable density",
+  "logRhoDM": "log10(rho_dm/rho_critical_today); null for absent or unrepresentable density",
+  "logRhoR": "log10(total radiation/rho_critical_today); null also when nonthermal daughter production is not continued in a tail",
+  "logRhoDE": "log10(abs(rho_de)/rho_critical_today); sign from active configuration/events; null for absent or unrepresentable density",
+  "omegaM,omegaR,omegaDE,omegaK": "Instantaneous Friedmann fractions; undefined at H=0; asymptotic fractions are leading-order limiting values",
+  "logTcmb": "log10(adiabatic photon temperature/K); null if the log is out of range",
+  "logRadiationEffectiveT": "log10(effective total radiation temperature/K), normalized to initial radiation density; not an asserted thermal spectrum, null if unsupported",
+  "logHubbleRadiusMpc": "log10(c/abs(H)/Mpc); undefined at H=0; not generally an event horizon",
+  "logComovingHubbleMpc": "log10(c/(a abs(H))/Mpc); null if undefined or unrepresentable",
+  "logHorizonEntropy": "log10(S/k_B) only for the de Sitter limiting horizon; null elsewhere; not a total entropy",
+  "stellarFraction": "Illustrative comoving stellar-population logistic proxy, not a star count",
+  "baryonSurvival,electronSurvival": "Exponential comoving tracer survival. Decay products do not feed back into background dynamics; numeric zero can mean underflow",
+  "bhMassFractions": "Representative remaining black-hole masses normalized by their initial masses, isolated blackbody approximation",
+  "constraintResidual": "Independent Friedmann residual on time-domain branches; zero in expansion branches where H is defined algebraically by the constraint, not an independent conservation test",
+  "regime": "numerical, asymptotic, or contraction; consult result.diagnostics for the solved domain and termination reason"
+}

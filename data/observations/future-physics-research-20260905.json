@@ -1,0 +1,293 @@
+{
+  "verifiedAsOf": "2026-09-05",
+  "scope": "Primary-source research; benchmarks and numerical recommendations are independently derived from the stated model equations. This is not an exhaustive catalogue of decay channels.",
+  "sources": [
+    {
+      "id": "sk2020",
+      "authors": "Super-Kamiokande Collaboration; A. Takenaka et al.",
+      "title": "Search for proton decay via p→e+π0 and p→μ+π0 with an enlarged fiducial volume in Super-Kamiokande I-IV",
+      "date": "2020-10-30",
+      "year": 2020,
+      "journal": "Physical Review D 102, 112011",
+      "doi": "10.1103/PhysRevD.102.112011",
+      "url": "https://arxiv.org/abs/2010.16098",
+      "status": "published experiment",
+      "findings": [
+        {
+          "channel": "p→e+π0",
+          "quantity": "partial lifetime tau / branching fraction",
+          "lowerBoundYears": 2.4e34,
+          "confidenceLevel": 0.9
+        },
+        {
+          "channel": "p→μ+π0",
+          "quantity": "partial lifetime tau / branching fraction",
+          "lowerBoundYears": 1.6e34,
+          "confidenceLevel": 0.9
+        }
+      ],
+      "note": "No e+π0 candidates; the μ+π0 candidate is consistent with expected atmospheric-neutrino background. No confirmed proton decay."
+    },
+    {
+      "id": "sk2014",
+      "authors": "Super-Kamiokande Collaboration; K. Abe et al.",
+      "title": "Search for Proton Decay via p→νK+ using 260 kiloton·year data of Super-Kamiokande",
+      "date": "2014-08-06",
+      "year": 2014,
+      "journal": "Physical Review D 90, 072005",
+      "doi": "10.1103/PhysRevD.90.072005",
+      "url": "https://arxiv.org/abs/1408.1195",
+      "status": "published experiment",
+      "findings": [
+        {
+          "channel": "p→antineutrino K+",
+          "quantity": "partial lifetime tau / branching fraction",
+          "lowerBoundYears": 5.9e33,
+          "confidenceLevel": 0.9
+        }
+      ],
+      "note": "Channel bounds cannot be used as measured or universal total lifetimes."
+    },
+    {
+      "id": "sk2026pions",
+      "authors": "Super-Kamiokande Collaboration",
+      "title": "Search for proton decay via p→e+π0π0 and p→μ+π0π0 in 0.401 megaton-years exposure of Super-Kamiokande I-V",
+      "date": "2026-04-13",
+      "year": 2026,
+      "url": "https://arxiv.org/abs/2604.10975",
+      "status": "primary collaboration paper; check journal metadata before labelling peer reviewed",
+      "findings": [
+        {
+          "channel": "p→e+π0π0",
+          "quantity": "partial lifetime tau / branching fraction",
+          "lowerBoundYears": 7.2e33,
+          "confidenceLevel": 0.9
+        },
+        {
+          "channel": "p→μ+π0π0",
+          "quantity": "partial lifetime tau / branching fraction",
+          "lowerBoundYears": 4.5e33,
+          "confidenceLevel": 0.9
+        }
+      ],
+      "note": "One candidate per channel, both consistent with background."
+    },
+    {
+      "id": "sk2026invisible",
+      "authors": "Super-Kamiokande Collaboration; Y. M. Liu et al.",
+      "title": "Search for proton decay into a single charged antilepton and a massless invisible particle using the full pure water data set of Super-Kamiokande",
+      "date": "2026-08-31",
+      "year": 2026,
+      "url": "https://arxiv.org/abs/2608.30361",
+      "status": "preprint v1 available before research cutoff",
+      "findings": [
+        {
+          "channel": "p→e+X (X massless, invisible, neutral)",
+          "quantity": "partial lifetime tau / branching fraction",
+          "lowerBoundYears": 1.72e33,
+          "confidenceLevel": 0.9
+        },
+        {
+          "channel": "p→μ+X (X massless, invisible, neutral)",
+          "quantity": "partial lifetime tau / branching fraction",
+          "lowerBoundYears": 6.1e32,
+          "confidenceLevel": 0.9
+        }
+      ],
+      "note": "401 kiloton-year exposure; no significant indication beyond background."
+    },
+    {
+      "id": "borexino2015",
+      "authors": "Borexino Collaboration; M. Agostini et al.",
+      "title": "A test of electric charge conservation with Borexino",
+      "date": "2015-09-03",
+      "year": 2015,
+      "journal": "Physical Review Letters 115, 231802",
+      "doi": "10.1103/PhysRevLett.115.231802",
+      "url": "https://arxiv.org/abs/1509.01223",
+      "status": "published experiment",
+      "findings": [
+        {
+          "channel": "e−→νγ",
+          "quantity": "channel-specific electron lifetime lower limit",
+          "lowerBoundYears": 6.6e28,
+          "confidenceLevel": 0.9
+        }
+      ],
+      "note": "This hypothetical electron decay violates electric charge conservation. Bound is not evidence of instability. Stable electron is the standard-model choice."
+    },
+    {
+      "id": "hawking1975",
+      "authors": "S. W. Hawking",
+      "title": "Particle creation by black holes",
+      "year": 1975,
+      "journal": "Communications in Mathematical Physics 43, 199–220; erratum 46, 206 (1976)",
+      "doi": "10.1007/BF02345020",
+      "url": "https://inspirehep.net/literature/101338",
+      "status": "semiclassical theoretical result",
+      "note": "Hawking temperature and thermal emission; ideal Stefan–Boltzmann lifetime used below is a simplified derived implementation, not an exact all-species evaporation calculation."
+    },
+    {
+      "id": "page1976",
+      "authors": "Don N. Page",
+      "title": "Particle emission rates from a black hole: Massless particles from an uncharged, nonrotating hole",
+      "year": 1976,
+      "journal": "Physical Review D 13, 198–206",
+      "doi": "10.1103/PhysRevD.13.198",
+      "url": "https://www.osti.gov/biblio/4048788",
+      "status": "primary theoretical calculation",
+      "note": "Greybody transmission and emitted species change luminosity and lifetime coefficients. Historical massless-neutrino assumptions must not be copied uncritically for modern stellar-mass holes."
+    },
+    {
+      "id": "adams1997",
+      "authors": "Fred C. Adams and Gregory Laughlin",
+      "title": "A Dying Universe: The Long Term Fate and Evolution of Astrophysical Objects",
+      "year": 1997,
+      "journal": "Reviews of Modern Physics 69, 337–372",
+      "doi": "10.1103/RevModPhys.69.337",
+      "url": "https://arxiv.org/html/astro-ph/9701131",
+      "status": "long-term extrapolation/review with stellar calculations",
+      "note": "Gas-star formation decline around 10^12–10^13 yr, low-mass stars around 10^13 yr, conventional stellar era transition around 10^14–10^15 yr; dynamical stellar escape around 10^19–10^20 yr is model dependent. Degenerate/black-hole/dark-era transitions assume particle physics, especially proton decay. These are approximate ranges, not measured dates or mandatory boundaries."
+    },
+    {
+      "id": "caplan2020",
+      "authors": "M. E. Caplan",
+      "title": "Black Dwarf Supernova in the Far Future",
+      "date": "2020-08-05",
+      "year": 2020,
+      "doi": "10.1093/mnras/staa2262",
+      "url": "https://arxiv.org/html/2008.02296",
+      "status": "conditional theoretical extrapolation",
+      "note": "Assuming no proton decay, black-dwarf collapse is estimated to start around 10^1100 yr for ~1.35 solar masses; ~10^1600 yr for ~1.24 solar masses; ~10^32000 yr at ~1.16 solar masses is especially uncertain at low density. Thus no such event within a 10^1000 yr endpoint. Not the fate of all remnants."
+    },
+    {
+      "id": "vacuum2018",
+      "authors": "Anders Andreassen, William Frost, Matthew D. Schwartz",
+      "title": "Scale Invariant Instantons and the Complete Lifetime of the Standard Model",
+      "year": 2018,
+      "journal": "Physical Review D 97, 056006",
+      "doi": "10.1103/PhysRevD.97.056006",
+      "url": "https://arxiv.org/abs/1707.08124",
+      "status": "conditional theoretical calculation",
+      "note": "Updated v4 reports 10^139 yr and >10^58 yr at 95% within its Standard Model calculation and inputs. This is not an observational prediction or universal universe expiry date; highly sensitive to top mass, strong coupling, matching, and physics beyond assumptions."
+    },
+    {
+      "id": "vacuum2024",
+      "authors": "Gudrun Hiller, Tim Höhne, Daniel F. Litim, Tom Steudtner",
+      "title": "Vacuum Stability in the Standard Model and Beyond",
+      "year": 2024,
+      "journal": "Physical Review D 110, 115017",
+      "doi": "10.1103/PhysRevD.110.115017",
+      "url": "https://arxiv.org/abs/2401.08811",
+      "status": "primary theoretical analysis",
+      "note": "Stability centrally depends on top mass and strong coupling; decreasing uncertainties by factors ~2–3 could settle Standard Model stability at 5 sigma. New physics can alter stability. This work does not calculate a tunnelling lifetime; do not attribute one to it."
+    },
+    {
+      "id": "phantom2003",
+      "authors": "Robert R. Caldwell, Marc Kamionkowski, Nevin N. Weinberg",
+      "title": "Phantom Energy and Cosmic Doomsday",
+      "year": 2003,
+      "journal": "Physical Review Letters 91, 071301",
+      "doi": "10.1103/PhysRevLett.91.071301",
+      "url": "https://arxiv.org/abs/astro-ph/0302506",
+      "status": "conditional cosmological model",
+      "note": "Persistent phantom energy can produce scale-factor and density divergence in finite proper time. A possibility under assumptions, not established fate."
+    },
+    {
+      "id": "gibbons1977",
+      "authors": "G. W. Gibbons and S. W. Hawking",
+      "title": "Cosmological event horizons, thermodynamics, and particle creation",
+      "year": 1977,
+      "journal": "Physical Review D 15, 2738–2751",
+      "doi": "10.1103/PhysRevD.15.2738",
+      "url": "https://journals.aps.org/prd/abstract/10.1103/PhysRevD.15.2738",
+      "status": "semiclassical theoretical result",
+      "note": "Pure de Sitter horizon thermal response; T_dS=ħH/(2πkB). Do not replace redshifted CMB T0/a with this number; display CMB and horizon temperature separately."
+    },
+    {
+      "id": "codata2022",
+      "authors": "CODATA; P. J. Mohr et al.",
+      "title": "CODATA recommended values of the fundamental physical constants: 2022",
+      "year": 2025,
+      "journal": "Reviews of Modern Physics 97, 025002",
+      "url": "https://physics.nist.gov/cuu/pdf/RevModPhys.97.025002.pdf",
+      "status": "standards/primary adjustment",
+      "note": "c=299792458 m/s; G=6.67430e-11 SI; h=6.62607015e-34 J s; kB=1.380649e-23 J/K. h, c and kB are exact SI values; G has measurement uncertainty."
+    }
+  ],
+  "recommendedModels": {
+    "decay": {
+      "equation": "N(t)/N0 = exp[-(t-t0)/tau] for an explicitly assumed constant mean lifetime; half-life=tau*ln(2). Use comoving populations, or include a^-3 when reporting physical number density.",
+      "defaults": "Provide Stable explicitly; any finite lifetime is a user scenario. An experimental lower bound is not a selected lifetime or probability distribution.",
+      "validation": "At elapsed t=tau, fraction=exp(-1). At elapsed t=tau*ln(2), fraction=0.5. Stable fraction=1. To compare with a channel constraint L, use tau/B>L, not tau>L unless B=1.",
+      "largeTimes": "Keep u=log10(elapsed years), v=log10(tau years); log survival=-10^(u-v). Distinguish numerical underflow from physically exactly zero. Last decay in a finite population is stochastic and is not at t=tau."
+    },
+    "hawking": {
+      "temperatureEquation": "T=ħc^3/(8πGMkB)",
+      "massLossEquation": "dM/dt=-alpha/M^2, alpha=ħc^4/(15360πG^2)",
+      "lifetimeEquation": "tau=5120πG^2*M0^3/(ħc^4)",
+      "remainingMassEquation": "M(t)=M0*(1-t/tau)^(1/3), 0<=t<tau, with the endpoint identified as a semiclassical breakdown/event",
+      "constants": {
+        "solarMassKg": 1.98847e30,
+        "secondsPerJulianYear": 31557600,
+        "solarMassLifetimeYears": 2.095682421948516e67,
+        "log10SolarMassLifetimeYears": 67.32132547065657,
+        "solarMassTemperatureK": 6.170073828591918e-8
+      },
+      "validation": "Doubling initial mass multiplies lifetime by 8 and halves initial temperature. At t=7*tau/8, remaining mass=M0/2. A 10^11 solar-mass hole has ideal lifetime ~2.10e100 yr; increasing the allowed mass range moves the nominal end of the black-hole era.",
+      "limitations": "Isolated, neutral, nonrotating ideal blackbody approximation; greybody factors, particle species, accretion/background absorption, mergers, spin and quantum-gravity endpoint are omitted. Do not call exact. Net evaporation needs background sufficiently cool; distinguish CMB temperature from de Sitter horizon temperature."
+    },
+    "vacuum": {
+      "default": "Unknown; no assumed decay event. Do not publish a measured vacuum-decay clock or assign model-fate probabilities.",
+      "optionalScenario": "An explicitly user-selected local Poisson hazard lambda per year can give S(t)=exp(-lambda*deltaT), but label this an illustrative effective model. A physical nucleation rate is per four-volume; observer survival is exp[-integral Gamma dV4] over the relevant past light cone, not an arbitrary universal global timer. The proper rate and ultraviolet physics are unknown.",
+      "postEvent": "Terminate this model branch at the event; do not animate a scientifically asserted post-decay universe."
+    },
+    "futureEras": "Use approximate, conditional event windows. Never remove baryonic remnants at a fixed 10^37–10^40 yr if proton decay is disabled. Never mark black-dwarf supernova before 10^1100 yr in the cited model. Avoid modern factual claims from 1997 dark-matter candidate assumptions.",
+    "extremeRange": "Store u=log10(time/yr), so 10^1000 is u=1000. This alone is insufficient for de Sitter a: ln(a)~H*t itself exceeds a Number at large u. Store ln(a) in signed-log/layered form or return honest symbolic asymptotes. For de Sitter, log10(ln(a))~u+log10(H_per_year); a=exp(10^[u+log10(H_per_year)]). Similarly log densities and temperatures may require signed layered values. Do not clamp time to 10^308 or all values to zero/infinity and still claim physical coverage.",
+    "integration": "Integrate the FLRW system over its numerical interval with error-controlled steps; hand off to labelled matched asymptotes only once subdominant terms fall below a stated tolerance. Future CPL extrapolation w(a)=w0+wa(1-a) is phenomenological and unbounded; its exp[3wa(a-1)] factor requires log-safe evaluation and an explicit extrapolation warning. Branches with a finite rip or crunch stop at that event, rather than continuing to 10^1000."
+  },
+  "analyticBenchmarks": [
+    {
+      "name": "Einstein-de Sitter",
+      "parameters": "Omega_m=1; other Omegas=0; a(t0)=1",
+      "solution": "a(deltaT)=[1+(3/2)H0*deltaT]^(2/3), H=H0*a^(-3/2), q=1/2",
+      "checks": "t0=2/(3H0); expansion increasing, density*a^3 constant, Tcmb*a constant"
+    },
+    {
+      "name": "Pure radiation",
+      "parameters": "Omega_r=1; other Omegas=0; a(t0)=1",
+      "solution": "a(deltaT)=[1+2H0*deltaT]^(1/2); q=1; t0=1/(2H0)"
+    },
+    {
+      "name": "Pure de Sitter",
+      "parameters": "Omega_Lambda=1; other Omegas=0; a(t0)=1",
+      "solution": "a=exp(H0*deltaT), H=H0, q=-1, event-horizon proper radius=c/H0; future lifetime infinite"
+    },
+    {
+      "name": "Flat constant-w fluid",
+      "parameters": "Omega_w=1, w constant, a(t0)=1",
+      "solution": "For w != -1: a=[1+(3/2)(1+w)H0*deltaT]^[2/(3(1+w))]. For w<-1, tRip-t0=2/[3*abs(1+w)*H0] exactly.",
+      "phantomExample": "w=-1.5: H0*(tRip-t0)=4/3; at deltaT=(tRip-t0)/2, a=2^(4/3), H=2H0. Big Rip remaining-time formula including sqrt(OmegaDE) is only a dark-energy-dominated approximation in mixed matter models.",
+      "stopRule": "Do not take a fractional power after its bracket changes sign or continue beyond tRip."
+    },
+    {
+      "name": "Closed dust recollapse",
+      "parameters": "Omega_m>1, Omega_k=1-Omega_m, other Omegas=0",
+      "solution": "A=Omega_m/[2*(Omega_m-1)], B=Omega_m/[2*H0*(Omega_m-1)^(3/2)]; a=A*(1-cos eta), t=B*(eta-sin eta), eta in [0,2pi]. aMax=Omega_m/(Omega_m-1), tTurn=pi*B, tCrunch=2pi*B. eta0=acos(2/Omega_m-1) on expanding branch.",
+      "numericCase": "Omega_m=2, Omega_k=-1: aMax=2; H0*t0=pi/2-1; H0*(tTurn-t0)=pi/2+1; H0*(tCrunch-t0)=3pi/2+1.",
+      "checks": "H crosses from positive to negative at the finite aMax. Solving only H=+sqrt(F) cannot recollapse. A log(a) independent variable also fails at the turn unless branch handling is explicit. Locate F(a)=0; never clamp negative F to a frozen universe."
+    },
+    {
+      "name": "Dust plus negative cosmological constant",
+      "parameters": "Omega_Lambda=-L<0, Omega_m=1+L, Omega_k=Omega_r=0",
+      "solution": "a=(Omega_m/L)^(1/3)*sin(theta)^(2/3), theta=(3/2)H0*sqrt(L)*t; theta in (0,pi). aMax=(Omega_m/L)^(1/3); tCrunch=2pi/[3H0*sqrt(L)]. At a=1 on expansion, theta0=asin(sqrt(L/Omega_m)).",
+      "checks": "Turn at theta=pi/2; shows positive spatial curvature is not necessary for recollapse with negative Lambda."
+    },
+    {
+      "name": "Friedmann and normalization residuals",
+      "parameters": "All supported models",
+      "solution": "At a=1, E^2(1)=Omega_r+Omega_m+Omega_k+Omega_de=1. For computed background, test (H/H0)^2-E^2(a) within tolerance and model conservation scalings.",
+      "checks": "Censor sample counts beyond terminal singularities; report numerical errors separately from observational uncertainties or model uncertainty."
+    }
+  ]
+}

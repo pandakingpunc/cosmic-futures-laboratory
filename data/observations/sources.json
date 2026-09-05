@@ -1,0 +1,320 @@
+[
+  {
+    "id": "planck2018",
+    "title": "Planck 2018 results. VI. Cosmological parameters",
+    "authors": "Planck Collaboration; N. Aghanim et al.",
+    "date": "2020-09-11",
+    "url": "https://arxiv.org/abs/1807.06209",
+    "doi": "10.1051/0004-6361/201833910",
+    "arxiv": "1807.06209",
+    "dataset": "TT,TE,EE+lowE+lensing; flat ΛCDM",
+    "selectedBecause": "Well-characterized CMB reference with published parameters and assumptions.",
+    "notes": "68% marginalized means, not a universal consensus or a joint maximum-likelihood vector. Curvature and w are fixed model assumptions. Massive-neutrino density in the app is a residual from rounded Ωm and Ωcb; not an exact 0.06-eV conversion.",
+    "parameters": {
+      "H0": {
+        "value": 67.36,
+        "sigma": 0.54,
+        "unit": "km/s/Mpc"
+      },
+      "Omega_m": {
+        "value": 0.3153,
+        "sigma": 0.0073
+      },
+      "omega_b": {
+        "value": 0.02237,
+        "sigma": 0.00015
+      },
+      "omega_c": {
+        "value": 0.12,
+        "sigma": 0.0012
+      },
+      "confidence": "68%"
+    }
+  },
+  {
+    "id": "desi2026",
+    "title": "DESI DR2 Lyα forest full-shape cosmological constraints",
+    "authors": "DESI Collaboration",
+    "date": "2026-08-04",
+    "url": "https://arxiv.org/html/2607.27410v3",
+    "doi": "10.48550/arXiv.2607.27410",
+    "arxiv": "2607.27410v3",
+    "dataset": "DR2 BAO + Lyα full shape + CMB + DES-Dovekie",
+    "selectedBecause": "Latest reviewed 2026 collaboration update, including revised combinations.",
+    "notes": "Preprint; Table 3, 68% marginalized means. Baryon/neutrino split in the preset is a declared reference approximation. Lyα shifts toward ΛCDM; reported evolving-DE preference is 2.7σ with CMB and 3.2σ with selected SNe. These are not fate probabilities. CPL future behavior is unvalidated.",
+    "parameters": {
+      "H0": {
+        "value": 67.37,
+        "sigma": 0.54
+      },
+      "Omega_m": {
+        "value": 0.3134,
+        "sigma": 0.0052
+      },
+      "w0": {
+        "value": -0.821,
+        "sigma": 0.054
+      },
+      "wa": {
+        "value": -0.65,
+        "sigma": 0.2
+      },
+      "cosmological_covariance": null
+    }
+  },
+  {
+    "id": "desi2025",
+    "title": "DESI DR2 Results II: Measurements of BAO and cosmological constraints",
+    "authors": "DESI Collaboration",
+    "date": "2025-10-06",
+    "url": "https://arxiv.org/html/2503.14738v3",
+    "doi": "10.1103/tr6y-kpc6",
+    "arxiv": "2503.14738v3",
+    "dataset": "DESI DR2 BAO + CMB + Pantheon+/Union3/DESY5",
+    "selectedBecause": "Historical comparison for the 2026 update.",
+    "notes": "March 2025 result: evolving-DE preference 2.8–4.2σ depends on the supernova compilation. Newer results also change data combinations; significance comparison is not a controlled one-probe substitution.",
+    "parameters": {
+      "sigma_range": [2.8, 4.2]
+    }
+  },
+  {
+    "id": "act2025",
+    "title": "The Atacama Cosmology Telescope: DR6 Power Spectra, Likelihoods and ΛCDM Parameters",
+    "authors": "ACT Collaboration",
+    "date": "2025",
+    "url": "https://arxiv.org/html/2503.14452v2",
+    "doi": null,
+    "arxiv": "2503.14452v2",
+    "dataset": "P-ACT and lensing/DESI combinations",
+    "selectedBecause": "Independent high-resolution CMB measurements and updated combinations.",
+    "notes": "P-ACT includes Planck. H0=67.62±0.50 for P-ACT alone; 68.43±0.27 for P-ACT+lensing+DESI DR2 under flat ΛCDM. App density composition and Ωm sampling width for the P-ACT-H0 illustration are explicitly illustrative, not an ACT fit vector.",
+    "parameters": {
+      "H0_PACT": 67.62,
+      "sigma": 0.5,
+      "H0_PACT_lensing_DESI_DR2": 68.43,
+      "combined_sigma": 0.27
+    }
+  },
+  {
+    "id": "shoes2024",
+    "title": "A small Magellanic Cloud distance anchor for the Hubble constant",
+    "authors": "A. G. Riess et al.; SH0ES",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2404.08038",
+    "doi": "10.3847/1538-4357/ad630e",
+    "arxiv": "2404.08038",
+    "dataset": "Cepheid–supernova distance ladder with four anchors",
+    "selectedBecause": "Documents a distinct local H0 inference and the Hubble tension.",
+    "notes": "H0=73.17±0.86 km/s/Mpc. Do not average with CMB-derived H0 without a joint likelihood and explicit assumptions.",
+    "parameters": {
+      "H0": 73.17,
+      "sigma": 0.86
+    }
+  },
+  {
+    "id": "pantheon2022",
+    "title": "The Pantheon+ Analysis: Cosmological Constraints",
+    "authors": "D. Brout et al.",
+    "date": "2022",
+    "url": "https://arxiv.org/abs/2202.04077",
+    "doi": "10.3847/1538-4357/ac8e04",
+    "arxiv": "2202.04077",
+    "dataset": "Pantheon+ type-Ia supernovae",
+    "selectedBecause": "Supernova-distance constraints and calibration distinction.",
+    "notes": "Uncalibrated supernovae do not determine absolute H0. Flat ΛCDM Ωm=0.334±0.018 for SNe alone.",
+    "parameters": {
+      "Omega_m": 0.334,
+      "sigma": 0.018
+    }
+  },
+  {
+    "id": "euclid2026",
+    "title": "Euclid data release timeline — August 2026 update",
+    "authors": "NASA Euclid Science Center at IPAC",
+    "date": "2026-08",
+    "url": "https://euclid.caltech.edu/page/data-release-timeline",
+    "doi": null,
+    "arxiv": null,
+    "dataset": "Mission release schedule",
+    "selectedBecause": "Avoids inventing an unreleased Euclid cosmology posterior.",
+    "notes": "Q2 June 24 2026; DR1 Foundation scheduled November 2026 and Complete mid-2027 at review time. Schedule is subject to change.",
+    "parameters": {}
+  },
+  {
+    "id": "fixsen2009",
+    "title": "The Temperature of the Cosmic Microwave Background",
+    "authors": "D. J. Fixsen",
+    "date": "2009",
+    "url": "https://arxiv.org/abs/0911.1955",
+    "doi": "10.1088/0004-637X/707/2/916",
+    "arxiv": "0911.1955",
+    "dataset": "COBE/FIRAS temperature recalibration",
+    "selectedBecause": "Traceable present-day CMB temperature.",
+    "notes": "T0=2.72548±0.00057 K, rounded to 2.7255 K. Adiabatic photon cooling T∝a⁻¹; nonthermal daughter radiation is distinct.",
+    "parameters": {
+      "T0_K": 2.72548,
+      "sigma_K": 0.00057
+    }
+  },
+  {
+    "id": "superk2020",
+    "title": "Search for proton decay via p→e+π0 and p→μ+π0 in Super-Kamiokande I–IV",
+    "authors": "Super-Kamiokande Collaboration; A. Takenaka et al.",
+    "date": "2020-10-30",
+    "url": "https://arxiv.org/abs/2010.16098",
+    "doi": "10.1103/PhysRevD.102.112011",
+    "arxiv": "2010.16098",
+    "dataset": "Super-Kamiokande I–IV",
+    "selectedBecause": "Strong channel-specific proton stability bounds.",
+    "notes": "No established decay. Partial lifetime τ/B, not total lifetime: e+π0 >2.4×10^34 yr; μ+π0 >1.6×10^34 yr at 90% CL. A lower bound is not a forecast lifetime.",
+    "parameters": {
+      "e_pi0_lower_yr": 2.4e34,
+      "mu_pi0_lower_yr": 1.6e34,
+      "CL": 0.9
+    }
+  },
+  {
+    "id": "superk2026",
+    "title": "Search for proton decay into a single charged antilepton and a massless invisible particle",
+    "authors": "Super-Kamiokande Collaboration; Y. M. Liu et al.",
+    "date": "2026-08-31",
+    "url": "https://arxiv.org/abs/2608.30361",
+    "doi": null,
+    "arxiv": "2608.30361",
+    "dataset": "Full pure-water Super-K data, 401 kiloton-years",
+    "selectedBecause": "Current reviewed channel-specific stability search.",
+    "notes": "Preprint. No significant signal; bounds apply to the specified invisible-particle channels, not universally to all proton decays.",
+    "parameters": {
+      "p_eX_lower_yr": 1.72e33,
+      "p_muX_lower_yr": 6.1e32,
+      "CL": 0.9
+    }
+  },
+  {
+    "id": "borexino2015",
+    "title": "A test of electric charge conservation with Borexino",
+    "authors": "Borexino Collaboration; M. Agostini et al.",
+    "date": "2015-09-03",
+    "url": "https://arxiv.org/abs/1509.01223",
+    "doi": "10.1103/PhysRevLett.115.231802",
+    "arxiv": "1509.01223",
+    "dataset": "Borexino",
+    "selectedBecause": "Experimental bound on a hypothetical electron decay channel.",
+    "notes": "e−→νγ lifetime >6.6×10^28 yr at 90% CL. This tests a charge-violating channel; electron decay is disabled by default.",
+    "parameters": {
+      "lower_yr": 6.6e28,
+      "CL": 0.9
+    }
+  },
+  {
+    "id": "hawking1975",
+    "title": "Particle creation by black holes",
+    "authors": "S. W. Hawking",
+    "date": "1975",
+    "url": "https://doi.org/10.1007/BF02345020",
+    "doi": "10.1007/BF02345020",
+    "arxiv": null,
+    "dataset": "Semiclassical theory",
+    "selectedBecause": "Foundational Hawking temperature and evaporation physics.",
+    "notes": "App uses isolated neutral nonrotating blackbody approximation, not exact greybody/spin/species evolution. T=ℏc³/(8πGkB M).",
+    "parameters": {
+      "solar_mass_temperature_K": 6.1700738e-8
+    }
+  },
+  {
+    "id": "page1976",
+    "title": "Particle emission rates from a black hole: Massless particles from an uncharged, nonrotating hole",
+    "authors": "D. N. Page",
+    "date": "1976",
+    "url": "https://doi.org/10.1103/PhysRevD.13.198",
+    "doi": "10.1103/PhysRevD.13.198",
+    "arxiv": null,
+    "dataset": "Semiclassical greybody calculation",
+    "selectedBecause": "Documents corrections omitted from the ideal evaporation coefficient.",
+    "notes": "The app's τ=5120πG²M³/(ℏc⁴) is an ideal blackbody estimate; Page's particle emission rates are not implemented. Quantum-gravity endpoint is unknown.",
+    "parameters": {
+      "ideal_solar_mass_lifetime_yr": 2.095682421948516e67
+    }
+  },
+  {
+    "id": "adams1997",
+    "title": "A Dying Universe: The Long-Term Fate and Evolution of Astrophysical Objects",
+    "authors": "F. C. Adams and G. Laughlin",
+    "date": "1997",
+    "url": "https://arxiv.org/abs/astro-ph/9701131",
+    "doi": "10.1103/RevModPhys.69.337",
+    "arxiv": "astro-ph/9701131",
+    "dataset": "Long-term astrophysical approximations",
+    "selectedBecause": "Motivates broad conditional stellar/remnant eras.",
+    "notes": "Historical theoretical synthesis, not modern observational precision. Stellar fraction logistic midpoint 10^12.5 yr and slope 1.4 in the app are explicitly chosen illustrative proxy parameters, not fitted values.",
+    "parameters": {
+      "last_stars_order_yr": "10^13–10^14.5",
+      "relaxation_order_yr": "10^19–10^22"
+    }
+  },
+  {
+    "id": "caplan2020",
+    "title": "Black dwarf supernova in the far future",
+    "authors": "M. E. Caplan",
+    "date": "2020",
+    "url": "https://arxiv.org/abs/2008.02296",
+    "doi": "10.1093/mnras/staa2262",
+    "arxiv": "2008.02296",
+    "dataset": "Hypothetical stable-proton remnant evolution",
+    "selectedBecause": "Shows why stable remnants need not vanish after black-hole evaporation.",
+    "notes": "Conditional black-dwarf-supernova onset around 10^1100 yr, beyond this application's 10^1000 endpoint. Not included as a numerical process.",
+    "parameters": {}
+  },
+  {
+    "id": "phantom2003",
+    "title": "Phantom Energy and Cosmic Doomsday",
+    "authors": "R. R. Caldwell, M. Kamionkowski and N. N. Weinberg",
+    "date": "2003",
+    "url": "https://arxiv.org/abs/astro-ph/0302506",
+    "doi": "10.1103/PhysRevLett.91.071301",
+    "arxiv": "astro-ph/0302506",
+    "dataset": "Constant phantom equation-of-state model",
+    "selectedBecause": "Conditional finite-time Big Rip and analytic benchmark.",
+    "notes": "Persistent w<−1 can make the future proper-time integral converge. This is not observational evidence for a Big Rip.",
+    "parameters": {}
+  },
+  {
+    "id": "vacuum2024",
+    "title": "Vacuum Stability in the Standard Model and Beyond",
+    "authors": "G. Hiller, T. Höhne, D. F. Litim and T. Steudtner",
+    "date": "2024",
+    "url": "https://arxiv.org/abs/2401.08811",
+    "doi": "10.1103/PhysRevD.110.115017",
+    "arxiv": "2401.08811",
+    "dataset": "Standard Model and beyond-Standard-Model stability analysis",
+    "selectedBecause": "Documents strong theoretical and parameter dependence.",
+    "notes": "No vacuum lifetime from this source is used. A user-selected local Poisson clock is only a toy model, not a four-volume nucleation calculation.",
+    "parameters": {}
+  },
+  {
+    "id": "gibbons1977",
+    "title": "Cosmological event horizons, thermodynamics, and particle creation",
+    "authors": "G. W. Gibbons and S. W. Hawking",
+    "date": "1977",
+    "url": "https://doi.org/10.1103/PhysRevD.15.2738",
+    "doi": "10.1103/PhysRevD.15.2738",
+    "arxiv": null,
+    "dataset": "Semiclassical cosmological horizon theory",
+    "selectedBecause": "de Sitter horizon temperature and entropy, with restricted domain.",
+    "notes": "T_dS=ℏH/(2πkB); this is distinct from redshifted CMB T. The Hubble radius is not generally the event horizon. Horizon entropy shown only for the de Sitter limit.",
+    "parameters": {}
+  },
+  {
+    "id": "friedmann1922",
+    "title": "On the curvature of space",
+    "authors": "A. Friedmann",
+    "date": "1922",
+    "url": "https://doi.org/10.1007/BF01332580",
+    "doi": "10.1007/BF01332580",
+    "arxiv": null,
+    "dataset": "FLRW background dynamics",
+    "selectedBecause": "Foundational homogeneous expansion and recollapse equations.",
+    "notes": "The simulator assumes an isotropic homogeneous background with specified fluid equations of state. It does not evolve perturbations.",
+    "parameters": {}
+  }
+]

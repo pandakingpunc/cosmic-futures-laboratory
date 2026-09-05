@@ -1,0 +1,12 @@
+{
+  "title": "Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures",
+  "upload_type": "software",
+  "description": "Version 0.1.0 research software preview. An interactive homogeneous FLRW simulator with adaptive numerical integration, conservative dark-matter-to-radiation transfers, conditional extreme-time asymptotes, astrophysical tracers, seeded uncertainty sampling, scientific references and reproducible exports. It does not calculate a unique actual cosmic fate, run an N-body model or fit an observational likelihood. Methodology and limitations are documented in the archive. Replace creator placeholders before publication.",
+  "creators": [{"name":"REPLACE_WITH_RELEASE_AUTHOR"}],
+  "version": "0.1.0",
+  "publication_date": "2026-09-05",
+  "license": "mit",
+  "access_right": "open",
+  "keywords": ["cosmology","FLRW","dark energy","numerical simulation","reproducibility","scientific visualization"],
+  "language": "eng"
+}

@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: >-
+  Cite the specific archived software version after replacing the release
+  author placeholder and adding the Zenodo-assigned DOI. No DOI has been minted.
+title: 'Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures'
+type: software
+version: 0.1.0
+date-released: '2026-09-05'
+license: MIT
+authors:
+  - family-names: REPLACE_WITH_RELEASE_AUTHOR
+abstract: >-
+  An interactive FLRW background simulator with adaptive numerical integration,
+  conservative dark-matter transfers, conditional asymptotic continuation,
+  astrophysical tracer approximations, uncertainty sampling and versioned
+  observational provenance. A research software preview, not a unique forecast
+  of the actual cosmic fate or an externally peer-reviewed solver.
+keywords:
+  - cosmology
+  - FLRW
+  - dark energy
+  - numerical simulation
+  - reproducibility
+  - scientific visualization
+references:
+  - type: article
+    title: 'Planck 2018 results. VI. Cosmological parameters'
+    authors:
+      - name: Planck Collaboration
+    year: 2020
+    doi: 10.1051/0004-6361/201833910
+  - type: article
+    title: 'A Dying Universe: The Long-Term Fate and Evolution of Astrophysical Objects'
+    authors:
+      - family-names: Adams
+        given-names: Fred C.
+      - family-names: Laughlin
+        given-names: Gregory
+    year: 1997
+    doi: 10.1103/RevModPhys.69.337

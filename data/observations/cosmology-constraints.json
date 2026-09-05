@@ -1,0 +1,63 @@
+{
+  "version": "2026-09-05.1",
+  "reviewedAt": "2026-09-05",
+  "presets": [
+    {
+      "id": "planck2018",
+      "label": "Planck 2018 · ΛCDM reference",
+      "H0": 67.36,
+      "omegaB": 0.049301692328524445,
+      "omegaDM": 0.26447041034523616,
+      "omegaNu": 0.0015278973262394242,
+      "omegaR": 7.96e-5,
+      "omegaDE": 0.6846204,
+      "Neff": 3.046,
+      "deModel": "lambda",
+      "w0": -1,
+      "wa": 0,
+      "sourceIds": ["planck2018", "fixsen2009"],
+      "notes": "TT,TE,EE+lowE+lensing marginalized means. Matter split preserves rounded Ωm=0.3153; neutrino residual is treated as pressureless today and into the future. Radiation contains photons and an effective two massless species; no massive-neutrino radiation double counting. Closure determines Ωde. This is a reference, not a claim of a unique current best fit. The neutrino fraction is the residual of rounded matter and cold+baryon means, not an exact mass-to-density conversion.",
+      "sigmaH0": 0.54,
+      "sigmaOmegaM": 0.0073
+    },
+    {
+      "id": "desi2026",
+      "label": "DESI 2026 + CMB + SNe · CPL",
+      "H0": 67.37,
+      "omegaB": 0.0493,
+      "omegaDM": 0.26257,
+      "omegaNu": 0.00153,
+      "omegaR": 7.96e-5,
+      "omegaDE": 0.6865204,
+      "Neff": 3.044,
+      "deModel": "cpl",
+      "w0": -0.821,
+      "wa": -0.65,
+      "sourceIds": ["desi2026", "planck2018"],
+      "notes": "DR2 BAO + Lyα full shape + CMB + DES-Dovekie Table 3 marginalized means. Baryon/neutrino split and radiation are reference approximations, not extracted joint fit parameters. CPL is a fit ansatz and is not a reliable infinite-future extrapolation. No joint covariance supplied in this dataset.",
+      "sigmaH0": 0.54,
+      "sigmaOmegaM": 0.0052
+    },
+    {
+      "id": "act2025",
+      "label": "P-ACT H₀ · illustrative composition",
+      "H0": 67.62,
+      "omegaB": 0.049,
+      "omegaDM": 0.262,
+      "omegaNu": 0.0015,
+      "omegaR": 7.9e-5,
+      "omegaDE": 0.687421,
+      "Neff": 3.044,
+      "deModel": "lambda",
+      "w0": -1,
+      "wa": 0,
+      "sourceIds": ["act2025"],
+      "notes": "H0 is P-ACT alone, 67.62 ± 0.50. Density composition is a declared illustrative reference, not the ACT best-fit parameter vector. P-ACT+lensing+DESI DR2 gives H0=68.43 ± 0.27 under flat ΛCDM. The Ωm sampling width 0.0073 is illustrative, borrowed from the Planck reference, not measured by this combination.",
+      "sigmaH0": 0.5,
+      "sigmaOmegaM": 0.0073
+    }
+  ],
+  "covariance": null,
+  "covarianceNote": "Marginal errors are not a joint posterior. Default ensembles use explicitly labeled independent illustrative Gaussians; users can supply a positive-definite covariance or posterior samples.",
+  "updatePolicy": "Review primary sources, record combination and table, validate units and closure, increment version, retain previous release in Git. Never auto-replace defaults from headlines."
+}
