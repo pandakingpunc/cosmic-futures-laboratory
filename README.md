@@ -1,5 +1,7 @@
 # Cosmic Futures Laboratory
 
+[![Scientific and software validation](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/workflows/ci.yml/badge.svg)](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/workflows/ci.yml)
+
 A numerical laboratory for exploring **conditional futures of the Universe**. Configure cosmological fluids, calculate their evolution, inspect assumptions and compare the results. The application and publication materials are in English.
 
 Source repository: [pandakingpunc/cosmic-futures-laboratory](https://github.com/pandakingpunc/cosmic-futures-laboratory).

@@ -31,7 +31,9 @@ The decaying-matter radiation comparison has maximum absolute log-density differ
 - The layout was inspected at the default desktop viewport and 390×844 CSS pixels. Mobile configuration controls and the run button remain accessible, with no horizontal document overflow. Screenshots are in `docs/media/`.
 - No warning/error console messages were observed in the inspected production session. Browser download controls were exercised; the embedded browser did not expose a completed download event, so saving files to disk from that browser is not certified by this record. Export serialization is tested, and generated result files are included under `examples/`.
 
-GitHub Actions workflows are supplied but have not been claimed to have run on an external GitHub repository. The owner subsequently supplied the author name Mustafa Karatum; citation placeholders were replaced and the local public-release metadata check passed. This check does not establish that GitHub publication or Zenodo archival has occurred.
+The [first GitHub Actions validation run](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/runs/33964495365) passed on Linux for source revision `64a8d95ddfdcfd7bf57be425b6d537a570dfdd28`. Dependency installation, scientific tests, type checking, linting, example generation, production build and dependency audit all completed successfully. This supplements the local Windows checks above.
+
+The owner supplied the author name Mustafa Karatum and affiliation Independent researcher; citation placeholders were replaced and the local public-release metadata check passed. GitHub renders the software citation using the supplied name and verified public repository URL. No Zenodo archival or DOI assignment is claimed.
 
 ## Validation boundaries
 
