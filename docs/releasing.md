@@ -1,6 +1,6 @@
 # GitHub and Zenodo release guide
 
-The project structure is ready for owner review and publication. The owner supplied the name **Mustafa Karatum** and GitHub username **pandakingpunc**. Both citation files now contain this author name. Add any additional authors and optional verified affiliations/ORCIDs before publication. Update the actual release date if it differs from the prepared date. A public repository name has not yet been selected; no repository URL or DOI has been invented.
+The project structure is ready for owner review and publication. The owner supplied the name **Mustafa Karatum**, GitHub username **pandakingpunc**, and affiliation **Independent researcher**, with no institutional affiliation or ORCID. Both citation files contain the supplied name and independent-researcher designation; ORCID is omitted. The selected GitHub repository name is **cosmic-futures-laboratory**, under **pandakingpunc**. Repository creation and public upload remain to be verified before treating the target URL as a published source location. No DOI has been assigned. Review any additional authors and update the actual release date before publication.
 
 ## Where to enter publication information
 
@@ -12,7 +12,7 @@ All files below are in the repository root unless a directory is stated.
 | GitHub account | Owner account `pandakingpunc`; recorded here and in README | Supplied by the owner |
 | Public repository URL | Add `repository-code` to `CITATION.cff`; update README; add an appropriate `related_identifiers` entry to `.zenodo.json` | Set after the repository name and actual URL are established |
 | ORCID | Add `orcid` to the corresponding author/creator entry in both files | Optional; use an existing verified identifier |
-| Institution | Add `affiliation` to the corresponding author/creator entry in both files | Optional; omit when there is no affiliation to declare |
+| Affiliation | `affiliation` in the corresponding author/creator entry in both files | Entered as Independent researcher; no institution claimed |
 | Other authors | Add entries to both author/creator arrays | Include if applicable |
 | Release date/version | `date-released` and `version` in CFF; `publication_date` and `version` in Zenodo JSON | Verify at release time |
 | DOI | Add the actual assigned DOI to citation metadata after archival | Assigned by Zenodo; do not invent it |

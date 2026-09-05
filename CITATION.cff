@@ -10,6 +10,7 @@ license: MIT
 authors:
   - family-names: Karatum
     given-names: Mustafa
+    affiliation: Independent researcher
 abstract: >-
   An interactive FLRW background simulator with adaptive numerical integration,
   conservative dark-matter transfers, conditional asymptotic continuation,
