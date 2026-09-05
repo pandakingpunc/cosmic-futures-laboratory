@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  icons: { icon: '/favicon.svg' },
   title: 'Cosmic Futures Laboratory | A numerical universe explorer',
   description:
     'Conditional cosmological futures with adaptive Friedmann integration, traceable observational inputs, uncertainty analysis and reproducible reports.',

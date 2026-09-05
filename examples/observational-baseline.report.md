@@ -75,7 +75,7 @@ Approximation: Matched constant-fluid asymptote, ρ ∝ a^(0.0000), subdominant 
 
 ## Cosmic Evolution
 
-201 samples. Status: complete. 
+201 samples. Status: complete.
 
 ## Major Events
 
