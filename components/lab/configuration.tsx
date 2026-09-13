@@ -28,17 +28,18 @@ export function ConfigurationPanel({
   const file = useRef<HTMLInputElement>(null);
   const set = <K extends keyof Configuration>(key: K, v: Configuration[K]) =>
     setConfig({ ...c, [key]: v, preset: key === 'name' ? c.preset : 'custom' });
+  const sum =
+    c.omegaB + c.omegaDM + c.omegaNu + c.omegaR + c.omegaDE + c.omegaK;
+  const issues = validate(c);
   const number = (key: keyof Configuration, label: string, hint?: string) => (
     <NumberField
       label={label}
       value={c[key] as number}
       onChange={(v) => set(key, v)}
       hint={hint}
+      error={issues.fields[key]}
     />
   );
-  const sum =
-    c.omegaB + c.omegaDM + c.omegaNu + c.omegaR + c.omegaDE + c.omegaK;
-  const issues = validate(c);
   function example(value: string) {
     let next = { ...defaultConfig(), preset: 'custom', name: value };
     if (value === 'Mild phantom')
@@ -145,6 +146,11 @@ export function ConfigurationPanel({
               Set Ωde by closure
             </button>
           </div>
+          {issues.fields.closure && (
+            <small className="field-error" role="alert">
+              {issues.fields.closure}
+            </small>
+          )}
           <div className="two-cols">
             {number('Tcmb', 'CMB temperature · K')}
             {number('Neff', 'Effective species Neff')}
@@ -203,6 +209,11 @@ export function ConfigurationPanel({
               <small>
                 a, z=1/a−1, + − * / ^, log, exp, sin, cos, sqrt, abs, tanh.
               </small>
+              {issues.fields.expression && (
+                <small className="field-error" role="alert">
+                  {issues.fields.expression}
+                </small>
+              )}
             </label>
           )}
           {c.deModel === 'cpl' && (
@@ -295,6 +306,11 @@ export function ConfigurationPanel({
               }
             />
             <small>Comma separated, e.g. 10, 1e5, 1e9.</small>
+            {issues.fields.blackHoleMasses && (
+              <small className="field-error" role="alert">
+                {issues.fields.blackHoleMasses}
+              </small>
+            )}
           </label>
           <Toggle
             label="Stochastic vacuum-decay toy model"
@@ -440,7 +456,21 @@ export function ConfigurationPanel({
       </div>
       <div className="config-run">
         {issues.errors.length > 0 && (
-          <p className="inline-warning">{issues.errors[0]}</p>
+          <div className="inline-warning validation-summary" role="alert">
+            <strong>
+              {issues.errors.length === 1
+                ? 'One input needs attention'
+                : `${issues.errors.length} inputs need attention`}
+            </strong>
+            <ul>
+              {issues.errors.slice(0, 6).map((e) => (
+                <li key={e}>{e}</li>
+              ))}
+              {issues.errors.length > 6 && (
+                <li>… and {issues.errors.length - 6} more.</li>
+              )}
+            </ul>
+          </div>
         )}
         <button
           className="run-button"

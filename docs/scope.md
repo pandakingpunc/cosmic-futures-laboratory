@@ -19,8 +19,8 @@ This release prioritizes a working, auditable FLRW laboratory. It is not a compl
 | Sensitivity         | Computed local finite differences                                             | Not global Sobol indices or a universal parameter ranking                             |
 | Sweeps              | Two-dimensional bounded dark-energy grid                                      | Not arbitrary higher-dimensional inference                                            |
 | Interventions       | Multiple timed events; some matched tails                                     | Inconsistent or unsupported continuations stop explicitly                             |
-| Comparisons         | Four in-memory complete runs, multiple graph quantities, export               | First series overlaid for multiseries quantities; inspect/export full runs separately |
+| Comparisons         | Four complete runs persisted in the browser, result-file import, export      | First series overlaid for multiseries quantities; inspect/export full runs separately |
 | Provenance          | Reviewed, bundled primary-source registry and raw research snapshots          | No automatic ingestion of new papers or posterior chains                              |
-| Reports             | JSON, CSV, SVG and Markdown                                                   | No PDF/Word generator or DOI registration                                             |
+| Reports             | JSON, CSV, SVG, PNG, Markdown and shareable configuration links               | No PDF/Word generator or DOI registration                                             |
 
 “Research software preview” describes this scope honestly. Successful unit tests are not external scientific peer review. Features beyond these boundaries require additional mathematical formulation and independent validation, rather than cosmetic controls with no physical implementation.

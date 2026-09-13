@@ -5,6 +5,8 @@ import type { Configuration } from '@/src/science/types';
 import type { EnsembleOptions, EnsembleResult } from '@/src/science/analysis';
 import { Choice, NumberField, Badge, format, download } from './controls';
 import { ScientificPlot } from './chart';
+import { compute } from './compute';
+import type { AnalysisMode } from '@/src/science/dispatch';
 import { VERSION, DATASET_VERSION } from '@/src/science/types';
 type SensitivityRow = {
   parameter: string;
@@ -59,7 +61,7 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
     config: Configuration;
     timestamp: string;
   } | null>(null);
-  async function request(mode: string) {
+  async function request(mode: AnalysisMode) {
     setBusy(mode);
     setError('');
     try {
@@ -71,14 +73,7 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
               posterior: posterior.trim() ? JSON.parse(posterior) : undefined,
             }
           : range;
-      const r = await fetch('/api/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode, config, options: opts }),
-      });
-      const v = await r.json();
-      const apiError = (v as { error?: string }).error;
-      if (!r.ok || apiError) throw new Error(apiError ?? 'Analysis failed.');
+      const v = await compute<unknown>(mode, config, opts);
       if (mode === 'ensemble') {
         setEns(v as EnsembleResult);
         setEnsMeta({

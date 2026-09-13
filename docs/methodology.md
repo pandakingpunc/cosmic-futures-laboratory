@@ -40,7 +40,7 @@ The warm-fluid model has constant wDM in [0,1/3] and C=C₀exp(−3wDMx). It doe
 
 The expansion state is [τ,R,ln|ude|,J]. A seven-stage Dormand–Prince embedded 5(4) step estimates local RMS error with scale atol+rtol·max(|y_old|,|y_new|). A failed step is reduced; no independently clipped negative density is accepted. Maximum scale-factor step is 0.1. Default rtol=10⁻⁸ and atol=10⁻¹¹ are numerical settings, not observational uncertainty.
 
-Output samples are reconstructed inside accepted steps by refining τ(x) and taking a partial RK step. Rejection counts, accepted error norms, numerical reach and regime labels are retained. Minimum-step or work-budget limits are reported. Rejection heuristics are **not a rigorous stiffness detector**, and there is no general implicit-solver fallback in this version.
+Output samples are reconstructed inside accepted steps by refining τ(x) with a bracketed Newton iteration (dτ/dx = 1/E is available from the ODE) that terminates at floating-point resolution, then taking a partial RK step to that x. Rejection counts, accepted error norms, numerical reach and regime labels are retained. Minimum-step or work-budget limits are reported. Rejection heuristics are **not a rigorous stiffness detector**, and there is no general implicit-solver fallback in this version.
 
 For stable constant-fluid models with negative vacuum energy or closed curvature, a regular time equation evolves [a,v=da/dτ] in u=ln(1+τ):
 

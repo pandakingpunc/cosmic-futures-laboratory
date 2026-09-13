@@ -33,12 +33,21 @@ export function seededRandom(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-export function validate(c: Configuration): {
+export type ValidationField = keyof Configuration | 'closure';
+export interface Validation {
   errors: string[];
   warnings: string[];
-} {
+  /** First error per configuration field, for inline form feedback. */
+  fields: Partial<Record<ValidationField, string>>;
+}
+export function validate(c: Configuration): Validation {
   const errors: string[] = [],
-    warnings: string[] = [];
+    warnings: string[] = [],
+    fields: Validation['fields'] = {};
+  const fail = (field: ValidationField, message: string) => {
+    errors.push(message);
+    fields[field] ??= message;
+  };
   const numeric = [
     'H0',
     'omegaB',
@@ -66,82 +75,94 @@ export function validate(c: Configuration): {
     'vacuumLogLifetime',
   ] as const;
   for (const k of numeric)
-    if (!Number.isFinite(c[k])) errors.push(`${k} must be finite.`);
+    if (!Number.isFinite(c[k])) fail(k, `${k} must be finite.`);
   if (c.H0 < 1e-6 || c.H0 > 1000)
-    errors.push(
+    fail(
+      'H0',
       'H₀ must be between 10⁻⁶ and 1000 km/s/Mpc, the supported numerical range.',
     );
   for (const k of ['omegaB', 'omegaDM', 'omegaNu', 'omegaR'] as const)
     if (c[k] < 0)
-      errors.push(
+      fail(
+        k,
         `${k} cannot be negative in the supported fluid equations, including the sandbox.`,
       );
   const sum =
     c.omegaB + c.omegaDM + c.omegaNu + c.omegaR + c.omegaDE + c.omegaK;
   if (Math.abs(sum - 1) > 1e-5)
-    errors.push(
+    fail(
+      'closure',
       `Density closure fails: ΣΩ = ${sum.toPrecision(7)}. Set Ωde or Ωk explicitly so ΣΩ=1; values are never silently renormalized.`,
     );
-  if (c.Tcmb <= 0) errors.push('CMB temperature must be positive.');
+  if (c.Tcmb <= 0) fail('Tcmb', 'CMB temperature must be positive.');
   if (c.Neff < 0 || c.Neff > 20)
-    errors.push('Effective relativistic species must be between zero and 20.');
+    fail('Neff', 'Effective relativistic species must be between zero and 20.');
   for (const k of [
     'protonLogLifetime',
     'electronLogLifetime',
     'vacuumLogLifetime',
   ] as const)
-    if (c[k] < 0 || c[k] > 1000)
-      errors.push(`${k} must lie between 0 and 1000.`);
+    if (c[k] < 0 || c[k] > 1000) fail(k, `${k} must lie between 0 and 1000.`);
   if (c.endLogYears < 0 || c.endLogYears > 1000)
-    errors.push('Endpoint must be from 1 to 10^1000 elapsed years.');
+    fail('endLogYears', 'Endpoint must be from 1 to 10^1000 elapsed years.');
   if (c.samples < 40 || c.samples > 1000 || !Number.isInteger(c.samples))
-    errors.push('Choose 40–1000 output samples.');
-  if (c.rtol < 1e-12 || c.rtol > 1e-3 || c.atol < 1e-14 || c.atol > 1e-5)
-    errors.push('Solver tolerances outside supported bounds.');
+    fail('samples', 'Choose 40–1000 output samples.');
+  if (c.rtol < 1e-12 || c.rtol > 1e-3)
+    fail('rtol', 'Relative tolerance must lie between 10⁻¹² and 10⁻³.');
+  if (c.atol < 1e-14 || c.atol > 1e-5)
+    fail('atol', 'Absolute tolerance must lie between 10⁻¹⁴ and 10⁻⁵.');
   if (c.evaporationFactor <= 0)
-    errors.push('Evaporation multiplier must be positive.');
+    fail('evaporationFactor', 'Evaporation multiplier must be positive.');
   if (
     !Array.isArray(c.blackHoleMasses) ||
     c.blackHoleMasses.length < 1 ||
     c.blackHoleMasses.length > 12 ||
     c.blackHoleMasses.some((m) => m <= 0 || !Number.isFinite(m) || m > 1e30)
   )
-    errors.push('Supply 1–12 black-hole masses in (0, 10^30] solar masses.');
+    fail(
+      'blackHoleMasses',
+      'Supply 1–12 black-hole masses in (0, 10^30] solar masses.',
+    );
+  else if (new Set(c.blackHoleMasses).size !== c.blackHoleMasses.length)
+    fail('blackHoleMasses', 'Black-hole masses must be distinct.');
   if (!['hawking', 'disabled', 'remnant'].includes(c.evaporation))
-    errors.push('Unknown black-hole evaporation model.');
-  if (typeof c.name !== 'string' || typeof c.expression !== 'string')
-    errors.push('Universe name and custom expression must be text.');
+    fail('evaporation', 'Unknown black-hole evaporation model.');
+  if (typeof c.name !== 'string') fail('name', 'Universe name must be text.');
+  if (typeof c.expression !== 'string')
+    fail('expression', 'Custom expression must be text.');
   for (const k of [
     'sandbox',
     'protonDecay',
     'electronDecay',
     'vacuumDecay',
   ] as const)
-    if (typeof c[k] !== 'boolean') errors.push(`${k} must be a boolean.`);
+    if (typeof c[k] !== 'boolean') fail(k, `${k} must be a boolean.`);
+  if (!['lambda', 'constant', 'cpl', 'bounded', 'custom'].includes(c.deModel))
+    fail('deModel', 'Unknown dark-energy model.');
   if (
-    !['lambda', 'constant', 'cpl', 'bounded', 'custom'].includes(c.deModel) ||
     !['stable', 'decay', 'annihilation', 'warm', 'interacting'].includes(
       c.dmModel,
     )
   )
-    errors.push('Unknown energy or matter model.');
-  if (
-    c.dmLogLifetime < 0 ||
-    c.dmLogLifetime > 1000 ||
-    c.interaction < 0 ||
-    c.annihilation < 0 ||
-    c.warmW < 0 ||
-    c.warmW > 1 / 3
-  )
-    errors.push(
-      'Dark-matter lifetime/rate/equation-of-state outside supported range.',
+    fail('dmModel', 'Unknown dark-matter model.');
+  if (c.dmLogLifetime < 0 || c.dmLogLifetime > 1000)
+    fail(
+      'dmLogLifetime',
+      'Dark-matter log lifetime must lie between 0 and 1000.',
     );
-  if (!Array.isArray(c.events)) errors.push('Custom events must be an array.');
+  if (c.interaction < 0)
+    fail('interaction', 'Transfer coefficient ξ cannot be negative.');
+  if (c.annihilation < 0)
+    fail('annihilation', 'Annihilation coefficient A cannot be negative.');
+  if (c.warmW < 0 || c.warmW > 1 / 3)
+    fail('warmW', 'Warm-fluid w must lie between 0 and 1/3.');
+  if (!Array.isArray(c.events))
+    fail('events', 'Custom events must be an array.');
   else {
     if (c.events.length > 20)
-      errors.push('At most 20 custom events are supported.');
+      fail('events', 'At most 20 custom events are supported.');
     if (c.events.length && !c.sandbox)
-      errors.push('Enable the nonstandard sandbox to apply custom events.');
+      fail('sandbox', 'Enable the nonstandard sandbox to apply custom events.');
     for (const e of c.events)
       if (
         !e ||
@@ -159,14 +180,14 @@ export function validate(c: Configuration): {
           'dm-lifetime',
         ].includes(e.action)
       )
-        errors.push('Invalid custom event.');
+        fail('events', 'Invalid custom event.');
   }
   if (c.deModel === 'custom') {
     try {
       const f = compileExpression(c.expression);
       for (const a of [1, 1.01, 2, 10]) f(a);
     } catch (e) {
-      errors.push((e as Error).message);
+      fail('expression', (e as Error).message);
     }
   }
   if (c.deModel === 'cpl')
@@ -199,7 +220,7 @@ export function validate(c: Configuration): {
   warnings.push(
     'Stellar populations and remnant eras are phenomenological proxies; no N-body dynamics, stellar population synthesis, or exact entropy budget is computed.',
   );
-  return { errors, warnings };
+  return { errors, warnings, fields };
 }
 
 interface Node {
@@ -269,8 +290,14 @@ export function simulate(input: Configuration): Result {
     wa = c.wa;
   let eventIndex = 0;
   const random = seededRandom(c.seed);
+  // A draw earlier than one elapsed year terminates at the first sample
+  // instead of producing negative log-time coordinates.
   const vacuumLog = c.vacuumDecay
-    ? c.vacuumLogLifetime + Math.log10(-Math.log(Math.max(1e-15, 1 - random())))
+    ? Math.max(
+        0,
+        c.vacuumLogLifetime +
+          Math.log10(-Math.log(Math.max(1e-15, 1 - random()))),
+      )
     : Infinity;
   const effectiveEnd = Math.min(c.endLogYears, vacuumLog);
   const eventQueue = c.events
@@ -568,9 +595,11 @@ export function simulate(input: Configuration): Result {
     const numericalEnd = Math.min(effectiveEnd, finalLog);
     const targets = [
       -Infinity,
-      ...Array.from(
-        { length: c.samples },
-        (_, i) => (i * numericalEnd) / (c.samples - 1),
+      ...new Set(
+        Array.from(
+          { length: c.samples },
+          (_, i) => (i * numericalEnd) / (c.samples - 1),
+        ),
       ),
     ];
     let j = 0;
@@ -587,16 +616,35 @@ export function simulate(input: Configuration): Result {
       let px = n.x,
         py = n.y;
       if (next.x > n.x && tau > n.y[0]) {
+        // Refine τ(x)=target inside the accepted step with a bracketed Newton
+        // iteration; dτ/dx = 1/E is available from the ODE itself. The
+        // bracket guarantees convergence and the exit test ends at
+        // floating-point resolution, matching a full bisection.
         let lo = n.x,
-          hi = next.x;
-        for (let k = 0; k < 52; k++) {
-          const mid = (lo + hi) / 2;
-          const t = dopriStep(derivative, n.x, n.y, mid - n.x, c.rtol, c.atol);
-          if (t.y[0] < tau) lo = mid;
-          else hi = mid;
+          hi = next.x,
+          guess =
+            n.x + ((tau - n.y[0]) / (next.y[0] - n.y[0])) * (next.x - n.x),
+          py2 = n.y;
+        for (let k = 0; k < 64; k++) {
+          if (!(guess > lo && guess < hi)) guess = (lo + hi) / 2;
+          const t = dopriStep(
+            derivative,
+            n.x,
+            n.y,
+            guess - n.x,
+            c.rtol,
+            c.atol,
+          );
+          const f = t.y[0] - tau;
+          if (f < 0) lo = guess;
+          else hi = guess;
+          px = guess;
+          py2 = t.y;
+          if (f === 0 || hi - lo <= 2 * Number.EPSILON * Math.max(1, hi)) break;
+          const slope = derivative(guess, t.y)[0];
+          guess = slope > 0 ? guess - f / slope : (lo + hi) / 2;
         }
-        px = (lo + hi) / 2;
-        py = dopriStep(derivative, n.x, n.y, px - n.x, c.rtol, c.atol).y;
+        py = py2;
       }
       result.samples.push(sampleAt(px, py, lt === -Infinity ? 0 : lt));
     }

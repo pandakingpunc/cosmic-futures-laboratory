@@ -35,7 +35,15 @@
     ".test-output/**",
     ".venv/**"
   ],
-  "overrides": [{"files":["components/lab/chart.tsx","components/lab/structure-view.tsx"],"rules":{"jsx-a11y/prefer-tag-over-role":"off"}}],
+  "overrides": [
+    {
+      "files": [
+        "components/lab/chart.tsx",
+        "components/lab/structure-view.tsx"
+      ],
+      "rules": { "jsx-a11y/prefer-tag-over-role": "off" }
+    }
+  ],
   "rules": {
     "no-array-constructor": "error",
     "no-var": "error",

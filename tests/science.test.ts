@@ -7,20 +7,43 @@ import {
   blackHoleLifetime,
   survival,
 } from '../src/science/astrophysics';
-import { ensemble, cholesky, interpolate } from '../src/science/analysis';
+import {
+  ensemble,
+  cholesky,
+  interpolate,
+  sensitivity,
+  sweep,
+} from '../src/science/analysis';
 import { csv, report } from '../src/science/report';
+import { cosmicEvents } from '../src/science/astrophysics';
+import { runAnalysis, isAnalysisMode } from '../src/science/dispatch';
+import { POST } from '../app/api/simulate/route';
+import {
+  encodeConfig,
+  decodeConfig,
+  readSharedConfig,
+  shareHash,
+  isResult,
+} from '../components/lab/persistence';
 import type { Configuration } from '../src/science/types';
 let failures = 0,
   count = 0;
-function test(name: string, fn: () => void) {
+const runs: Promise<void>[] = [];
+// Synchronous tests run in place; asynchronous tests are awaited before the
+// summary so their assertions count.
+function test(name: string, fn: () => void | Promise<void>) {
   count++;
-  try {
-    fn();
-    console.log(`PASS ${name}`);
-  } catch (e) {
-    failures++;
-    console.error(`FAIL ${name}`, e);
-  }
+  runs.push(
+    (async () => {
+      try {
+        await fn();
+        console.log(`PASS ${name}`);
+      } catch (e) {
+        failures++;
+        console.error(`FAIL ${name}`, e);
+      }
+    })(),
+  );
 }
 function near(a: number, b: number, tol = 1e-5) {
   assert.ok(
@@ -405,5 +428,188 @@ test('simultaneous numerical interventions share one time boundary', () => {
   assert.equal(b.status, 'complete', b.diagnostics.reason);
   near(b.samples.at(-1)!.logA!, a.samples.at(-1)!.logA!, 1e-7);
 });
+test('output samples hit their target elapsed times to machine precision', () => {
+  const c = { ...defaultConfig(), endLogYears: 12, samples: 50 },
+    r = simulate(c);
+  assert.equal(r.status, 'complete', r.diagnostics.reason);
+  const numerical = r.samples.filter(
+    (s) => !s.isPresent && s.regime === 'numerical',
+  );
+  assert.ok(numerical.length >= 49);
+  for (let i = 1; i < numerical.length; i++)
+    assert.ok(numerical[i].logA! > numerical[i - 1].logA!);
+  // Rerunning to a sample's own time reproduces its state.
+  const probe = numerical[Math.floor(numerical.length / 2)];
+  const direct = simulate({ ...c, endLogYears: probe.logYears, samples: 40 });
+  near(direct.samples.at(-1)!.logA!, probe.logA!, 1e-12);
+});
+test('duplicate black-hole masses are rejected with a field message', () => {
+  const v = validate({ ...defaultConfig(), blackHoleMasses: [10, 10] });
+  assert.ok(v.errors.some((e) => e.includes('distinct')));
+  assert.ok(v.fields.blackHoleMasses);
+  assert.equal(validate(defaultConfig()).errors.length, 0);
+});
+test('validation maps errors to configuration fields', () => {
+  const v = validate({
+    ...defaultConfig(),
+    H0: -1,
+    rtol: 1,
+    atol: 1,
+    omegaDE: 0.5,
+    warmW: 2,
+  });
+  for (const f of ['H0', 'rtol', 'atol', 'closure', 'warmW'] as const)
+    assert.ok(v.fields[f], `missing field message for ${f}`);
+  assert.equal(new Set(v.errors).size, v.errors.length);
+  assert.equal(validate(defaultConfig()).fields.H0, undefined);
+});
+test('a vacuum draw before one elapsed year never yields negative times', () => {
+  for (let seed = 1; seed < 40; seed++) {
+    const r = simulate({
+      ...defaultConfig(),
+      vacuumDecay: true,
+      vacuumLogLifetime: 0,
+      endLogYears: 6,
+      samples: 40,
+      seed,
+    });
+    assert.ok(
+      r.samples.every((s) => s.logYears >= 0),
+      `seed ${seed}`,
+    );
+    assert.ok(r.events.every((e) => e.logYears >= 0));
+    assert.ok(!JSON.stringify(r).includes('NaN'));
+  }
+});
+test('future matter–dark-energy equality is detected with unique event ids', () => {
+  // The reference universe is already dark-energy dominated, so its equality
+  // lies in the past; a matter-dominated start crosses in the future.
+  const c = pure({ omegaB: 0.7, omegaDE: 0.3, endLogYears: 11 }),
+    r = simulate(c);
+  const equality = r.events.filter((e) => e.id.startsWith('equality'));
+  assert.equal(equality.length, 1);
+  assert.equal(equality[0].id, 'equality');
+  const at = r.samples.find((s) => s.logYears === equality[0].logYears)!;
+  assert.ok(Math.abs(at.omegaM! - at.omegaDE!) < 0.06);
+  assert.equal(r.events.filter((e) => e.id === 'equality').length, 1);
+  // A later w switch lets matter overtake again: ids stay unique.
+  const two = simulate({
+    ...c,
+    endLogYears: 12,
+    sandbox: true,
+    events: [{ id: 'w', logTime: 10.5, action: 'change-w', value: 1 }],
+  });
+  const ids = cosmicEvents(two.config, two.samples, 12).map((e) => e.id);
+  assert.equal(new Set(ids).size, ids.length);
+  assert.ok(ids.filter((id) => id.startsWith('equality')).length >= 1);
+});
+test('sensitivity returns four ranked finite-difference rows', () => {
+  const rows = sensitivity({ ...defaultConfig(), endLogYears: 11 });
+  assert.equal(rows.length, 4);
+  assert.deepEqual([...rows].map((r) => r.parameter).sort(), [
+    'H0',
+    'omegaM',
+    'w0',
+    'wa',
+  ]);
+  for (let i = 1; i < rows.length; i++)
+    assert.ok((rows[i - 1].response ?? 0) >= (rows[i].response ?? 0));
+  assert.ok(rows.find((r) => r.parameter === 'H0')!.derivative! > 0);
+  assert.equal(rows.find((r) => r.parameter === 'wa')!.derivative, 0);
+});
+test('sweep grid covers phantom and quintessence outcomes', () => {
+  const rows = sweep(
+    { ...defaultConfig(), endLogYears: 20 },
+    { w0Min: -1.2, w0Max: -0.8, waMin: 0, waMax: 0.1, resolution: 3 },
+  );
+  assert.equal(rows.length, 9);
+  assert.ok(rows.some((r) => r.outcome.includes('Rip')));
+  assert.ok(rows.some((r) => r.outcome.includes('accelerated')));
+  assert.throws(() =>
+    sweep(defaultConfig(), {
+      w0Min: 0,
+      w0Max: -1,
+      waMin: 0,
+      waMax: 1,
+      resolution: 3,
+    }),
+  );
+  assert.throws(() =>
+    sweep(defaultConfig(), undefined as unknown as Parameters<typeof sweep>[1]),
+  );
+  assert.throws(() =>
+    ensemble(
+      defaultConfig(),
+      undefined as unknown as Parameters<typeof ensemble>[1],
+    ),
+  );
+});
+test('the analysis dispatcher and HTTP route agree and validate modes', async () => {
+  assert.ok(isAnalysisMode('sweep') && !isAnalysisMode('unknown'));
+  const c = { samples: 40, endLogYears: 8 };
+  const direct = runAnalysis('deterministic', c) as ReturnType<typeof simulate>;
+  const post = (body: unknown) =>
+    POST(
+      new Request('http://laboratory.test/api/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: typeof body === 'string' ? body : JSON.stringify(body),
+      }),
+    );
+  const ok = await post({ config: c });
+  assert.equal(ok.status, 200);
+  assert.equal(ok.headers.get('cache-control'), 'no-store');
+  const viaHttp = (await ok.json()) as ReturnType<typeof simulate>;
+  assert.equal(
+    viaHttp.metadata.configurationHash,
+    direct.metadata.configurationHash,
+  );
+  assert.deepEqual(
+    viaHttp.samples.map((s) => s.expansionIndex),
+    direct.samples.map((s) => s.expansionIndex),
+  );
+  assert.equal((await post({ config: [] })).status, 400);
+  assert.equal((await post({ config: c, mode: 'unknown' })).status, 400);
+  assert.equal((await post('{')).status, 400);
+  const missing = await post({ config: c, mode: 'ensemble' });
+  assert.equal(missing.status, 400);
+  assert.match(((await missing.json()) as { error: string }).error, /options/);
+  const sweepResponse = await post({
+    config: c,
+    mode: 'sweep',
+    options: { w0Min: -1.1, w0Max: -0.9, waMin: 0, waMax: 0.1, resolution: 3 },
+  });
+  assert.equal(sweepResponse.status, 200);
+  assert.equal(((await sweepResponse.json()) as unknown[]).length, 9);
+});
+test('shareable links round-trip configurations including non-ASCII names', () => {
+  const c = { ...defaultConfig(), name: 'Λ · deneme ✓', w0: -1.05 };
+  const encoded = encodeConfig(c);
+  assert.match(encoded, /^[A-Za-z0-9_-]+$/);
+  assert.deepEqual(decodeConfig(encoded), c);
+  assert.deepEqual(readSharedConfig(shareHash(c)), c);
+  assert.equal(readSharedConfig('#other=1'), null);
+  assert.equal(decodeConfig('not base64 @@'), null);
+  assert.equal(
+    decodeConfig(encodeConfig([] as unknown as Configuration)),
+    null,
+  );
+  const partial = decodeConfig(
+    btoa(JSON.stringify({ H0: 70 }))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, ''),
+  );
+  assert.equal(partial?.H0, 70);
+  assert.equal(partial?.omegaB, defaultConfig().omegaB);
+});
+test('result files are recognized for the comparison bench', () => {
+  const r = simulate({ ...defaultConfig(), endLogYears: 6, samples: 40 });
+  assert.ok(isResult(JSON.parse(JSON.stringify(r))));
+  assert.ok(!isResult(defaultConfig()));
+  assert.ok(!isResult(null));
+  assert.ok(!isResult({ samples: [], events: [] }));
+});
+await Promise.all(runs);
 console.log(`${count - failures}/${count} scientific checks passed.`);
 if (failures) process.exitCode = 1;

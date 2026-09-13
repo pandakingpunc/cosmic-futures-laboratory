@@ -55,6 +55,7 @@ export function NumberField({
   hint,
   min,
   max,
+  error,
 }: {
   label: string;
   value: number;
@@ -63,6 +64,7 @@ export function NumberField({
   hint?: string;
   min?: number;
   max?: number;
+  error?: string;
 }) {
   const [draft, setDraft] = useState(String(value));
   const [previousValue, setPreviousValue] = useState(value);
@@ -72,10 +74,11 @@ export function NumberField({
       setDraft(String(value));
   }
   return (
-    <label className="control">
+    <label className={`control ${error ? 'has-error' : ''}`}>
       <span>{label}</span>
       <input
         aria-label={label}
+        aria-invalid={error ? true : undefined}
         type="text"
         inputMode="decimal"
         className="mono"
@@ -89,6 +92,11 @@ export function NumberField({
         }}
       />
       {hint && <small>{hint}</small>}
+      {error && (
+        <small className="field-error" role="alert">
+          {error}
+        </small>
+      )}
     </label>
   );
 }
@@ -154,6 +162,43 @@ export function download(
   a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+/** Rasterizes an SVG chart to PNG at the given device scale and downloads it. */
+export function downloadSvgAsPng(
+  svg: SVGSVGElement,
+  name: string,
+  scale = 2,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const [, , w, h] = (svg.getAttribute('viewBox') ?? '0 0 940 360')
+      .split(/\s+/)
+      .map(Number);
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = w * scale;
+      canvas.height = h * scale;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('Canvas is unavailable.'));
+      ctx.scale(scale, scale);
+      ctx.drawImage(image, 0, 0, w, h);
+      canvas.toBlob((blob) => {
+        if (!blob) return reject(new Error('PNG encoding failed.'));
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        resolve();
+      }, 'image/png');
+    };
+    image.onerror = () =>
+      reject(new Error('The chart could not be rasterized.'));
+    image.src =
+      'data:image/svg+xml;charset=utf-8,' +
+      encodeURIComponent(new XMLSerializer().serializeToString(svg));
+  });
 }
 export function format(n: number | null | undefined, digits = 3) {
   if (n === null || n === undefined || !Number.isFinite(n))

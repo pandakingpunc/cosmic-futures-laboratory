@@ -1,4 +1,26 @@
-# Validation record — version 0.1.0
+# Validation record
+
+## Revalidation of the unreleased main branch — 2026-09-13
+
+Revalidated locally on 2026-09-13 with Node.js 24.19.0, Windows, and the updated pinned dependency tree after the changes listed under *Unreleased* in `CHANGELOG.md` (browser-worker execution, Newton-refined output sampling, shareable links, browser persistence, inline validation, dependency cleanup).
+
+- `npm test` passes **45 checks**; the harness now awaits asynchronous checks so HTTP-route assertions count. New checks cover sample-time precision (a rerun to a sample's own time reproduces log₁₀ a to 10⁻¹²), field-mapped validation, duplicate black-hole masses, the vacuum clock at lifetime 0 for 39 seeds, unique equality-event identifiers, sensitivity ordering, sweep outcomes and option validation, the dispatcher and `POST /api/simulate` handler, link encoding with non-ASCII names, and result-file recognition.
+- Numerical equivalence: all 16 example configurations plus the 10¹⁰⁰ and 10¹⁰⁰⁰-year defaults were recomputed with the previous bisection sampler and the new bracketed Newton sampler. Accepted-step counts, classifications, statuses and event times are identical. The largest difference in any logarithmic sample quantity is 3.6×10⁻¹⁰ (the `limited` DESI CPL case near its stiff boundary) and at most 1.2×10⁻¹³ for every other case. Configuration hashes are unchanged.
+- The independent SciPy DOP853 comparison was rerun on the regenerated examples: maximum |Δ log₁₀ a| 4.362×10⁻¹¹ (observational reference), 4.221×10⁻¹¹ (decaying dark matter), 2.709×10⁻¹¹ (matter benchmark), 7.657×10⁻¹¹ (radiation benchmark), identical to the 0.1.0 record within the printed precision.
+- Type checking, linting, `npm run format:check`, the Cloudflare build, the Vercel build and `npm run validate:vercel` pass. The worker bundle is emitted under `_next/static/workers/` in both outputs.
+- `npm audit --audit-level=high` reports zero vulnerabilities after updating wrangler 4.131.1, @cloudflare/vite-plugin 1.54.8 and @cloudflare/workers-types; the 0.1.0 dependency tree had since accumulated four high-severity advisories through miniflare/sharp.
+- Browser checks against the development server: a modified H₀ was calculated in the worker with no request to `/api/simulate` (only the worker module was fetched); a 32-realization ensemble ran the same way; the address bar received the `#c=` link and the browser store held the configuration; a reload without the hash restored and recalculated H₀=70; a manually constructed link with H₀=72 and a new name restored, recalculated and preserved the one-slot comparison bench; an out-of-range H₀ showed the inline field message, the summary list and a disabled run button. At 375×812 CSS pixels the header shows icon-only share and export buttons with no horizontal document overflow. No console errors were observed.
+
+Timings on the validation machine, single Node.js process, indicative only:
+
+| Workload | Before | After |
+| --- | ---: | ---: |
+| Default run, 240 samples to 10¹⁰⁰ yr | 67 ms | 15 ms |
+| Ensemble, 32 realizations | 0.71 s | 0.17 s |
+| Ensemble, 256 realizations | 5.5 s | 1.2 s |
+| Sweep, 15×15 grid | 2.8 s | 1.1 s |
+
+## Version 0.1.0
 
 Validated locally on 2026-09-05 with Node.js 24.19.0, Windows, and the pinned npm dependency tree. These checks establish specific numerical and software behavior; they are not external scientific peer review or a proof that arbitrary future physics is modeled correctly.
 

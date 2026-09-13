@@ -2255,3 +2255,41 @@ pre {
     scroll-behavior: auto !important;
   }
 }
+
+/* Session sharing, inline validation and PNG export (added 2026-09) */
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.control.has-error input {
+  border-color: #c98a7c;
+  box-shadow: 0 0 0 1px #c98a7c55;
+}
+.field-error {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #e5a294;
+  margin-top: 2px;
+}
+.validation-summary {
+  margin-bottom: 12px;
+}
+.validation-summary strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #ecd0ab;
+}
+.validation-summary ul {
+  margin: 0;
+  padding-left: 16px;
+}
+.validation-summary li + li {
+  margin-top: 3px;
+}
+@media (max-width: 1000px) {
+  .header-actions {
+    margin-left: auto;
+  }
+}

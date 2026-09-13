@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowDownToLine,
   ArrowUpRight,
@@ -9,9 +9,12 @@ import {
   BookOpen,
   FlaskConical,
   GitBranch,
+  Image,
   Layers,
+  Link2,
   ListTree,
   Plus,
+  Upload,
   X,
   Check,
   CircleHelp,
@@ -22,7 +25,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { ConfigurationPanel } from './configuration';
 import { ScientificPlot, type PlotSeries } from './chart';
-import { Choice, Badge, Time, format, download } from './controls';
+import {
+  Choice,
+  Badge,
+  Time,
+  format,
+  download,
+  downloadSvgAsPng,
+} from './controls';
 import { AnalysisPanel } from './analysis-panel';
 import { StructureView } from './structure-view';
 import {
@@ -31,8 +41,16 @@ import {
   SourcesPanel,
   ReportPanel,
 } from './detail-panels';
+import { compute } from './compute';
+import {
+  isResult,
+  loadStored,
+  readSharedConfig,
+  saveStored,
+  shareHash,
+} from './persistence';
 import { defaultConfig } from '@/src/science/defaults';
-import { simulate, hashConfig } from '@/src/science/engine';
+import { simulate, hashConfig, validate } from '@/src/science/engine';
 import {
   DATASET_VERSION,
   VERSION,
@@ -139,7 +157,66 @@ export default function Laboratory() {
     [epoch, setEpoch] = useState(11),
     [event, setEvent] = useState<CosmicEvent | null>(null),
     [comparisons, setComparisons] = useState<Result[]>([]),
-    [showConfig, setShowConfig] = useState(false);
+    [showConfig, setShowConfig] = useState(false),
+    [restored, setRestored] = useState(false);
+  const resultFile = useRef<HTMLInputElement>(null);
+  const run = useCallback(
+    async (override?: Configuration) => {
+      const target = override ?? config;
+      setBusy(true);
+      setError('');
+      setNotice('');
+      try {
+        const data = await compute<Result>('deterministic', target);
+        setResult(data);
+        setEvent(null);
+        setEpoch(Math.min(11, data.samples.at(-1)?.logYears ?? 11));
+        if (data.errors.length) setError(data.errors.join(' '));
+        else {
+          setNotice(
+            'Simulation calculated. Exports retain this configuration and its provenance.',
+          );
+          // The address bar always identifies the last calculated universe.
+          window.history.replaceState(null, '', shareHash(data.config));
+        }
+        setShowConfig(false);
+      } catch (e) {
+        setError((e as Error).message);
+      } finally {
+        setBusy(false);
+      }
+    },
+    [config],
+  );
+  // Restore a shared link (takes precedence) or the previous browser session.
+  // Browser storage and the URL are external systems, so the restore happens
+  // in a scheduled callback rather than synchronously in the effect body.
+  useEffect(() => {
+    if (restored) return;
+    let cancelled = false;
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      const shared = readSharedConfig(window.location.hash);
+      const stored = loadStored();
+      if (stored.comparisons?.length) setComparisons(stored.comparisons);
+      const restoredConfig = shared ?? stored.config;
+      if (restoredConfig && !validate(restoredConfig).errors.length) {
+        setConfig(restoredConfig);
+        if (hashConfig(restoredConfig) !== hashConfig(defaultConfig()))
+          void run(restoredConfig);
+      } else if (shared)
+        setError(
+          'The shared link contains an invalid configuration; the default reference universe is shown instead.',
+        );
+      setRestored(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [restored, run]);
+  useEffect(() => {
+    if (restored) saveStored({ config, comparisons });
+  }, [restored, config, comparisons]);
   const dirty = hashConfig(config) !== result.metadata.configurationHash,
     maxTime = result.samples.at(-1)?.logYears ?? config.endLogYears;
   const xMax =
@@ -160,51 +237,66 @@ export default function Laboratory() {
       ),
     [result, epoch],
   );
-  async function run(override?: Configuration) {
-    setBusy(true);
-    setError('');
-    setNotice('');
+  async function shareLink() {
+    const url = `${window.location.origin}${window.location.pathname}${shareHash(result.config)}`;
     try {
-      const response = await fetch('/api/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ config: override ?? config }),
-      });
-      const data = (await response.json()) as Result & { error?: string };
-      if (!response.ok || data.error)
-        throw new Error(data.error ?? 'The simulation request failed.');
-      setResult(data);
-      setEvent(null);
-      setEpoch(Math.min(11, data.samples.at(-1)?.logYears ?? 11));
-      if (data.errors.length) setError(data.errors.join(' '));
-      else
-        setNotice(
-          'Simulation calculated. Exports retain this configuration and its provenance.',
-        );
-      setShowConfig(false);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
+      await navigator.clipboard.writeText(url);
+      setNotice(
+        'Link copied. Opening it reproduces this configuration and recalculates the universe.',
+      );
+    } catch {
+      window.prompt('Copy this reproducible link:', url);
     }
   }
-  function saveUniverse() {
+  function addComparison(r: Result) {
     if (comparisons.length >= 4) {
       setNotice(
         'Four comparison slots are occupied. Remove one in Compare to add another.',
       );
-      return;
+      return false;
     }
-    setComparisons([...comparisons, structuredClone(result)]);
-    setNotice(`Saved ${result.config.name} for comparison.`);
+    setComparisons([...comparisons, structuredClone(r)]);
+    return true;
   }
-  function saveChart() {
-    const svg = document.querySelector('[data-export-chart]');
-    if (svg)
+  async function importResult(file: File | undefined) {
+    if (!file) return;
+    try {
+      if (file.size > 20e6) throw new Error('Result file exceeds 20 MB.');
+      const v: unknown = JSON.parse(await file.text());
+      if (!isResult(v))
+        throw new Error(
+          'This file is not a complete result. Configuration-only files load through Import JSON in the configuration panel.',
+        );
+      const check = validate(v.config);
+      if (check.errors.length) throw new Error(check.errors.join(' '));
+      if (addComparison(v))
+        setNotice(
+          `Imported ${v.config.name}${
+            v.metadata.version !== VERSION
+              ? ` (computed with software version ${v.metadata.version}; current is ${VERSION})`
+              : ''
+          } into the comparison bench.`,
+        );
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+  function saveUniverse() {
+    if (addComparison(result))
+      setNotice(`Saved ${result.config.name} for comparison.`);
+  }
+  function saveChart(kind: 'svg' | 'png') {
+    const svg = document.querySelector<SVGSVGElement>('[data-export-chart]');
+    if (!svg) return;
+    if (kind === 'svg')
       download(
         'cosmic-evolution.svg',
         new XMLSerializer().serializeToString(svg),
         'image/svg+xml',
+      );
+    else
+      downloadSvgAsPng(svg, 'cosmic-evolution.png').catch((e: Error) =>
+        setError(e.message),
       );
   }
   function loadBranch(kind: string) {
@@ -253,14 +345,23 @@ export default function Laboratory() {
             · DATA {DATASET_VERSION.split('.')[0]}
           </span>
         </div>
-        <button
-          className="header-export"
-          onClick={() =>
-            download('cosmic-universe.json', JSON.stringify(result, null, 2))
-          }
-        >
-          <ArrowDownToLine size={16} /> Export universe
-        </button>
+        <div className="header-actions">
+          <button
+            className="header-export"
+            onClick={() => void shareLink()}
+            title="Copy a link that reproduces the calculated configuration"
+          >
+            <Link2 size={16} /> Share link
+          </button>
+          <button
+            className="header-export"
+            onClick={() =>
+              download('cosmic-universe.json', JSON.stringify(result, null, 2))
+            }
+          >
+            <ArrowDownToLine size={16} /> Export universe
+          </button>
+        </div>
       </header>
       <div className={`workspace ${showConfig ? 'show-config' : ''}`}>
         <ConfigurationPanel
@@ -453,10 +554,19 @@ export default function Laboratory() {
                     />
                     <button
                       className="icon-button"
-                      onClick={saveChart}
+                      onClick={() => saveChart('svg')}
                       aria-label="Export visible chart as SVG"
+                      title="Export SVG"
                     >
                       <ArrowDownToLine size={16} />
+                    </button>
+                    <button
+                      className="icon-button"
+                      onClick={() => saveChart('png')}
+                      aria-label="Export visible chart as PNG"
+                      title="Export PNG"
+                    >
+                      <Image size={16} />
                     </button>
                   </div>
                 </div>
@@ -621,14 +731,33 @@ export default function Laboratory() {
                     <span className="eyebrow">COMPARE UNIVERSES</span>
                     <h2>Same equations. Different assumptions.</h2>
                   </div>
-                  <button className="secondary-button" onClick={saveUniverse}>
-                    <Plus size={15} /> Keep current result
-                  </button>
+                  <div className="heading-actions">
+                    <button
+                      className="secondary-button"
+                      onClick={() => resultFile.current?.click()}
+                    >
+                      <Upload size={15} /> Import result
+                    </button>
+                    <button className="secondary-button" onClick={saveUniverse}>
+                      <Plus size={15} /> Keep current result
+                    </button>
+                  </div>
+                  <input
+                    type="file"
+                    accept=".json,application/json"
+                    hidden
+                    ref={resultFile}
+                    onChange={(e) => {
+                      void importResult(e.target.files?.[0]);
+                      e.target.value = '';
+                    }}
+                  />
                 </div>
                 <p>
                   Save up to four calculated universes, then change the initial
-                  conditions and run again. Export results to keep them across
-                  page reloads.
+                  conditions and run again. The bench and the current
+                  configuration persist in this browser; exported result files
+                  can be imported back without recalculation.
                 </p>
                 <Choice
                   label="Comparison quantity"

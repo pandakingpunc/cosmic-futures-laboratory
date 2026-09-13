@@ -141,6 +141,7 @@ export function cosmicEvents(
       ['adams1997', 'page1976'],
     );
   }
+  let crossings = 0;
   for (let j = 1; j < samples.length; j++) {
     const p = samples[j - 1],
       s = samples[j];
@@ -152,7 +153,7 @@ export function cosmicEvents(
       (p.omegaM - p.omegaDE) * (s.omegaM - s.omegaDE) < 0
     )
       add(
-        'equality',
+        ++crossings === 1 ? 'equality' : `equality-${crossings}`,
         'Matter–dark-energy equality',
         s.logYears,
         'Numerically detected crossing of the homogeneous matter and dark-energy density fractions.',

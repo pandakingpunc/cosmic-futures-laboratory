@@ -20,12 +20,15 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by the development server, normally `http://localhost:3000`. Choose a preset or change the initial conditions and press **RUN SIMULATION**. Modified inputs are marked until recalculated. Save universes to the comparison bench, inspect epochs with the time slider, and export JSON, CSV, SVG or a Markdown scientific report. Comparison slots live in memory; export results before reloading.
+Open the local URL printed by the development server, normally `http://localhost:3000`. Choose a preset or change the initial conditions and press **RUN SIMULATION**. Modified inputs are marked until recalculated. Save universes to the comparison bench, inspect epochs with the time slider, and export JSON, CSV, SVG, PNG or a Markdown scientific report.
+
+Calculations run in a browser Web Worker, so interactive use needs no server round trip. The current configuration and the comparison bench persist in the browser, the address bar always encodes the last calculated configuration as a shareable link (**Share link** copies it), and exported result files can be imported back into the bench without recalculation. `/api/simulate` accepts the same `{ config, mode, options }` body for scripts and serves as an automatic fallback.
 
 ```sh
 npm test
 npm run typecheck
 npm run lint
+npm run format:check
 npm run examples
 npm run build
 ```

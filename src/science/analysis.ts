@@ -103,6 +103,10 @@ export function interpolate(
     : v + ((w - v) * (logYears - a.logYears)) / (b.logYears - a.logYears);
 }
 export function ensemble(c: Configuration, o: EnsembleOptions): EnsembleResult {
+  if (!o || typeof o !== 'object' || !Array.isArray(o.sigmas))
+    throw new Error(
+      'Ensemble options must include runs, seed, distribution, four sigmas and an interval.',
+    );
   if (!Number.isInteger(o.runs) || o.runs < 4 || o.runs > 256)
     throw new Error('Ensemble size must be 4–256.');
   if (
@@ -247,6 +251,8 @@ export function sweep(
   },
 ) {
   if (
+    !range ||
+    typeof range !== 'object' ||
     !Object.values(range).every(Number.isFinite) ||
     range.resolution < 3 ||
     range.resolution > 15 ||

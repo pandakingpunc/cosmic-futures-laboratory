@@ -4,10 +4,18 @@
   "printWidth": 80,
   "sortPackageJson": false,
   "ignorePatterns": [
+    "**/*.md",
+    ".test-output/**",
+    ".venv/**",
+    ".vercel/**",
+    ".wrangler/**",
+    "bun.lock",
+    "bun.lockb",
+    "dist/**",
+    "docs/scipy-validation.json",
+    "examples/**",
     "package-lock.json",
     "pnpm-lock.yaml",
-    "yarn.lock",
-    "bun.lock",
-    "bun.lockb"
+    "yarn.lock"
   ]
 }

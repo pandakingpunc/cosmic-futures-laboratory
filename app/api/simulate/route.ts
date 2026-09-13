@@ -1,6 +1,4 @@
-import { simulate } from '@/src/science/engine';
-import { ensemble, sensitivity, sweep } from '@/src/science/analysis';
-import { defaultConfig } from '@/src/science/defaults';
+import { isAnalysisMode, runAnalysis } from '@/src/science/dispatch';
 export async function POST(request: Request) {
   try {
     if (Number(request.headers.get('content-length') ?? 0) > 1_000_000)
@@ -18,23 +16,21 @@ export async function POST(request: Request) {
         { error: 'A configuration object is required.' },
         { status: 400 },
       );
-    if (
-      body.mode !== undefined &&
-      !['deterministic', 'ensemble', 'sensitivity', 'sweep'].includes(body.mode)
-    )
+    const mode = body.mode ?? 'deterministic';
+    if (!isAnalysisMode(mode))
       return Response.json(
         { error: 'Unknown analysis mode.' },
         { status: 400 },
       );
-    const config = { ...defaultConfig(), ...body.config };
-    const result =
-      body.mode === 'ensemble'
-        ? ensemble(config, body.options)
-        : body.mode === 'sensitivity'
-          ? sensitivity(config)
-          : body.mode === 'sweep'
-            ? sweep(config, body.options)
-            : simulate(config);
+    if (
+      (mode === 'ensemble' || mode === 'sweep') &&
+      (!body.options || typeof body.options !== 'object')
+    )
+      return Response.json(
+        { error: `Analysis mode "${mode}" requires an options object.` },
+        { status: 400 },
+      );
+    const result = runAnalysis(mode, body.config, body.options);
     return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
   } catch (e) {
     return Response.json(
