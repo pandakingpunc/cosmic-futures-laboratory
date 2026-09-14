@@ -2,7 +2,13 @@
 
 The project owner is **Mustafa Karatum**, GitHub username **pandakingpunc**, an **Independent researcher** with no institutional affiliation or ORCID declared. Both citation files contain this supplied metadata; ORCID is omitted. The public repository is [pandakingpunc/cosmic-futures-laboratory](https://github.com/pandakingpunc/cosmic-futures-laboratory).
 
-## Published archive
+## Version 0.2.0 (tagged 2026-09-14)
+
+- Tag `v0.2.0` matches package version `0.2.0`; `CITATION.cff` and `.zenodo.json` carry the same version and release date.
+- The version DOI is assigned by Zenodo when the GitHub release for `v0.2.0` is published. After that, add `doi: 10.5281/zenodo.<new>` to `CITATION.cff`, record it in `CHANGELOG.md`, `README.md` and this file, and update the recommended citation.
+- Concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411) resolves to the latest archived version and is used for the README badge.
+
+## Published archive (0.1.0)
 
 - Software version: **0.1.0**, published **2026-09-05**.
 - Version DOI: [10.5281/zenodo.22343412](https://doi.org/10.5281/zenodo.22343412). Use this DOI when citing this exact version.

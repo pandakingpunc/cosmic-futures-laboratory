@@ -40,7 +40,7 @@ for name in ["observational-baseline", "decaying-dark-matter", "matter-analytic-
         checks[-1]["max_absolute_log10_radiation_error"] = radiation_error
 
 out = ROOT / "docs" / "scipy-validation.json"
-out.write_text(json.dumps({"software_version": "0.1.0", "checks": checks}, indent=2) + "\n", encoding="utf-8")
+out.write_text(json.dumps({"software_version": json.loads(Path("package.json").read_text(encoding="utf-8"))["version"], "checks": checks}, indent=2) + "\n", encoding="utf-8")
 for check in checks:
     print(f"PASS {check['case']}: max |delta log10 a| = {check['max_absolute_log10a_error']:.3e}")
 print(f"Independent reference results: {out.name}")

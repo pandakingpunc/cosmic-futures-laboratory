@@ -1,6 +1,6 @@
 # Cosmic Futures Laboratory — Scientific Report
 
-Generated 2026-09-13T14:13:14.740Z
+Generated 2026-09-14T12:52:27.955Z
 
 ## Simulation Configuration
 
@@ -109,7 +109,7 @@ Null fields explicitly mean absent, undefined, unavailable, or out-of-range quan
 
 ## Reproducibility
 
-Software 0.1.0; data 2026-09-05.1; seed 42. Export the JSON result plus the release source and lockfile.
+Software 0.2.0; data 2026-09-05.1; seed 42. Export the JSON result plus the release source and lockfile.
 
 ## References
 

@@ -1,13 +1,13 @@
 # Cosmic Futures Laboratory
 
 [![Scientific and software validation](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/workflows/ci.yml/badge.svg)](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/workflows/ci.yml)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22343412.svg)](https://doi.org/10.5281/zenodo.22343412)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22343411.svg)](https://doi.org/10.5281/zenodo.22343411)
 
 A numerical laboratory for exploring **conditional futures of the Universe**. Configure cosmological fluids, calculate their evolution, inspect assumptions and compare the results. The application and publication materials are in English.
 
 Source repository: [pandakingpunc/cosmic-futures-laboratory](https://github.com/pandakingpunc/cosmic-futures-laboratory).
 
-This is version **0.1.0, a research software preview**. Its core has analytic regression tests and an independent SciPy comparison. It has not undergone external scientific peer review. It does not calculate a unique or observationally measured probability for the ultimate cosmic fate.
+This is version **0.2.0, a research software preview**. Its core has analytic regression tests and an independent SciPy comparison. It has not undergone external scientific peer review. It does not calculate a unique or observationally measured probability for the ultimate cosmic fate.
 
 ![The observatory with a calculated Lambda reference universe](docs/media/observatory.png)
 
@@ -112,9 +112,11 @@ docs/                   Methodology, limits, provenance, publication guide
 
 ## GitHub and Zenodo release
 
+Version **0.2.0** is tagged as [`v0.2.0`](https://github.com/pandakingpunc/cosmic-futures-laboratory/releases/tag/v0.2.0) on 2026-09-14; its Zenodo version DOI is recorded here once the archive exists. The concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411) always resolves to the latest archived version.
+
 Version **0.1.0** was archived on Zenodo on **2026-09-05**, with version DOI [10.5281/zenodo.22343412](https://doi.org/10.5281/zenodo.22343412). The archive corresponds to GitHub tag [`v0.1.0.0`](https://github.com/pandakingpunc/cosmic-futures-laboratory/releases/tag/v0.1.0.0), source revision `eaeedceceff2856f9c70743eb538c28dc10e9cde`. Tags `v0.1.0` and `v0.1.0.0` contain the same source; the software version is `0.1.0`.
 
-Recommended citation:
+Recommended citation for the archived 0.1.0 release (replace the version and DOI once 0.2.0 is archived):
 
 > Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22343412
 

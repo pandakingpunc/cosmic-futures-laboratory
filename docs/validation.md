@@ -1,8 +1,8 @@
 # Validation record
 
-## Revalidation of the unreleased main branch — 2026-09-13
+## Version 0.2.0 — validated 2026-09-13
 
-Revalidated locally on 2026-09-13 with Node.js 24.19.0, Windows, and the updated pinned dependency tree after the changes listed under *Unreleased* in `CHANGELOG.md` (browser-worker execution, Newton-refined output sampling, shareable links, browser persistence, inline validation, dependency cleanup).
+Revalidated locally on 2026-09-13 with Node.js 24.19.0, Windows, and the updated pinned dependency tree after the changes listed under 0.2.0 in `CHANGELOG.md` (browser-worker execution, Newton-refined output sampling, shareable links, browser persistence, inline validation, dependency cleanup).
 
 - `npm test` passes **45 checks**; the harness now awaits asynchronous checks so HTTP-route assertions count. New checks cover sample-time precision (a rerun to a sample's own time reproduces log₁₀ a to 10⁻¹²), field-mapped validation, duplicate black-hole masses, the vacuum clock at lifetime 0 for 39 seeds, unique equality-event identifiers, sensitivity ordering, sweep outcomes and option validation, the dispatcher and `POST /api/simulate` handler, link encoding with non-ASCII names, and result-file recognition.
 - Numerical equivalence: all 16 example configurations plus the 10¹⁰⁰ and 10¹⁰⁰⁰-year defaults were recomputed with the previous bisection sampler and the new bracketed Newton sampler. Accepted-step counts, classifications, statuses and event times are identical. The largest difference in any logarithmic sample quantity is 3.6×10⁻¹⁰ (the `limited` DESI CPL case near its stiff boundary) and at most 1.2×10⁻¹³ for every other case. Configuration hashes are unchanged.

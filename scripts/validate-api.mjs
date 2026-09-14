@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 const base = process.argv[2] ?? 'http://localhost:3000';
 const send = (body) =>
   fetch(`${base}/api/simulate`, {
@@ -12,7 +13,10 @@ const result = await response.json();
 assert.equal(result.status, 'complete');
 assert.ok(result.samples.length >= 40);
 assert.ok(result.samples.every((s) => Number.isFinite(s.expansionIndex)));
-assert.equal(result.metadata.version, '0.1.0');
+assert.equal(
+  result.metadata.version,
+  JSON.parse(await readFile('package.json', 'utf8')).version,
+);
 const invalid = await (await send({ config: { omegaDE: 0 } })).json();
 assert.equal(invalid.status, 'invalid');
 assert.equal((await send({ config: {}, mode: 'unknown' })).status, 400);
