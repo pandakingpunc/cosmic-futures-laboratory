@@ -5,7 +5,7 @@ The project owner is **Mustafa Karatum**, GitHub username **pandakingpunc**, an 
 ## Version 0.2.0 (tagged 2026-09-14)
 
 - Tag `v0.2.0` matches package version `0.2.0`; `CITATION.cff` and `.zenodo.json` carry the same version and release date.
-- The version DOI is assigned by Zenodo when the GitHub release for `v0.2.0` is published. After that, add `doi: 10.5281/zenodo.<new>` to `CITATION.cff`, record it in `CHANGELOG.md`, `README.md` and this file, and update the recommended citation.
+- Version DOI: [10.5281/zenodo.22750182](https://doi.org/10.5281/zenodo.22750182), assigned on 2026-09-14 from the published GitHub release `v0.2.0` (source revision `2679395`). It is recorded in `CITATION.cff`, `CHANGELOG.md` and the README citation.
 - Concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411) resolves to the latest archived version and is used for the README badge.
 
 ## Published archive (0.1.0)
@@ -32,7 +32,7 @@ All files below are in the repository root unless a directory is stated.
 | Affiliation | `affiliation` in the corresponding author/creator entry in both files | Entered as Independent researcher; no institution claimed |
 | Other authors | Add entries to both author/creator arrays | Include if applicable |
 | Release date/version | `date-released` and `version` in CFF; `publication_date` and `version` in Zenodo JSON | Verify at release time |
-| Version DOI | `doi` in `CITATION.cff`; README badge and recommended citation | Set to `10.5281/zenodo.22343412` for version 0.1.0 |
+| Version DOI | `doi` in `CITATION.cff`; recommended citation (the README badge uses the concept DOI) | `10.5281/zenodo.22750182` for version 0.2.0; `10.5281/zenodo.22343412` for 0.1.0 |
 
 These fields are publication metadata, not simulator settings. When both files are present, Zenodo uses `.zenodo.json` for GitHub archival, so keep author, title, version, date and license synchronized with `CITATION.cff`. The Zenodo JSON deliberately omits a fixed `doi` so that future releases can receive their own version DOI. See the [official Zenodo metadata guide](https://help.zenodo.org/docs/github/describe-software/zenodo-json/).
 
@@ -51,8 +51,10 @@ Use Zenodo's GitHub integration for the chosen repository or manually upload a s
 
 After Zenodo assigns a DOI, record the version DOI in the citation metadata for the appropriate release, distinguish it from the concept DOI, and update the recommended citation. Do not invent a DOI or use another software project's identifier.
 
-Recommended citation for version 0.1.0:
+Recommended citation for version 0.2.0:
 
-> Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.1.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22343412
+> Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.2.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22750182
+
+For version 0.1.0 use DOI 10.5281/zenodo.22343412 with the same form.
 
 Public deployment or archival remains an explicit owner action. The application may have a separately hosted private preview; that is not GitHub publication or Zenodo archival.

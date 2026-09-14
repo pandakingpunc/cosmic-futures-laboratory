@@ -2,6 +2,8 @@
 
 ## Version 0.2.0 — validated 2026-09-13
 
+Archived on Zenodo on 2026-09-14 from GitHub release `v0.2.0` with version DOI [10.5281/zenodo.22750182](https://doi.org/10.5281/zenodo.22750182); the public record lists version 0.2.0, the author, affiliation and MIT license under concept DOI 10.5281/zenodo.22343411.
+
 Revalidated locally on 2026-09-13 with Node.js 24.19.0, Windows, and the updated pinned dependency tree after the changes listed under 0.2.0 in `CHANGELOG.md` (browser-worker execution, Newton-refined output sampling, shareable links, browser persistence, inline validation, dependency cleanup).
 
 - `npm test` passes **45 checks**; the harness now awaits asynchronous checks so HTTP-route assertions count. New checks cover sample-time precision (a rerun to a sample's own time reproduces log₁₀ a to 10⁻¹²), field-mapped validation, duplicate black-hole masses, the vacuum clock at lifetime 0 for 39 seeds, unique equality-event identifiers, sensitivity ordering, sweep outcomes and option validation, the dispatcher and `POST /api/simulate` handler, link encoding with non-ASCII names, and result-file recognition.

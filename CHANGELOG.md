@@ -2,7 +2,7 @@
 
 ## 0.2.0 — 2026-09-14
 
-Tagged as `v0.2.0`. The Zenodo version DOI is recorded here after archival; the concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411) resolves to the latest archived version.
+Archived on Zenodo from GitHub release `v0.2.0`: version DOI [10.5281/zenodo.22750182](https://doi.org/10.5281/zenodo.22750182). The concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411) resolves to the latest archived version.
 
 - Add a separate Vinext/Nitro Vercel build with server functions, static assets and routing configuration.
 - Verify the packaged Vercel homepage and scientific APIs in CI while preserving the existing Cloudflare/Sites build.
