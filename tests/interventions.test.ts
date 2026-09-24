@@ -34,8 +34,10 @@ test('custom events remain disabled by default and are not ignored', () => {
     events: [{ id: 'a', logTime: 40, action: 'halt' as const, value: 0 }],
   };
   assert.equal(simulate(c).status, 'invalid');
+  // A halt in the matched tail stops exactly as it does numerically.
   const r = simulate({ ...c, sandbox: true });
-  assert.equal(r.status, 'limited');
+  assert.equal(r.status, 'terminated');
+  assert.equal(r.classification, 'Custom intervention boundary');
   assert.ok(r.events.some((e) => e.id === 'a'));
 });
 test('simultaneous tail events compose without losing previous changes', () => {

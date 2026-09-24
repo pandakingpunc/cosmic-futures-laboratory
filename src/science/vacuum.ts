@@ -37,7 +37,9 @@ export function vacuumTermination(
   if (!(vacuumLog <= c.endLogYears && Math.abs(lastLog - vacuumLog) < 1e-8))
     return null;
   return {
-    samples: samples.filter((s) => s.logYears <= vacuumLog),
+    // The same tolerance that detected the event keeps a final sample that
+    // its grid placed one rounding step beyond the drawn time.
+    samples: samples.filter((s) => s.logYears <= vacuumLog + 1e-8),
     fate: {
       classification: 'Vacuum-decay termination',
       explanation: EXPLANATION,

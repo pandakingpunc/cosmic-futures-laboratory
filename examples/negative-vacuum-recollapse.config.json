@@ -1,6 +1,6 @@
 {
   "name": "negative-vacuum-recollapse",
-  "preset": "planck2018",
+  "preset": "custom",
   "H0": 67.36,
   "omegaB": 1.1,
   "omegaDM": 0,

@@ -9,3 +9,17 @@ export function seededRandom(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+/** MurmurHash3 32-bit finalizer: a bijective mix of a 32-bit integer. */
+export function mix32(v: number): number {
+  let h = v >>> 0;
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
+  return h >>> 0;
+}
+/** Largest seed; seeds are integers in [0, 2³² − 1]. */
+export const MAX_SEED = 0xffffffff;
+export const isSeed = (v: unknown): v is number =>
+  Number.isInteger(v) && (v as number) >= 0 && (v as number) <= MAX_SEED;

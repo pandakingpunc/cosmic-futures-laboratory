@@ -3,11 +3,13 @@ import { background, derivative, type Model } from '../model/background';
 import {
   applyNumericalIntervention,
   initialSegment,
+  undefinedBranchReason,
   type Segment,
   type Stop,
 } from '../model/segment';
+import type { WorkBudget } from '../core/limits';
 import type { CosmicEvent, PhysicsEvent } from '../types';
-import { counted, type SimulationCounters } from './counters';
+import { counted, rethrowBudget, type SimulationCounters } from './counters';
 import { dopriStep, type Derivative } from './dopri5';
 /** An accepted state with the segment in force there. */
 export interface Node {
@@ -40,6 +42,7 @@ export function integrateExpansion(
   queue: readonly PhysicsEvent[],
   effectiveEnd: number,
   counters?: SimulationCounters,
+  budget?: WorkBudget,
 ): ExpansionOutcome {
   const { c, logH0 } = model;
   const deInitial = ln(Math.abs(c.omegaDE));
@@ -62,6 +65,7 @@ export function integrateExpansion(
     (u, v) => derivative(u, v, segment, model),
     counters,
     'derivativeEvaluations',
+    budget,
   );
   const nodes: Node[] = [],
     events: CosmicEvent[] = [];
@@ -79,6 +83,7 @@ export function integrateExpansion(
     try {
       trial = dopriStep(rhs, x, y, step, c.rtol, c.atol, k1);
     } catch (e) {
+      rethrowBudget(e);
       rejectedSteps++;
       step *= 0.25;
       if (step < MIN_STEP) {
@@ -144,7 +149,7 @@ export function integrateExpansion(
         // The last node already holds the valid state, which is retained.
         stop = {
           status: 'terminated',
-          reason: `Custom event made the expansion branch undefined: ${(e as Error).message} Last valid state retained.`,
+          reason: undefinedBranchReason((e as Error).message),
         };
         break;
       }

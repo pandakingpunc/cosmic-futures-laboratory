@@ -1,16 +1,12 @@
 import { astrophysics } from '../astrophysics';
-import {
-  C_KM_S,
-  H0_YEAR,
-  LN10,
-  LOG10_INV_PLANCK_M,
-  LOG10_MPC_M,
-} from '../core/constants';
+import { C_KM_S, H0_YEAR, LN10, logDeSitterEntropy } from '../core/constants';
 import { ln, safe } from '../core/numeric';
+import { asymptote } from '../model/asymptote';
 import { background, type Model } from '../model/background';
 import type { Stop } from '../model/segment';
 import type { CosmicEvent, PhysicsEvent, Sample } from '../types';
 import type { Node } from './expanding';
+import { DOMINANCE } from './sampling';
 import {
   applyTailIntervention,
   type TailContext,
@@ -20,7 +16,7 @@ export interface TailInput {
   model: Model;
   /** Final numerical node; its segment continues into the tail. */
   final: Node;
-  /** Last numerical sample, the anchor of the matched asymptote. */
+  /** Sample at the final node, the anchor of the matched asymptote. */
   last: Sample;
   startLog: number;
   endLog: number;
@@ -33,6 +29,8 @@ export type TailOutcome =
       proven: true;
       /** Density exponent n of ρ ∝ a⁻ⁿ at the anchor, before interventions. */
       exponent: number;
+      /** The exponent in force at the end of the tail. */
+      finalExponent: number;
       /** Description of the matched asymptote for the diagnostics. */
       tail: string;
       samples: Sample[];
@@ -41,32 +39,28 @@ export type TailOutcome =
       /** An intervention changed the asymptote. */
       nonstandard: boolean;
       rip: boolean;
+      /** Index of the first queued event not yet executed. */
+      eventIndex: number;
       warnings: string[];
     };
-const UNSUPPORTED =
-  'No proven constant-fluid asymptote for this model. Numerical expansion stops at ln(a)=60; arbitrary CPL/custom extrapolation is not continued.';
 const EXTREME_RANGE =
   'Some log10(a), density logs and temperature logs themselves exceed IEEE-754 range. They are explicitly null; the nested-log expansion coordinate remains valid. Null also denotes absent components or quantities not justified in this regime.';
+/** Background indices grouped as the reported density fractions. */
+const GROUPS = [[0, 1], [2], [3], [4]];
 /**
  * Continues a resolved background past the numerical endpoint along a
- * matched constant-fluid power law, where one component dominates to 10⁻⁸.
+ * matched constant-fluid power law, where one component, or a set sharing
+ * one exponent, dominates to 10⁻⁸.
  */
 export function extendTail(input: TailInput): TailOutcome {
   const { model, final, last, startLog, endLog, queue } = input;
   const { c } = model,
     segment = final.segment;
   const b = background(final.x, final.y, segment, model);
-  let n: number, dominant: number;
-  const constant =
-    segment.deModel === 'lambda' ||
-    segment.deModel === 'constant' ||
-    segment.deModel === 'bounded';
-  const futureW =
-    segment.deModel === 'lambda'
-      ? -1
-      : segment.deModel === 'bounded'
-        ? segment.w0 + segment.wa
-        : segment.w0;
+  const fate = asymptote(model, b, segment);
+  if ('reason' in fate) return { proven: false, reason: fate.reason };
+  if (fate.tailReason) return { proven: false, reason: fate.tailReason };
+  const { n, dominant } = fate;
   const exponents = [
     3,
     c.dmModel === 'warm'
@@ -75,29 +69,31 @@ export function extendTail(input: TailInput): TailOutcome {
         ? 3 + c.interaction
         : 3,
     4,
-    3 * (1 + futureW),
+    NaN,
     2,
   ];
   const competitor = Math.min(
     ...exponents.filter((_, i) => i !== 3 && Number.isFinite(b.logs[i])),
   );
-  if (constant && segment.signDE > 0 && exponents[3] < competitor) {
-    n = exponents[3];
-    dominant = 3;
-  } else if (segment.signDE === 0 && c.dmModel === 'stable' && c.omegaK >= 0) {
-    dominant = c.omegaK > 0 ? 4 : model.matter + c.omegaDM > 0 ? 0 : 2;
-    n = exponents[dominant];
-  } else return { proven: false, reason: UNSUPPORTED };
-  const domFraction =
-    dominant === 0 ? b.fractions[0] + b.fractions[1] : b.fractions[dominant];
-  if (Math.abs(1 - domFraction) > 1e-8)
+  const domFraction = dominant.reduce((sum, i) => sum + b.fractions[i], 0);
+  if (Math.abs(1 - domFraction) > DOMINANCE)
     return {
       proven: false,
       reason: 'Asymptotic dominance threshold (1−fraction < 10⁻⁸) was not met.',
     };
-  const ctx: TailContext = { dominant, competitor, c };
+  // One dominant group has fraction 1; a tie keeps its matched fractions.
+  const group = GROUPS.findIndex((g) => g.includes(dominant[0]));
+  const single = dominant.every((i) => GROUPS[group].includes(i));
+  const fraction = (k: number, anchorValue: number | null) =>
+    single ? (k === group ? 1 : 0) : anchorValue;
+  const ctx: TailContext = {
+    deAlone: dominant.length === 1 && dominant[0] === 3,
+    competitor,
+    c,
+  };
   let state: TailState = {
       n,
+      deN: fate.deN,
       anchorA: final.x / LN10,
       anchorH: Math.log10(c.H0) + b.logE / LN10,
       g: segment.g,
@@ -113,11 +109,13 @@ export function extendTail(input: TailInput): TailOutcome {
   const tailText = `Matched constant-fluid asymptote, ρ ∝ a^(${(-n).toPrecision(5)}), subdominant fraction < 10⁻⁸. Future source ratios cannot overtake the dominant term. Numeric integration ends at log10(elapsed yr)=${startLog.toFixed(5)}.`;
   const samples: Sample[] = [],
     events: CosmicEvent[] = [];
+  // A branch resolved for less than one year starts its grid at one year.
+  const gridStart = Math.max(0, startLog);
   const allTargets = [
     ...new Set([
       ...Array.from(
         { length: c.samples },
-        (_, i) => startLog + ((endLog - startLog) * (i + 1)) / c.samples,
+        (_, i) => gridStart + ((endLog - gridStart) * (i + 1)) / c.samples,
       ),
       ...queue
         .slice(eventIndex)
@@ -187,11 +185,12 @@ export function extendTail(input: TailInput): TailOutcome {
         : anchorLogLogA;
       newH = anchorH - p * deltaA;
     }
-    const n = state.n,
+    const { n, deN } = state,
       radius = Math.log10(C_KM_S) - newH;
     const s: Sample = {
       ...anchor,
       logYears: lt,
+      isPresent: false,
       logA: safe(newA),
       expansionIndex: logLogA > 12 ? logLogA : Math.log10(1 + 10 ** logLogA),
       logH: safe(newH),
@@ -199,25 +198,22 @@ export function extendTail(input: TailInput): TailOutcome {
       logRhoDM: safe((anchor.logRhoDM ?? -Infinity) - 3 * deltaA),
       logRhoR: safe((anchor.logRhoR ?? -Infinity) - 4 * deltaA),
       logRhoDE:
-        n === 0
-          ? anchor.logRhoDE
-          : safe((anchor.logRhoDE ?? -Infinity) - n * deltaA),
+        deN === null
+          ? null
+          : deN === 0
+            ? anchor.logRhoDE
+            : safe((anchor.logRhoDE ?? -Infinity) - deN * deltaA),
       logTcmb: safe(Math.log10(c.Tcmb) - newA),
       logRadiationEffectiveT: null,
       q: n / 2 - 1,
-      w: dominant === 3 ? n / 3 - 1 : null,
+      w: deN === null ? null : deN / 3 - 1,
       logHubbleRadiusMpc: safe(radius),
       logComovingHubbleMpc: safe(radius - newA),
-      logHorizonEntropy:
-        n === 0
-          ? Math.log10(Math.PI) +
-            2 * (radius + LOG10_MPC_M + LOG10_INV_PLANCK_M) -
-            Math.log10(state.g)
-          : null,
-      omegaM: dominant === 0 ? 1 : 0,
-      omegaR: dominant === 2 ? 1 : 0,
-      omegaDE: dominant === 3 ? 1 : 0,
-      omegaK: dominant === 4 ? 1 : 0,
+      logHorizonEntropy: n === 0 ? logDeSitterEntropy(radius, state.g) : null,
+      omegaM: fraction(0, anchor.omegaM),
+      omegaR: fraction(1, anchor.omegaR),
+      omegaDE: fraction(2, anchor.omegaDE),
+      omegaK: fraction(3, anchor.omegaK),
       ...astrophysics(lt, c),
       regime: 'asymptotic',
       constraintResidual: 0,
@@ -275,12 +271,14 @@ export function extendTail(input: TailInput): TailOutcome {
   return {
     proven: true,
     exponent: n,
+    finalExponent: state.n,
     tail: tailText,
     samples,
     events,
     stop,
     nonstandard,
     rip,
+    eventIndex,
     warnings: lastTail.logA === null ? [EXTREME_RANGE] : [],
   };
 }

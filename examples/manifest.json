@@ -19,16 +19,16 @@
     "id": "mild-phantom",
     "status": "terminated",
     "classification": "Big Rip",
-    "samples": 101,
-    "configurationHash": "4025106b",
+    "samples": 125,
+    "configurationHash": "1739ea4a",
     "reason": "Finite future-time integral; singularity boundary reached."
   },
   {
     "id": "strong-phantom",
     "status": "terminated",
     "classification": "Big Rip",
-    "samples": 101,
-    "configurationHash": "70c7e416",
+    "samples": 125,
+    "configurationHash": "1568cd45",
     "reason": "Finite future-time integral; singularity boundary reached."
   },
   {
@@ -36,7 +36,7 @@
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
     "samples": 201,
-    "configurationHash": "7dd1d0d4",
+    "configurationHash": "84cef2e1",
     "reason": ""
   },
   {
@@ -44,7 +44,7 @@
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
     "samples": 201,
-    "configurationHash": "74dac157",
+    "configurationHash": "0b4ee1b0",
     "reason": ""
   },
   {
@@ -52,7 +52,7 @@
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
     "samples": 201,
-    "configurationHash": "8213e353",
+    "configurationHash": "3bf6a23a",
     "reason": ""
   },
   {
@@ -60,23 +60,23 @@
     "status": "complete",
     "classification": "Eternal accelerated power-law expansion",
     "samples": 201,
-    "configurationHash": "acf32d83",
+    "configurationHash": "fc1382ac",
     "reason": ""
   },
   {
     "id": "closed-matter-recollapse",
     "status": "terminated",
     "classification": "Big Crunch approach",
-    "samples": 102,
-    "configurationHash": "8cfd8827",
+    "samples": 127,
+    "configurationHash": "b3399f20",
     "reason": "Contracting scale factor reached a=10⁻⁴. The singularity itself and quantum-gravity regime are not integrated."
   },
   {
     "id": "negative-vacuum-recollapse",
     "status": "terminated",
     "classification": "Big Crunch approach",
-    "samples": 102,
-    "configurationHash": "9d19b9d2",
+    "samples": 127,
+    "configurationHash": "f492d5dd",
     "reason": "Contracting scale factor reached a=10⁻⁴. The singularity itself and quantum-gravity regime are not integrated."
   },
   {
@@ -84,7 +84,7 @@
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
     "samples": 201,
-    "configurationHash": "e5be733a",
+    "configurationHash": "409e819b",
     "reason": ""
   },
   {
@@ -92,7 +92,7 @@
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
     "samples": 201,
-    "configurationHash": "beb79788",
+    "configurationHash": "25a897a1",
     "reason": ""
   },
   {
@@ -100,7 +100,7 @@
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
     "samples": 201,
-    "configurationHash": "b9a3e56c",
+    "configurationHash": "121125a3",
     "reason": ""
   },
   {
@@ -108,7 +108,7 @@
     "status": "complete",
     "classification": "Custom / nonstandard evolution",
     "samples": 202,
-    "configurationHash": "fb5f03a1",
+    "configurationHash": "d02998c2",
     "reason": ""
   },
   {
@@ -116,7 +116,7 @@
     "status": "complete",
     "classification": "Long-lived decelerating expansion",
     "samples": 101,
-    "configurationHash": "14ee1b11",
+    "configurationHash": "b050d67a",
     "reason": ""
   },
   {
@@ -124,7 +124,7 @@
     "status": "complete",
     "classification": "Long-lived decelerating expansion",
     "samples": 101,
-    "configurationHash": "1c901dfb",
+    "configurationHash": "6176a690",
     "reason": ""
   }
 ]

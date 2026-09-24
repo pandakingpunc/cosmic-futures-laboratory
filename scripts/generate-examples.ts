@@ -72,8 +72,19 @@ const cases: Record<string, Partial<Configuration>> = {
 };
 await mkdir('examples', { recursive: true });
 const manifest = [];
+// An example keeps its preset label only while its physics is that preset's;
+// any other change makes it 'custom', as editing does in the laboratory.
+const matchesPreset = (c: Configuration) => {
+  const reference: Configuration = {
+    ...defaultConfig(c.preset),
+    name: c.name,
+    samples: c.samples,
+  };
+  return JSON.stringify(c) === JSON.stringify(reference);
+};
 for (const [id, patch] of Object.entries(cases)) {
   const c = { ...baseline, ...patch, name: id, samples: 100 };
+  if (!matchesPreset(c)) c.preset = 'custom';
   const result = simulate(c, { timestamp });
   await writeFile(
     `examples/${id}.config.json`,

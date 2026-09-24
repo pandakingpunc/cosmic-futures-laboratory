@@ -1,6 +1,6 @@
 {
   "name": "closed-matter-recollapse",
-  "preset": "planck2018",
+  "preset": "custom",
   "H0": 67.36,
   "omegaB": 2,
   "omegaDM": 0,

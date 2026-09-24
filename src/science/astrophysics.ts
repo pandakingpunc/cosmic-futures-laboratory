@@ -25,6 +25,8 @@ export function blackHoleFraction(
     ? Math.max(remaining, 2.176434e-8 / (mass * 1.98847e30))
     : remaining;
 }
+/** A mass in M☉ to three significant figures, e.g. 15 → 1.5e+1. */
+const massLabel = (m: number) => Number(m.toPrecision(3)).toExponential();
 export function astrophysics(logYears: number, c: Configuration) {
   return {
     stellarFraction: 1 / (1 + 10 ** Math.min(300, 1.4 * (logYears - 12.5))),
@@ -104,7 +106,7 @@ export function cosmicEvents(
     if (c.evaporation !== 'disabled')
       add(
         `bh-${m}`,
-        `${m.toExponential(0)} M☉ black hole: ideal evaporation`,
+        `${massLabel(m)} M☉ black hole: ideal evaporation`,
         blackHoleLifetime(Math.log10(m), c.evaporationFactor),
         'Isolated, uncharged, nonrotating Hawking blackbody estimate. Background accretion, greybody factors and changing particle species are omitted; the endpoint is uncertain.',
         'Model dependent',
@@ -117,7 +119,7 @@ export function cosmicEvents(
     if (crossing)
       add(
         `cool-${m}`,
-        `CMB cooler than ${m.toExponential(0)} M☉ Hawking temperature`,
+        `CMB cooler than ${massLabel(m)} M☉ Hawking temperature`,
         crossing.logYears,
         'Temperature crossing only: suggests the background changes from hotter to colder than this ideal black hole. It is not a complete net-accretion calculation.',
         'Model dependent',

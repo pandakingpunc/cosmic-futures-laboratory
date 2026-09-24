@@ -1,7 +1,14 @@
 import { simulate } from './engine';
-import { ensemble, sensitivity, sweep } from './analysis';
-import { defaultConfig } from './defaults';
+import { ensemble, sensitivity, sweep, type AnalysisContext } from './analysis';
+import { withDefaults } from './defaults';
 import type { Configuration } from './types';
+// Work limits and error types for callers of runAnalysis, such as the API.
+export {
+  API_LIMITS,
+  BudgetExceededError,
+  ValidationError,
+  type WorkBudget,
+} from './core/limits';
 export const ANALYSIS_MODES = [
   'deterministic',
   'ensemble',
@@ -24,21 +31,28 @@ export function isAnalysisMode(v: unknown): v is AnalysisMode {
     typeof v === 'string' && (ANALYSIS_MODES as readonly string[]).includes(v)
   );
 }
-/** Shared entry point for the HTTP API and the browser worker. */
+/**
+ * Shared entry point for the HTTP API and the browser worker. A partial
+ * configuration is completed from its named preset (or the default preset);
+ * unknown keys are dropped. Analyses validate their base configuration and
+ * options and throw ValidationError; `ctx.budget` is shared by every run and
+ * throws BudgetExceededError when exhausted.
+ */
 export function runAnalysis(
   mode: AnalysisMode,
   config: Partial<Configuration>,
   options?: unknown,
+  ctx: AnalysisContext = {},
 ) {
-  const c = { ...defaultConfig(), ...config };
+  const c = withDefaults(config);
   switch (mode) {
     case 'ensemble':
-      return ensemble(c, options as Parameters<typeof ensemble>[1]);
+      return ensemble(c, options as Parameters<typeof ensemble>[1], ctx);
     case 'sensitivity':
-      return sensitivity(c);
+      return sensitivity(c, ctx);
     case 'sweep':
-      return sweep(c, options as Parameters<typeof sweep>[1]);
+      return sweep(c, options as Parameters<typeof sweep>[1], ctx);
     default:
-      return simulate(c);
+      return simulate(c, ctx);
   }
 }

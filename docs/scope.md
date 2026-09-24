@@ -5,7 +5,7 @@ This release prioritizes a working, auditable FLRW laboratory. It is not a compl
 | Capability          | Implemented scope                                                             | Boundary                                                                              |
 | ------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | Numerical expansion | Adaptive RK with conservative fluid transfers                                 | No general implicit stiff solver                                                      |
-| Recollapse          | Stable constant-w/Λ fluids, signed curvature/vacuum                           | No general interacting contraction solver                                             |
+| Recollapse          | Stable constant-w/Λ fluids, signed curvature/vacuum; turnaround and bounce    | No general interacting contraction solver                                             |
 | Extreme time        | Log-time, nested-log expansion, proven fluid tails                            | Arbitrary models stop at their numerical boundary                                     |
 | Dark energy         | Λ, constant w, CPL, bounded, arithmetic custom                                | No dynamical scalar-field potential solver                                            |
 | Dark matter         | Stable, decay, annihilation, warm pressure, H-proportional radiation transfer | No microscopic particle inference or free streaming                                   |

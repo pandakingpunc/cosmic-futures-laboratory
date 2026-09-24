@@ -42,3 +42,39 @@ export function defaultConfig(preset = 'planck2018'): Configuration {
     atol: 1e-11,
   };
 }
+/** Configuration keys in their canonical (serialization and hashing) order. */
+export const CONFIGURATION_KEYS = Object.keys(
+  defaultConfig(),
+) as readonly (keyof Configuration)[];
+const own = (o: object, k: string) =>
+  Object.prototype.hasOwnProperty.call(o, k);
+/**
+ * The known keys present in `input`, in canonical order, and the names of
+ * every other own key. Missing keys stay missing; nothing is filled in.
+ */
+export function canonicalConfig(input: unknown): {
+  config: Configuration;
+  unknown: string[];
+} {
+  const source = (
+    input && typeof input === 'object' && !Array.isArray(input) ? input : {}
+  ) as Record<string, unknown>;
+  const config: Record<string, unknown> = {};
+  for (const k of CONFIGURATION_KEYS) if (own(source, k)) config[k] = source[k];
+  const known = new Set<string>(CONFIGURATION_KEYS);
+  return {
+    config: config as unknown as Configuration,
+    unknown: Object.keys(source).filter((k) => !known.has(k)),
+  };
+}
+/**
+ * A complete configuration from a partial one: its known keys over the named
+ * preset when `preset` is a known id, otherwise over the default preset.
+ * Unknown keys are dropped.
+ */
+export function withDefaults(partial: unknown): Configuration {
+  const { config } = canonicalConfig(partial);
+  const id = typeof config.preset === 'string' ? config.preset : undefined;
+  const base = defaultConfig(presets.some((p) => p.id === id) ? id : undefined);
+  return { ...base, ...config };
+}

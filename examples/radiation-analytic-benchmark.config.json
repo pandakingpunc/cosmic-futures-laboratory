@@ -1,6 +1,6 @@
 {
   "name": "radiation-analytic-benchmark",
-  "preset": "planck2018",
+  "preset": "custom",
   "H0": 67.36,
   "omegaB": 0,
   "omegaDM": 0,

@@ -1,6 +1,6 @@
 {
   "name": "bounded-quintessence",
-  "preset": "planck2018",
+  "preset": "custom",
   "H0": 67.36,
   "omegaB": 0.049301692328524445,
   "omegaDM": 0.26447041034523616,

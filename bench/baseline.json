@@ -9,8 +9,8 @@
         "samplingEvaluations": 4593,
         "rootIterations": 757
       },
-      "medianMs": 4.14,
-      "p90Ms": 7.44
+      "medianMs": 5.84,
+      "p90Ms": 7.55
     },
     "samples-1000-1e11": {
       "counters": {
@@ -18,8 +18,8 @@
         "samplingEvaluations": 19917,
         "rootIterations": 3309
       },
-      "medianMs": 7.26,
-      "p90Ms": 8.76
+      "medianMs": 8.15,
+      "p90Ms": 11.35
     },
     "desi-2026-cpl": {
       "counters": {
@@ -27,26 +27,26 @@
         "samplingEvaluations": 18165,
         "rootIterations": 3009
       },
-      "medianMs": 6.5,
-      "p90Ms": 6.9
+      "medianMs": 7.07,
+      "p90Ms": 7.22
     },
     "closed-dust-recollapse": {
       "counters": {
         "derivativeEvaluations": 2377,
-        "samplingEvaluations": 1490,
+        "samplingEvaluations": 1908,
         "rootIterations": 42
       },
-      "medianMs": 1.45,
-      "p90Ms": 1.98
+      "medianMs": 1.62,
+      "p90Ms": 2.69
     },
     "strong-phantom-w-1.5": {
       "counters": {
         "derivativeEvaluations": 3613,
-        "samplingEvaluations": 4548,
+        "samplingEvaluations": 4961,
         "rootIterations": 755
       },
-      "medianMs": 2.72,
-      "p90Ms": 3.41
+      "medianMs": 3.29,
+      "p90Ms": 4.18
     },
     "de-sitter-tail-1e1000": {
       "counters": {
@@ -54,8 +54,8 @@
         "samplingEvaluations": 4593,
         "rootIterations": 757
       },
-      "medianMs": 2.93,
-      "p90Ms": 3.18
+      "medianMs": 3.22,
+      "p90Ms": 3.57
     },
     "ensemble-64-seed-1": {
       "counters": {
@@ -63,17 +63,17 @@
         "samplingEvaluations": 96992,
         "rootIterations": 15956
       },
-      "medianMs": 106.49,
-      "p90Ms": 117.96
+      "medianMs": 126.68,
+      "p90Ms": 137.33
     },
     "sweep-9x9": {
       "counters": {
         "derivativeEvaluations": 292383,
-        "samplingEvaluations": 146498,
+        "samplingEvaluations": 149018,
         "rootIterations": 24199
       },
-      "medianMs": 125.76,
-      "p90Ms": 132.84
+      "medianMs": 152.84,
+      "p90Ms": 216.43
     },
     "sensitivity": {
       "counters": {
@@ -81,8 +81,8 @@
         "samplingEvaluations": 9560,
         "rootIterations": 1575
       },
-      "medianMs": 3.62,
-      "p90Ms": 4.02
+      "medianMs": 6.99,
+      "p90Ms": 7.62
     }
   }
 }

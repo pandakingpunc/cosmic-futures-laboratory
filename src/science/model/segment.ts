@@ -22,6 +22,16 @@ export type Intervention =
   | { readonly stop: Stop };
 export const CURVED_G_REASON =
   'Changing G in a curved model requires separate curvature and density matching. This intervention is supported only for flat models.';
+export const NONPOSITIVE_G_REASON =
+  'A nonpositive G multiplier makes this solver formulation undefined.';
+export const forcedStopReason = (action: string) =>
+  `Forced ${action} reached. H cannot be instantaneously changed consistently with the unmodified Friedmann stress-energy; expansion evolution stops at this intervention.`;
+export const undefinedBranchReason = (message: string) =>
+  `Custom event made the expansion branch undefined: ${message} Last valid state retained.`;
+export const lifetimeReason = (c: Configuration) =>
+  c.dmModel !== 'decay'
+    ? 'A lifetime switch requires an already active decay model.'
+    : 'Lifetime discontinuity reached. Donor survival history requires a new matched interacting segment; this version stops explicitly.';
 export function initialSegment(c: Configuration): Segment {
   return {
     g: 1,
@@ -58,29 +68,10 @@ export function applyNumericalIntervention(
     if (c.omegaK !== 0)
       return { stop: { status: 'limited', reason: CURVED_G_REASON } };
     if (e.value <= 0)
-      return {
-        stop: {
-          status: 'terminated',
-          reason:
-            'A nonpositive G multiplier makes this solver formulation undefined.',
-        },
-      };
+      return { stop: { status: 'terminated', reason: NONPOSITIVE_G_REASON } };
     return { segment: { ...segment, g: e.value }, y: [...y] };
   }
   if (e.action === 'dm-lifetime')
-    return {
-      stop: {
-        status: 'limited',
-        reason:
-          c.dmModel !== 'decay'
-            ? 'A lifetime switch requires an already active decay model.'
-            : 'Lifetime discontinuity reached. Donor survival history requires a new matched interacting segment; this version stops explicitly.',
-      },
-    };
-  return {
-    stop: {
-      status: 'terminated',
-      reason: `Forced ${e.action} reached. H cannot be instantaneously changed consistently with the unmodified Friedmann stress-energy; expansion evolution stops at this intervention.`,
-    },
-  };
+    return { stop: { status: 'limited', reason: lifetimeReason(c) } };
+  return { stop: { status: 'terminated', reason: forcedStopReason(e.action) } };
 }

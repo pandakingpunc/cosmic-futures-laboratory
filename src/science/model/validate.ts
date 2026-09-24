@@ -1,3 +1,4 @@
+import { hasControl } from '../core/text';
 import { compileExpression } from '../expression';
 import type { Configuration } from '../types';
 export type ValidationField = keyof Configuration | 'closure';
@@ -7,6 +8,13 @@ export interface Validation {
   /** First error per configuration field, for inline form feedback. */
   fields: Partial<Record<ValidationField, string>>;
 }
+/** Ids of built-in timeline events, and prefixes of their families. */
+const RESERVED_EVENT_ID =
+  /^(?:starformation|laststars|relaxation|proton|electron|dark|equality|rip|turn|bounce|crunch|vacuum)$|^(?:bh|cool|equality)-/;
+/** Largest |Ω|: beyond it closure cancellation exceeds double precision. */
+const DENSITY_LIMIT = 1e12;
+/** Largest |w| of the supported dark-energy equations. */
+const W_LIMIT = 1e5;
 export function validate(c: Configuration): Validation {
   const errors: string[] = [],
     warnings: string[] = [],
@@ -15,6 +23,10 @@ export function validate(c: Configuration): Validation {
     errors.push(message);
     fields[field] ??= message;
   };
+  if (!c || typeof c !== 'object' || Array.isArray(c)) {
+    fail('closure', 'The configuration must be an object.');
+    return { errors, warnings, fields };
+  }
   const numeric = [
     'H0',
     'omegaB',
@@ -54,8 +66,22 @@ export function validate(c: Configuration): Validation {
         k,
         `${k} cannot be negative in the supported fluid equations, including the sandbox.`,
       );
-  const sum =
-    c.omegaB + c.omegaDM + c.omegaNu + c.omegaR + c.omegaDE + c.omegaK;
+  for (const k of [
+    'omegaB',
+    'omegaDM',
+    'omegaNu',
+    'omegaR',
+    'omegaDE',
+    'omegaK',
+  ] as const)
+    if (Math.abs(c[k]) > DENSITY_LIMIT)
+      fail(
+        k,
+        `${k} must lie within ±10¹²; larger cancelling densities exceed the precision of the Friedmann constraint.`,
+      );
+  const sum = Number(
+    c.omegaB + c.omegaDM + c.omegaNu + c.omegaR + c.omegaDE + c.omegaK,
+  );
   if (Math.abs(sum - 1) > 1e-5)
     fail(
       'closure',
@@ -95,6 +121,28 @@ export function validate(c: Configuration): Validation {
   if (!['hawking', 'disabled', 'remnant'].includes(c.evaporation))
     fail('evaporation', 'Unknown black-hole evaporation model.');
   if (typeof c.name !== 'string') fail('name', 'Universe name must be text.');
+  else if (c.name.length > 120 || hasControl(c.name))
+    fail(
+      'name',
+      'Universe name must be at most 120 characters without line breaks or control characters.',
+    );
+  if (typeof c.preset !== 'string' || c.preset.length > 64)
+    fail(
+      'preset',
+      'Preset must be a text identifier of at most 64 characters.',
+    );
+  if (!Number.isInteger(c.seed) || c.seed < 0 || c.seed > 0xffffffff)
+    fail('seed', 'Seed must be an integer from 0 to 4294967295.');
+  if (
+    ['constant', 'cpl', 'bounded'].includes(c.deModel) &&
+    Math.abs(c.w0) > W_LIMIT
+  )
+    fail('w0', 'w₀ must lie within ±10⁵, the supported finite range.');
+  if (c.deModel === 'bounded' && Math.abs(c.w0 + c.wa) > W_LIMIT)
+    fail(
+      'wa',
+      'The bounded limit w₀+wₐ must lie within ±10⁵, the supported finite range.',
+    );
   if (typeof c.expression !== 'string')
     fail('expression', 'Custom expression must be text.');
   for (const k of [
@@ -148,6 +196,19 @@ export function validate(c: Configuration): Validation {
         ].includes(e.action)
       )
         fail('events', 'Invalid custom event.');
+      else if (!e.id || e.id.length > 64 || hasControl(e.id))
+        fail(
+          'events',
+          'Custom event ids must be 1–64 characters without control characters.',
+        );
+      else if (RESERVED_EVENT_ID.test(e.id))
+        fail(
+          'events',
+          `Custom event id "${e.id}" is reserved for a built-in timeline event.`,
+        );
+    const ids = c.events.map((e) => e?.id);
+    if (new Set(ids).size !== ids.length)
+      fail('events', 'Custom event ids must be unique.');
   }
   if (c.deModel === 'custom') {
     try {

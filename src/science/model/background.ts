@@ -30,6 +30,7 @@ export interface Background {
   logs: number[];
   /** Signed density fractions in the same order. */
   fractions: number[];
+  /** Dark-energy equation of state; NaN when dark energy is absent. */
   w: number;
   q: number;
   D: number;
@@ -117,8 +118,9 @@ export function background(
   const logE = 0.5 * (Math.log(s.g) + max + Math.log(sum));
   const fractions = [0, 0, 0, 0, 0];
   for (let i = 0; i < 5; i++) fractions[i] = signed[i] / sum;
-  const w = wAt(x, s, m);
-  if (!Number.isFinite(w) || Math.abs(w) > 1e5)
+  // An absent dark energy has no equation of state to evaluate or bound.
+  const w = s.signDE ? wAt(x, s, m) : NaN;
+  if (s.signDE && (!Number.isFinite(w) || Math.abs(w) > 1e5))
     throw new Error(
       'Dark-energy equation exceeded its supported finite range.',
     );
@@ -135,7 +137,7 @@ export function background(
       (fractions[0] +
         fractions[1] * (1 + 3 * warm) +
         2 * fractions[2] +
-        fractions[3] * (1 + 3 * w)),
+        (s.signDE ? fractions[3] * (1 + 3 * w) : 0)),
     D,
     transfer,
   };

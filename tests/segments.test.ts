@@ -137,12 +137,13 @@ test('tail interventions keep the asymptote or stop explicitly', () => {
     c = r.config;
   const state = {
       n: 0,
+      deN: 0,
       anchorA: anchor.logA!,
       anchorH: anchor.logH!,
       g: 1,
       anchor,
     },
-    ctx = { dominant: 3, competitor: 2, c };
+    ctx = { deAlone: true, competitor: 2, c };
   const w = applyTailIntervention(event('change-w', -1.2), 30, state, ctx);
   assert.ok('n' in w);
   assert.equal(w.n, 3 * (1 + -1.2));
@@ -161,11 +162,19 @@ test('tail interventions keep the asymptote or stop explicitly', () => {
   );
   assert.ok('status' in suppressed);
   assert.match(suppressed.reason, /dominance threshold/);
-  const halt = applyTailIntervention(event('halt', 0), 30, state, ctx);
-  assert.ok('status' in halt);
+  const lifetime = applyTailIntervention(
+    event('dm-lifetime', 5),
+    30,
+    state,
+    ctx,
+  );
+  assert.ok('status' in lifetime);
+  assert.match(lifetime.reason, /already active decay/);
+  const off = applyTailIntervention(event('vacuum-scale', 0), 30, state, ctx);
+  assert.ok('status' in off);
   assert.match(
-    halt.reason,
-    /^Custom halt boundary reached at 10\^30\.000 years/,
+    off.reason,
+    /^Custom vacuum-scale boundary reached at 10\^30\.000/,
   );
   assert.equal(state.anchor, anchor);
 });

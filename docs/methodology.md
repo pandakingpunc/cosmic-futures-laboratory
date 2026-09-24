@@ -16,7 +16,7 @@ Massive neutrinos are pressureless for this future-only domain. Radiation is spe
 
 ## Dark energy
 
-The engine integrates d ln|ude|/dx = −3(1+w), retaining a separate sign. Zero dark energy remains absent.
+The engine integrates d ln|ude|/dx = −3(1+w), retaining a separate sign. Zero dark energy remains absent: its w(a) is then neither evaluated nor range-checked and samples report w as null. Constant, CPL and bounded laws require |w₀| ≤ 10⁵, and the bounded limit |w₀+wₐ| ≤ 10⁵.
 
 | Model                 | Equation                              | Interpretation                                       |
 | --------------------- | ------------------------------------- | ---------------------------------------------------- |
@@ -30,7 +30,7 @@ The custom parser permits arithmetic, powers and seven scalar functions. It does
 
 ## Conservative dark-matter transfers
 
-Use comoving donor C=uDM a³ and daughter R=ur a⁴. For decay Γ=1/τDM, the donor is evaluated exactly as C=C₀exp(−ΓΔt). Radiation obeys dR/dx=a ΓC/H. This removes explicit donor-decay stiffness and supports initially zero daughter radiation.
+Use comoving donor C=uDM a³ and daughter R=ur a⁴. For decay Γ=1/τDM, the donor is evaluated exactly as C=C₀exp(−ΓΔt). Radiation obeys dR/dx=a ΓC/H. This removes explicit donor-decay stiffness and supports initially zero daughter radiation; for lifetimes far shorter than 1/H₀ the daughter source can still demand steps below the solver minimum. A run that resolves less than one elapsed year reports only the present state, a numerical reach of zero and that reason, never negative log-time coordinates.
 
 For annihilation with dimensionless A, J'=A exp(−3x)/E and C=C₀/(1+C₀J). Its paired radiation source is a A C² exp(−3x)/E. For the phenomenological interaction Q=ξHρDM, C=C₀exp(−ξx), R'=aξC. Each source is calculated once and used with opposite signs in the physical continuity equations, so ΣQ=0. Modes are alternatives, not an arbitrary simultaneous particle model.
 
@@ -40,20 +40,22 @@ The warm-fluid model has constant wDM in [0,1/3] and C=C₀exp(−3wDMx). It doe
 
 The expansion state is [τ,R,ln|ude|,J]. A seven-stage Dormand–Prince embedded 5(4) step estimates local RMS error with scale atol+rtol·max(|y_old|,|y_new|). A failed step is reduced; no independently clipped negative density is accepted. Maximum scale-factor step is 0.1. Default rtol=10⁻⁸ and atol=10⁻¹¹ are numerical settings, not observational uncertainty.
 
-Output samples are reconstructed inside accepted steps by refining τ(x) with a bracketed Newton iteration (dτ/dx = 1/E is available from the ODE) that terminates at floating-point resolution, then taking a partial RK step to that x. Rejection counts, accepted error norms, numerical reach and regime labels are retained. Minimum-step or work-budget limits are reported. Rejection heuristics are **not a rigorous stiffness detector**, and there is no general implicit-solver fallback in this version.
+Output samples are reconstructed inside accepted steps by refining τ(x) with a bracketed Newton iteration (dτ/dx = 1/E is available from the ODE) that terminates at floating-point resolution, then taking a partial RK step to that x. `samples` sets this base grid, even in log time; event-resolving samples may be added: about samples/4 samples even in ln a when a phantom asymptote packs the approach to a Big Rip into the last log-time interval, and as many about evenly in log a between the turnaround and a=10⁻⁴ of a collapse. If a sample cannot be reconstructed, the run ends as limited at the last reconstructed sample. Rejection counts, accepted error norms, numerical reach and regime labels are retained. Minimum-step or work-budget limits are reported. Rejection heuristics are **not a rigorous stiffness detector**, and there is no general implicit-solver fallback in this version.
 
-For stable constant-fluid models with negative vacuum energy or closed curvature, a regular time equation evolves [a,v=da/dτ] in u=ln(1+τ):
+An optional work budget counts right-hand-side evaluations across all runs of an analysis and stops it with an explicit error when exhausted; it never changes the arithmetic, and unbudgeted runs are unaffected.
+
+For stable constant-fluid models with negative vacuum energy or closed curvature, a regular time equation evolves [a,v=da/dτ] in u=ln(1+τ). A closed model stays on the expanding branch when its expansion provably never halts: with positive constant-w fluids, a²E² is a convex sum of exponentials in ln a plus the curvature constant, so its minimum decides whether H² stays positive. Only events that execute within the requested interval select the solver:
 
 ```
 da/du = exp(u) v
 dv/du = −0.5 exp(u) a [um + 2ur + (1+3w)ude].
 ```
 
-This crosses v=0 naturally. The turnaround root is refined within an accepted step. Friedmann residual |v²/a²−Σui|/Σ|ui| is independently monitored. Integration stops at a<10⁻⁴ on collapse, before the actual singularity; it does not compute quantum gravity. Other model families may report an unresolved boundary.
+This crosses v=0 naturally. The turnaround root is refined within an accepted step, and so is a later bounce, where a negative stiff component reverses the contraction. The acceleration equation then depends on a alone, so the solution is time-reversible and is classified as an oscillating classical solution; only the first turnaround and bounce are listed as events. Friedmann residual |v²/a²−Σui|/Σ|ui| is independently monitored. Integration stops at a<10⁻⁴ on collapse, before the actual singularity; it does not compute quantum gravity. A turnaround within the first elapsed year is shown at one year. Other model families may report an unresolved boundary.
 
 ## Matched extreme-future continuation
 
-Numerical expansion reaches at most x=60. A single-fluid tail is used only when its fractional dominance exceeds 1−10⁻⁸ and the supported model ensures future competitor ratios cannot grow. Bounded-w asymptotes use the known analytic limit; merely sampling w≈−1 does not establish de Sitter behavior. Unknown/CPL future behavior does not receive an invented tail.
+Numerical expansion reaches at most x=60. A single-fluid tail is used only when its fractional dominance exceeds 1−10⁻⁸ and the supported model ensures future competitor ratios cannot grow. The dominant term is the positive component with the smallest exponent; components sharing that exponent form one fluid, subdominant constant-w dark energy is carried along, and negative curvature or vacuum terms must dilute faster. Bounded-w asymptotes use the known analytic limit; merely sampling w≈−1 does not establish de Sitter behavior, and deviations of w₀+wₐ from −1 at the rounding level of the inputs are treated as −1. A run that ends inside the numerical segment is classified by the same asymptote. An exponent of 2 (curvature or w=−1/3) is coasting expansion. Unknown/CPL future behavior does not receive an invented tail.
 
 For density exponent n=3(1+w), p=n/2 and an anchor E*,a*, the tail is
 
@@ -70,7 +72,7 @@ At 10^1000 yr, even log₁₀a can overflow for a de Sitter solution. The interf
 
 The sandbox is off by default. Timed w, G and positive vacuum-density changes can be matched when their new segment retains proven dominance. Halt, forced reversal, unsupported lifetime-history changes, sign flips and lost dominance return explicit model boundaries when a consistent continuation is unavailable. A discontinuous intervention may require external energy or momentum; using a new Friedmann coefficient does not establish a covariant modified-gravity theory. No vacuum post-decay universe is asserted.
 
-G changes are supported only for flat models; curved models stop at the intervention because curvature is independent of the gravitational coupling and requires separate matching. H₀ is restricted to 10⁻⁶–1000 km/s/Mpc for numerical support. Simultaneous actions are processed at one boundary in listed order. Events outside the requested interval are not executed. A later vacuum clock cannot supersede an earlier physical termination.
+G changes are supported only for flat models; curved models stop at the intervention because curvature is independent of the gravitational coupling and requires separate matching. H₀ is restricted to 10⁻⁶–1000 km/s/Mpc for numerical support. Simultaneous actions are processed at one boundary in listed order. Events outside the requested interval are not executed and do not change the solver. Halt, reversal and nonpositive G stop the branch with the same status and reason in the numerical segment and the matched tail. A later vacuum clock cannot supersede an earlier physical termination.
 
 The G intervention changes the background expansion coefficient only. Black-hole and particle tracer constants retain their stated reference values; a fully coupled varying-constants theory is not implemented.
 
@@ -82,10 +84,10 @@ The stellar logistic proxy has chosen midpoint log₁₀yr=12.5 and slope 1.4. I
 
 The Hawking blackbody estimates use T=ℏc³/(8πGkBM) and τ=5120πG²M³/(ℏc⁴), yielding about 2.10×10⁶⁷(M/M☉)³ yr. M/M₀=(1−Δt/τ)^(1/3) until the semiclassical endpoint. The stable-remnant option imposes a Planck-mass floor. Accretion, greybody factors, spin, mergers and additional particle species are omitted. CMB/Hawking temperature crossings are diagnostics, not accretion solutions.
 
-Tγ=Tγ,0/a is independent of nonthermal daughter radiation. Horizon entropy is shown only in the de Sitter limit, in units of kB; no total entropy or uniquely defined free-energy budget is claimed. A general event-horizon integral is not supplied, and the plotted Hubble radius should not be substituted for it.
+Tγ=Tγ,0/a is independent of nonthermal daughter radiation. Horizon entropy S=πR²c³/(ħ·gG) is shown only in the de Sitter limit, in units of kB: a w ≡ −1 vacuum whose fraction is within 10⁻⁸ of unity, the tail threshold. It uses the coupling G_eff=gG in force and CODATA 2018 ħ, G and c; no total entropy or uniquely defined free-energy budget is claimed. A general event-horizon integral is not supplied, and the plotted Hubble radius should not be substituted for it.
 
 ## Statistical interpretation
 
-Independent Gaussian or equal-variance uniform draws illustrate sensitivity. A user may supply a positive-definite 4×4 covariance or posterior rows ordered [H₀,Ωm,w₀,wₐ]. Density ratios are held fixed and Ωde is explicitly derived by closure in each draw. Invalid draws are counted without silent resampling. Bands report the number of branches still resolved at each time and condition on survival.
+Independent Gaussian or equal-variance uniform draws illustrate sensitivity. A user may supply a positive-definite 4×4 covariance or posterior rows ordered [H₀,Ωm,w₀,wₐ]; posterior resampling draws only the row index. Density ratios are held fixed and Ωde is explicitly derived by closure in each draw. Analyses validate their base configuration and options. Seeds are integers from 0 to 2³²−1, and each run's vacuum clock takes its seed from a stream separate from the parameter draws. Draws of parameters that the selected dark-energy law does not read are reported as having no effect. Invalid draws are counted without silent resampling. Bands report the number of branches still resolved at each time and condition on survival.
 
-Fate frequencies depend on the chosen model, priors, widths, covariance and numerical domain. They are not probabilities of the actual ultimate fate. Sensitivity measures central finite differences of the displayed expansion coordinate at min(endpoint,10¹¹ yr); its perturbation units and step sizes are reported. The bounded-model sweep solves each grid cell and shows unresolved states rather than assigning them an arbitrary fate.
+Fate frequencies depend on the chosen model, priors, widths, covariance and numerical domain. They are not probabilities of the actual ultimate fate. Sensitivity measures central finite differences of the displayed expansion coordinate at min(endpoint,10¹¹ yr), with the H₀ and Ωm steps limited to half their values; when one probe is invalid it falls back to a one-sided difference against the unperturbed run. Perturbation units, step sizes and the scheme are reported, and rows without a response sort last. The bounded-model sweep solves each grid cell and shows unresolved states rather than assigning them an arbitrary fate.

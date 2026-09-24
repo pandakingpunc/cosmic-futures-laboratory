@@ -53,6 +53,16 @@ const cases: Record<string, Partial<Configuration>> = {
   'cpl-extrapolation': { deModel: 'cpl', w0: -0.95, wa: -0.3, endLogYears: 30 },
   // 1 − Ωde ≈ 4×10⁻⁸ at ln a = 60, between the tail threshold and 10⁻⁷.
   'dominance-threshold-edge': { deModel: 'constant', w0: -0.09 },
+  // Negative stiff dark energy stops the collapse at a classical bounce.
+  'oscillating-bounce': {
+    ...empty,
+    omegaB: 2,
+    omegaDE: -0.05,
+    omegaK: -0.95,
+    deModel: 'constant',
+    w0: 1,
+    endLogYears: 11.2,
+  },
 };
 const entries: CorpusCase[] = Object.entries(cases).map(([id, patch]) => {
   const config: Configuration = {

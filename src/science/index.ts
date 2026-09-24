@@ -12,11 +12,23 @@ export {
 } from './model/validate';
 export { hashConfig } from './core/hash';
 export { H0_YEAR } from './core/constants';
-export { defaultConfig, presets } from './defaults';
+export {
+  canonicalConfig,
+  defaultConfig,
+  presets,
+  withDefaults,
+} from './defaults';
+export {
+  API_LIMITS,
+  BudgetExceededError,
+  ValidationError,
+  type WorkBudget,
+} from './core/limits';
 export {
   ensemble,
   sensitivity,
   sweep,
+  type AnalysisContext,
   type EnsembleOptions,
   type EnsembleResult,
   type Parameter,

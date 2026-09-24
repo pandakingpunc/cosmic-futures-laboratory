@@ -6,6 +6,7 @@ import {
   classifyTail,
 } from '../src/science/classify';
 import { defaultConfig } from '../src/science/defaults';
+import { background, createModel } from '../src/science/model/background';
 import { initialSegment } from '../src/science/model/segment';
 import { drawVacuumLog, vacuumTermination } from '../src/science/vacuum';
 import { simulate } from '../src/science/engine';
@@ -14,23 +15,30 @@ test('tail exponents map to their classifications', () => {
   assert.equal(name(0), 'Asymptotic de Sitter expansion');
   assert.equal(name(-1.5), 'Big Rip under constant phantom energy');
   assert.equal(name(1.9), 'Eternal accelerated power-law expansion');
-  assert.equal(name(2), 'Long-lived decelerating expansion');
+  assert.equal(name(2), 'Coasting expansion');
   assert.equal(name(3), 'Long-lived decelerating expansion');
   assert.equal(
     classifyTail(0, true).classification,
     'Custom / nonstandard evolution',
   );
   assert.equal(classifyTail(-1, true, true).classification, 'Big Rip');
-  // Interventions change the name, never the explanation of the anchor law.
+  // Without a change of law, an intervention keeps the anchor explanation.
   assert.equal(classifyTail(0, true).explanation, classifyTail(0).explanation);
   assert.match(classifyTail(-1).explanation, /finite model singularity/);
   assert.match(classifyTail(3).explanation, /does not end at a finite Big Rip/);
+  assert.match(classifyTail(2).explanation, /grows in proportion to time/);
 });
 test('finite intervals are classified from the final segment', () => {
   const c = defaultConfig(),
     s = initialSegment(c);
-  const name = (patch: Partial<typeof s>, omegaK = 0) =>
-    classifyFinite({ ...c, omegaK }, { ...s, ...patch }).classification;
+  const name = (patch: Partial<typeof s>, omegaK = 0) => {
+    const config = { ...c, omegaK, omegaDE: c.omegaDE - omegaK },
+      model = createModel(config),
+      segment = { ...s, ...patch },
+      y = [0, config.omegaR, Math.log(Math.abs(config.omegaDE)), 0];
+    return classifyFinite(model, background(0, y, segment, model), segment)
+      .classification;
+  };
   assert.equal(name({}), 'Asymptotic de Sitter expansion');
   assert.equal(
     name({ deModel: 'constant', w0: -1 }),
@@ -50,7 +58,13 @@ test('finite intervals are classified from the final segment', () => {
   );
   assert.equal(name({ signDE: 0 }), 'Long-lived decelerating expansion');
   assert.equal(name({ deModel: 'cpl' }), 'Undetermined with current physics');
-  assert.equal(name({}, -0.01), 'Undetermined · closed-model branch');
+  // A closed Λ model whose E² provably stays positive is de Sitter; one
+  // that may turn around is not classified.
+  assert.equal(name({}, -0.01), 'Asymptotic de Sitter expansion');
+  assert.equal(
+    name({ deModel: 'constant', w0: 0 }, -0.01),
+    'Undetermined · closed-model branch',
+  );
   assert.equal(classifyRecollapse(true).classification, 'Big Crunch approach');
   assert.equal(
     classifyRecollapse(false).classification,
