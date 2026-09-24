@@ -30,7 +30,7 @@ Validated locally on 2026-09-05 with Node.js 24.19.0, Windows, and the pinned np
 
 `npm test` passes **35 checks**. The suite covers numerical matter, radiation, curvature and de Sitter solutions; the exact flat matter–Lambda sinh solution; the constant-phantom finite-time integral; closed-dust turnaround; negative-vacuum collapse; constraint drift; extreme-time logarithmic representations; conservative dark-matter donor evolution; initial zero daughter radiation; safe expression parsing; input validation; Hawking mass-cubed scaling; particle survival; seeded ensembles; covariance validation; JSON/CSV/report serialization; and numerical-boundary reporting.
 
-Regression cases additionally verify continuous tail density matching, simultaneous interventions in both numerical and asymptotic segments, loss of asymptotic dominance, exclusion of events beyond the requested endpoint, correct ordering of competing terminal events, explicit nonflat-G boundaries, and reconstructed contraction samples used for statistical interpolation. Test assertions and tolerances are in `tests/science.test.ts`; counts alone are not an accuracy claim.
+Regression cases additionally verify continuous tail density matching, simultaneous interventions in both numerical and asymptotic segments, loss of asymptotic dominance, exclusion of events beyond the requested endpoint, correct ordering of competing terminal events, explicit nonflat-G boundaries, and reconstructed contraction samples used for statistical interpolation. Test assertions and tolerances are in `tests/*.test.ts`; counts alone are not an accuracy claim.
 
 ## Independent SciPy reference
 

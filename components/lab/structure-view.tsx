@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import type { Sample } from '@/src/science/types';
-import { seededRandom } from '@/src/science/engine';
+import { seededRandom } from '@/src/science/core/random';
 import { Slider } from '@/components/ui/slider';
 import { Badge, Time, format } from './controls';
 export function StructureView({ sample }: { sample: Sample }) {

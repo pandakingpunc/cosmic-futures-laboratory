@@ -1,5 +1,6 @@
 import type { Configuration, Result } from './types';
-import { simulate, seededRandom } from './engine';
+import { seededRandom } from './core/random';
+import { simulate, type SimulateOptions } from './engine';
 export type Parameter = 'H0' | 'omegaM' | 'w0' | 'wa';
 export interface EnsembleOptions {
   runs: number;
@@ -30,6 +31,8 @@ export interface EnsembleResult {
   outcomes: Record<string, number>;
   notes: string[];
 }
+/** Optional work counters, accumulated over every simulation of an analysis. */
+export type AnalysisContext = Pick<SimulateOptions, 'counters'>;
 const params: Parameter[] = ['H0', 'omegaM', 'w0', 'wa'];
 function center(c: Configuration) {
   return [c.H0, c.omegaB + c.omegaDM + c.omegaNu, c.w0, c.wa];
@@ -102,7 +105,11 @@ export function interpolate(
     ? v
     : v + ((w - v) * (logYears - a.logYears)) / (b.logYears - a.logYears);
 }
-export function ensemble(c: Configuration, o: EnsembleOptions): EnsembleResult {
+export function ensemble(
+  c: Configuration,
+  o: EnsembleOptions,
+  context: AnalysisContext = {},
+): EnsembleResult {
   if (!o || typeof o !== 'object' || !Array.isArray(o.sigmas))
     throw new Error(
       'Ensemble options must include runs, seed, distribution, four sigmas and an interval.',
@@ -153,11 +160,14 @@ export function ensemble(c: Configuration, o: EnsembleOptions): EnsembleResult {
               ? L[j].reduce((s, a, k) => s + a * z[k], 0)
               : o.sigmas[j] * z[j]),
         );
-    const run = simulate({
-      ...setParameters(c, v),
-      seed: o.seed + i,
-      samples: 80,
-    });
+    const run = simulate(
+      {
+        ...setParameters(c, v),
+        seed: o.seed + i,
+        samples: 80,
+      },
+      context,
+    );
     if (run.status === 'invalid') {
       rejected++;
       continue;
@@ -205,7 +215,7 @@ export function ensemble(c: Configuration, o: EnsembleOptions): EnsembleResult {
     ],
   };
 }
-export function sensitivity(c: Configuration) {
+export function sensitivity(c: Configuration, context: AnalysisContext = {}) {
   const base = center(c),
     deltas = [1, 0.01, 0.02, 0.05];
   const horizon = Math.min(c.endLogYears, 11);
@@ -215,16 +225,14 @@ export function sensitivity(c: Configuration) {
         minus = [...base];
       plus[i] += deltas[i];
       minus[i] -= deltas[i];
-      const a = simulate({
-          ...setParameters(c, plus),
-          endLogYears: horizon,
-          samples: 60,
-        }),
-        b = simulate({
-          ...setParameters(c, minus),
-          endLogYears: horizon,
-          samples: 60,
-        });
+      const a = simulate(
+          { ...setParameters(c, plus), endLogYears: horizon, samples: 60 },
+          context,
+        ),
+        b = simulate(
+          { ...setParameters(c, minus), endLogYears: horizon, samples: 60 },
+          context,
+        );
       const av = interpolate(a, horizon),
         bv = interpolate(b, horizon);
       return {
@@ -249,6 +257,7 @@ export function sweep(
     waMax: number;
     resolution: number;
   },
+  context: AnalysisContext = {},
 ) {
   if (
     !range ||
@@ -270,7 +279,10 @@ export function sweep(
         wa =
           range.waMin +
           ((range.waMax - range.waMin) * j) / (range.resolution - 1);
-      const r = simulate({ ...c, deModel: 'bounded', w0, wa, samples: 40 });
+      const r = simulate(
+        { ...c, deModel: 'bounded', w0, wa, samples: 40 },
+        context,
+      );
       rows.push({
         w0,
         wa,

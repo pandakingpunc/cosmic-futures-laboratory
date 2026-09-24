@@ -1,8 +1,24 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { simulate } from '../src/science/engine';
 import { defaultConfig } from '../src/science/defaults';
 import { report } from '../src/science/report';
 import type { Configuration } from '../src/science/types';
+// A fixed timestamp makes regeneration byte-reproducible: SOURCE_DATE_EPOCH
+// (seconds) if set, otherwise the release date in CITATION.cff.
+async function fixedTimestamp(): Promise<string> {
+  const epoch = process.env.SOURCE_DATE_EPOCH;
+  if (epoch) {
+    if (!/^\d+$/.test(epoch))
+      throw new Error('SOURCE_DATE_EPOCH must be a whole number of seconds.');
+    return new Date(Number(epoch) * 1000).toISOString();
+  }
+  const released = (await readFile('CITATION.cff', 'utf8')).match(
+    /^date-released:\s*['"]?(\d{4}-\d{2}-\d{2})['"]?\s*$/m,
+  );
+  if (!released) throw new Error('CITATION.cff has no date-released field.');
+  return new Date(`${released[1]}T00:00:00.000Z`).toISOString();
+}
+const timestamp = await fixedTimestamp();
 const baseline = defaultConfig();
 const cases: Record<string, Partial<Configuration>> = {
   'observational-baseline': {},
@@ -58,7 +74,7 @@ await mkdir('examples', { recursive: true });
 const manifest = [];
 for (const [id, patch] of Object.entries(cases)) {
   const c = { ...baseline, ...patch, name: id, samples: 100 };
-  const result = simulate(c);
+  const result = simulate(c, { timestamp });
   await writeFile(
     `examples/${id}.config.json`,
     JSON.stringify(c, null, 2) + '\n',
@@ -86,5 +102,5 @@ await writeFile(
   JSON.stringify(manifest, null, 2) + '\n',
 );
 console.log(
-  `Generated ${manifest.length} reproducible example configurations and computed outputs.`,
+  `Generated ${manifest.length} reproducible example configurations and computed outputs (timestamp ${timestamp}).`,
 );

@@ -1,0 +1,88 @@
+{
+  "node": "v24.19.0",
+  "os": "win32 10.0.26200 x64",
+  "cpu": "AMD Ryzen 5 5600 6-Core Processor",
+  "workloads": {
+    "default-240-samples-1e100": {
+      "counters": {
+        "derivativeEvaluations": 3607,
+        "samplingEvaluations": 4593,
+        "rootIterations": 757
+      },
+      "medianMs": 4.14,
+      "p90Ms": 7.44
+    },
+    "samples-1000-1e11": {
+      "counters": {
+        "derivativeEvaluations": 355,
+        "samplingEvaluations": 19917,
+        "rootIterations": 3309
+      },
+      "medianMs": 7.26,
+      "p90Ms": 8.76
+    },
+    "desi-2026-cpl": {
+      "counters": {
+        "derivativeEvaluations": 991,
+        "samplingEvaluations": 18165,
+        "rootIterations": 3009
+      },
+      "medianMs": 6.5,
+      "p90Ms": 6.9
+    },
+    "closed-dust-recollapse": {
+      "counters": {
+        "derivativeEvaluations": 2377,
+        "samplingEvaluations": 1490,
+        "rootIterations": 42
+      },
+      "medianMs": 1.45,
+      "p90Ms": 1.98
+    },
+    "strong-phantom-w-1.5": {
+      "counters": {
+        "derivativeEvaluations": 3613,
+        "samplingEvaluations": 4548,
+        "rootIterations": 755
+      },
+      "medianMs": 2.72,
+      "p90Ms": 3.41
+    },
+    "de-sitter-tail-1e1000": {
+      "counters": {
+        "derivativeEvaluations": 3607,
+        "samplingEvaluations": 4593,
+        "rootIterations": 757
+      },
+      "medianMs": 2.93,
+      "p90Ms": 3.18
+    },
+    "ensemble-64-seed-1": {
+      "counters": {
+        "derivativeEvaluations": 230848,
+        "samplingEvaluations": 96992,
+        "rootIterations": 15956
+      },
+      "medianMs": 106.49,
+      "p90Ms": 117.96
+    },
+    "sweep-9x9": {
+      "counters": {
+        "derivativeEvaluations": 292383,
+        "samplingEvaluations": 146498,
+        "rootIterations": 24199
+      },
+      "medianMs": 125.76,
+      "p90Ms": 132.84
+    },
+    "sensitivity": {
+      "counters": {
+        "derivativeEvaluations": 2846,
+        "samplingEvaluations": 9560,
+        "rootIterations": 1575
+      },
+      "medianMs": 3.62,
+      "p90Ms": 4.02
+    }
+  }
+}

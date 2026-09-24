@@ -5,6 +5,11 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -26,5 +31,17 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", ".vercel", ".output", ".nitro"]
+  "exclude": [
+    "node_modules",
+    ".vercel",
+    ".output",
+    ".nitro",
+    ".test-output",
+    "dist",
+    "outputs",
+    ".venv",
+    ".wrangler",
+    ".vinext",
+    "coverage"
+  ]
 }

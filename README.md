@@ -84,7 +84,7 @@ The explicit ODE solver does not automatically solve every stiff model. It rejec
 
 Each JSON result includes the complete input, software/data versions, equations, tolerances, seed, time origin, configuration fingerprint, event list and approximation diagnostics. The fingerprint is a noncryptographic FNV-1a identifier, not a security checksum. Preserve the JSON together with the source release and `package-lock.json`.
 
-`npm run examples` regenerates 16 configurations and computed outputs. See [examples/manifest.json](examples/manifest.json), the [baseline report](examples/observational-baseline.report.md), and configurations for phantom energy, recollapse, decaying dark matter, particle decay, remnants and nonstandard interventions. Timestamps vary on regeneration; seeded numerical results are deterministic for a fixed version and runtime.
+`npm run examples` regenerates 16 configurations and computed outputs. See [examples/manifest.json](examples/manifest.json), the [baseline report](examples/observational-baseline.report.md), and configurations for phantom energy, recollapse, decaying dark matter, particle decay, remnants and nonstandard interventions. Timestamps are fixed to `SOURCE_DATE_EPOCH` when it is set, otherwise to the release date in `CITATION.cff`, so regeneration is deterministic; CI fails when the committed examples differ from a fresh run.
 
 Independent reference validation is optional:
 
@@ -101,7 +101,7 @@ python scripts/validate_scipy.py
 ```text
 app/                    Routes and HTTP simulation API
 components/lab/         Scientific interface and plots
-src/science/            Numerical engine, analysis, tracers, reports
+src/science/            Layered numerical engine (core, model, solver), analysis, tracers, reports
 data/observations/      Versioned observations and primary sources
 tests/                  Analytic and numerical regression suite
 scripts/                Examples, independent validation, release checks

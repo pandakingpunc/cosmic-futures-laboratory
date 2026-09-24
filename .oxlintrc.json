@@ -42,6 +42,10 @@
         "components/lab/structure-view.tsx"
       ],
       "rules": { "jsx-a11y/prefer-tag-over-role": "off" }
+    },
+    {
+      "files": ["tests/**/*.test.ts"],
+      "rules": { "typescript/no-floating-promises": "off" }
     }
   ],
   "rules": {

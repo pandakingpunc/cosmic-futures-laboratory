@@ -12,11 +12,16 @@
     "validate:vercel": "node scripts/validate-vercel.mjs",
     "start": "wrangler dev --config dist/server/wrangler.json",
     "lint": "oxlint",
+    "check:arch": "node scripts/check-architecture.mjs",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "test": "node scripts/test.mjs",
+    "coverage": "node scripts/test.mjs --coverage",
     "typecheck": "tsc --noEmit",
-    "examples": "node scripts/examples.mjs"
+    "examples": "node scripts/run-ts.mjs scripts/generate-examples.ts",
+    "golden:update": "node scripts/run-ts.mjs scripts/golden-corpus.ts",
+    "bench": "node scripts/run-ts.mjs scripts/bench.ts",
+    "check": "npm test && npm run typecheck && npm run lint && npm run check:arch && npm run bench -- --check-counters --counters-only && npm run format:check && npm run examples"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

@@ -1,6 +1,9 @@
 'use client';
-import type { AnalysisMode } from '@/src/science/dispatch';
-import type { ComputeRequest, ComputeResponse } from '@/src/science/worker';
+import type {
+  AnalysisMode,
+  ComputeRequest,
+  ComputeResponse,
+} from '@/src/science/dispatch';
 import type { Configuration } from '@/src/science/types';
 type Pending = { resolve: (v: unknown) => void; reject: (e: Error) => void };
 let worker: Worker | null = null,

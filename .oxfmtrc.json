@@ -16,6 +16,7 @@
     "examples/**",
     "package-lock.json",
     "pnpm-lock.yaml",
+    "tests/golden/corpus.json",
     "yarn.lock"
   ]
 }
