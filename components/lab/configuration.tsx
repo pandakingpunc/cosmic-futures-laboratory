@@ -10,27 +10,44 @@ import {
 } from 'lucide-react';
 import type { Configuration, PhysicsEvent } from '@/src/science/types';
 import { defaultConfig, presets } from '@/src/science/defaults';
-import { validate } from '@/src/science/engine';
-import { Choice, NumberField, Section, Toggle, format } from './controls';
+import type { Validation } from '@/src/science/engine';
+import {
+  Choice,
+  NumberField,
+  NumberListField,
+  Section,
+  Toggle,
+  format,
+} from './controls';
+import { inspectConfig } from './persistence';
 export function ConfigurationPanel({
   config: c,
+  issues,
   setConfig,
   run,
   busy,
   onError,
+  onNotice,
 }: {
   config: Configuration;
+  /** validate(config), computed once by the laboratory. */
+  issues: Validation;
   setConfig: (c: Configuration) => void;
   run: () => void;
   busy: boolean;
   onError: (s: string) => void;
+  onNotice: (s: string) => void;
 }) {
   const file = useRef<HTMLInputElement>(null);
   const set = <K extends keyof Configuration>(key: K, v: Configuration[K]) =>
     setConfig({ ...c, [key]: v, preset: key === 'name' ? c.preset : 'custom' });
+  const setEvent = (i: number, patch: Partial<PhysicsEvent>) =>
+    set(
+      'events',
+      c.events.map((x, j) => (j === i ? { ...x, ...patch } : x)),
+    );
   const sum =
     c.omegaB + c.omegaDM + c.omegaNu + c.omegaR + c.omegaDE + c.omegaK;
-  const issues = validate(c);
   const number = (key: keyof Configuration, label: string, hint?: string) => (
     <NumberField
       label={label}
@@ -296,22 +313,13 @@ export function ConfigurationPanel({
             'Evaporation rate multiplier',
             '1 = isolated Schwarzschild blackbody estimate.',
           )}
-          <label className="control">
-            <span>Black-hole masses · M☉</span>
-            <input
-              defaultValue={c.blackHoleMasses.join(', ')}
-              key={c.blackHoleMasses.join(',')}
-              onBlur={(e) =>
-                set('blackHoleMasses', e.target.value.split(',').map(Number))
-              }
-            />
-            <small>Comma separated, e.g. 10, 1e5, 1e9.</small>
-            {issues.fields.blackHoleMasses && (
-              <small className="field-error" role="alert">
-                {issues.fields.blackHoleMasses}
-              </small>
-            )}
-          </label>
+          <NumberListField
+            label="Black-hole masses · M☉"
+            value={c.blackHoleMasses}
+            onChange={(v) => set('blackHoleMasses', v)}
+            hint="Comma separated, e.g. 10, 1e5, 1e9."
+            error={issues.fields.blackHoleMasses}
+          />
           <Toggle
             label="Stochastic vacuum-decay toy model"
             checked={c.vacuumDecay}
@@ -341,14 +349,16 @@ export function ConfigurationPanel({
                 valid state and a reason.
               </p>
               {c.events.map((e, i) => (
-                <div className="event-editor" key={e.id}>
+                // Imported or linked events may share an id, so the editor
+                // addresses events by position.
+                <div className="event-editor" key={`${i}:${e.id}`}>
                   <button
                     className="icon-button remove"
                     aria-label={`Remove custom event ${i + 1}`}
                     onClick={() =>
                       set(
                         'events',
-                        c.events.filter((x) => x.id !== e.id),
+                        c.events.filter((_, j) => j !== i),
                       )
                     }
                   >
@@ -357,14 +367,7 @@ export function ConfigurationPanel({
                   <NumberField
                     label={`Event ${i + 1} · log₁₀(years)`}
                     value={e.logTime}
-                    onChange={(v) =>
-                      set(
-                        'events',
-                        c.events.map((x) =>
-                          x.id === e.id ? { ...x, logTime: v } : x,
-                        ),
-                      )
-                    }
+                    onChange={(v) => setEvent(i, { logTime: v })}
                   />
                   <Choice
                     label="Action"
@@ -381,27 +384,13 @@ export function ConfigurationPanel({
                       { value: 'reverse', label: 'Force reversal' },
                     ]}
                     onChange={(v) =>
-                      set(
-                        'events',
-                        c.events.map((x) =>
-                          x.id === e.id
-                            ? { ...x, action: v as PhysicsEvent['action'] }
-                            : x,
-                        ),
-                      )
+                      setEvent(i, { action: v as PhysicsEvent['action'] })
                     }
                   />
                   <NumberField
                     label="New value / multiplier"
                     value={e.value}
-                    onChange={(v) =>
-                      set(
-                        'events',
-                        c.events.map((x) =>
-                          x.id === e.id ? { ...x, value: v } : x,
-                        ),
-                      )
-                    }
+                    onChange={(v) => setEvent(i, { value: v })}
                   />
                 </div>
               ))}
@@ -463,8 +452,8 @@ export function ConfigurationPanel({
                 : `${issues.errors.length} inputs need attention`}
             </strong>
             <ul>
-              {issues.errors.slice(0, 6).map((e) => (
-                <li key={e}>{e}</li>
+              {issues.errors.slice(0, 6).map((e, i) => (
+                <li key={i}>{e}</li>
               ))}
               {issues.errors.length > 6 && (
                 <li>… and {issues.errors.length - 6} more.</li>
@@ -495,16 +484,38 @@ export function ConfigurationPanel({
           hidden
           ref={file}
           onChange={async (e) => {
+            // Clear the selection first so choosing the same file again
+            // (to revert, or after fixing it) fires another change event.
+            const input = e.currentTarget,
+              f = input.files?.[0];
+            input.value = '';
+            if (!f) return;
+            onError('');
+            onNotice('');
             try {
-              const f = e.target.files?.[0];
-              if (!f) return;
               if (f.size > 1e6)
                 throw new Error('Configuration file exceeds 1 MB.');
-              const v = JSON.parse(await f.text());
-              const nc = { ...defaultConfig(), ...(v.config ?? v) };
-              const check = validate(nc);
-              if (check.errors.length) throw new Error(check.errors.join(' '));
-              setConfig(nc);
+              let v: unknown;
+              try {
+                v = JSON.parse(await f.text());
+              } catch {
+                throw new Error(`${f.name} is not valid JSON.`);
+              }
+              const raw =
+                v && typeof v === 'object' && 'config' in v ? v.config : v;
+              const { config, unknown, invalid } = inspectConfig(raw);
+              if (invalid.length)
+                throw new Error(
+                  `${f.name} is not a laboratory configuration: malformed ${invalid.join(', ')}.`,
+                );
+              setConfig(config);
+              onNotice(
+                `Loaded ${config.name} from ${f.name}.${
+                  unknown.length
+                    ? ` Unrecognized fields were ignored: ${unknown.join(', ')}.`
+                    : ''
+                }`,
+              );
             } catch (e) {
               onError((e as Error).message);
             }

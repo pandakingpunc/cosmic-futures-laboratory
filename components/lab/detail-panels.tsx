@@ -19,6 +19,7 @@ import {
 import { presets } from '@/src/science/defaults';
 import { BH_TEMPERATURE, blackHoleLifetime } from '@/src/science/astrophysics';
 import { csv, report } from '@/src/science/report';
+import { xSpan } from './plotting';
 import sourcesData from '@/data/observations/sources.json';
 const sources = sourcesData as Source[];
 export function TimelinePanel({
@@ -30,7 +31,8 @@ export function TimelinePanel({
   event: CosmicEvent | null;
   select: (e: CosmicEvent) => void;
 }) {
-  const maxTime = result.samples.at(-1)?.logYears ?? result.config.endLogYears;
+  const maxTime = result.samples.at(-1)?.logYears ?? result.config.endLogYears,
+    span = xSpan(maxTime);
   return (
     <div className="panel">
       <div className="panel-heading">
@@ -50,15 +52,15 @@ export function TimelinePanel({
         {[0, 0.2, 0.4, 0.6, 0.8, 1].map((v) => (
           <span key={v} style={{ left: `${v * 100}%` }}>
             <i />
-            <small>{format(v * maxTime, 1)}</small>
+            <small>{format(v * span, 1)}</small>
           </span>
         ))}
-        {result.events.map((e) => (
+        {result.events.map((e, i) => (
           <button
-            key={e.id}
+            key={`${i}:${e.id}`}
             aria-label={`${e.title}, log years ${e.logYears}`}
             style={{
-              left: `${Math.min(100, (e.logYears / Math.max(1, maxTime)) * 100)}%`,
+              left: `${Math.min(100, (e.logYears / span) * 100)}%`,
             }}
             onClick={() => select(e)}
             title={e.title}
@@ -68,10 +70,10 @@ export function TimelinePanel({
       <p className="fine-print">Position: log₁₀(elapsed years)</p>
       <div className="timeline-layout">
         <div className="timeline-list">
-          {result.events.map((e) => (
+          {result.events.map((e, i) => (
             <button
-              key={e.id}
-              className={`timeline-event ${event?.id === e.id ? 'selected' : ''}`}
+              key={`${i}:${e.id}`}
+              className={`timeline-event ${event === e ? 'selected' : ''}`}
               onClick={() => select(e)}
             >
               <Time logYears={e.logYears} />
@@ -128,9 +130,11 @@ export function TimelinePanel({
 export function EquationPanel({
   result,
   loadBranch,
+  busy,
 }: {
   result: Result;
   loadBranch: (name: string) => void;
+  busy: boolean;
 }) {
   return (
     <>
@@ -150,7 +154,7 @@ export function EquationPanel({
         </p>
         <div className="equations">
           {result.metadata.equations.map((eq, i) => (
-            <div key={eq}>
+            <div key={i}>
               <span>({i + 1})</span>
               <code>{eq}</code>
             </div>
@@ -202,8 +206,8 @@ export function EquationPanel({
           models do not receive an invented asymptote.
         </p>
         <div className="warning-list">
-          {result.warnings.map((w) => (
-            <p key={w}>{w}</p>
+          {result.warnings.map((w, i) => (
+            <p key={i}>{w}</p>
           ))}
         </div>
       </div>
@@ -242,7 +246,11 @@ export function EquationPanel({
               tone: 'muted',
             },
           ].map((b) => (
-            <button key={b.name} onClick={() => loadBranch(b.name)}>
+            <button
+              key={b.name}
+              disabled={busy}
+              onClick={() => loadBranch(b.name)}
+            >
               <Badge tone={b.tone as 'green'}>Conditional branch</Badge>
               <h3>{b.name}</h3>
               <p>{b.path}</p>
@@ -482,8 +490,8 @@ export function ReportPanel({ result }: { result: Result }) {
             <strong>Hawking T · K</strong>
             <strong>Ideal log₁₀(lifetime/yr)</strong>
           </div>
-          {result.config.blackHoleMasses.map((m) => (
-            <div key={m}>
+          {result.config.blackHoleMasses.map((m, i) => (
+            <div key={i}>
               <span>{format(m)}</span>
               <span>{format(BH_TEMPERATURE / m)}</span>
               <span>
@@ -505,8 +513,8 @@ export function ReportPanel({ result }: { result: Result }) {
           spin, accretion and quantum-gravity endpoint are not modeled.
         </p>
         <h4>Limitations</h4>
-        {result.warnings.slice(0, 4).map((w) => (
-          <p key={w}>{w}</p>
+        {result.warnings.slice(0, 4).map((w, i) => (
+          <p key={i}>{w}</p>
         ))}
       </article>
       <details>

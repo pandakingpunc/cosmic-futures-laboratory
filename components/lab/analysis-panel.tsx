@@ -6,6 +6,7 @@ import type { EnsembleOptions, EnsembleResult } from '@/src/science/analysis';
 import { Choice, NumberField, Badge, format, download } from './controls';
 import { ScientificPlot } from './chart';
 import { compute } from './compute';
+import { fateCellColor } from './plotting';
 import type { AnalysisMode } from '@/src/science/dispatch';
 import { VERSION, DATASET_VERSION } from '@/src/science/types';
 type SensitivityRow = {
@@ -24,7 +25,19 @@ type SweepRow = {
   status: string;
   finalExpansion: number | null;
 };
-export function AnalysisPanel({ config }: { config: Configuration }) {
+/** Outcome of a fate-map cell, naming the status when it is not resolved. */
+const cellOutcome = (s: SweepRow) =>
+  s.status === 'invalid' || s.status === 'limited'
+    ? `${s.outcome} (${s.status})`
+    : s.outcome;
+export function AnalysisPanel({
+  config,
+  configError,
+}: {
+  config: Configuration;
+  /** First validation error of the configuration, if any. */
+  configError?: string;
+}) {
   const [busy, setBusy] = useState(''),
     [error, setError] = useState(''),
     [ens, setEns] = useState<EnsembleResult | null>(null),
@@ -61,6 +74,12 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
     config: Configuration;
     timestamp: string;
   } | null>(null);
+  const intervalError =
+    options.interval > 0 && options.interval < 1
+      ? undefined
+      : 'Enter a central interval between 0 and 1, e.g. 0.95.';
+  // Analyses of an invalid configuration would only report rejected runs.
+  const blocked = !!busy || !!configError;
   async function request(mode: AnalysisMode) {
     setBusy(mode);
     setError('');
@@ -106,6 +125,12 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
   }
   return (
     <div className="analysis-layout">
+      {configError && (
+        <output className="inline-warning analysis-blocked">
+          Analyses are unavailable until the configuration is valid:{' '}
+          {configError}
+        </output>
+      )}
       <div className="panel">
         <div className="panel-heading">
           <div>
@@ -126,8 +151,7 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
             label="Realizations"
             value={options.runs}
             onChange={(n) => setOptions({ ...options, runs: n })}
-            min={4}
-            max={256}
+            hint="4–256 runs"
           />
           <NumberField
             label="Seed"
@@ -152,6 +176,7 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
             label="Central interval"
             value={options.interval}
             onChange={(n) => setOptions({ ...options, interval: n })}
+            error={intervalError}
           />
         </div>
         <div className="analysis-controls">
@@ -196,7 +221,7 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
         </details>
         <button
           className="secondary-button"
-          disabled={!!busy}
+          disabled={blocked || !!intervalError}
           onClick={() => request('ensemble')}
         >
           <Shuffle size={15} />
@@ -265,8 +290,8 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
                 </div>
               ))}
             </div>
-            {ens.notes.map((n) => (
-              <p className="fine-print" key={n}>
+            {ens.notes.map((n, i) => (
+              <p className="fine-print" key={i}>
                 {n}
               </p>
             ))}
@@ -286,7 +311,7 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
           </p>
           <button
             className="secondary-button"
-            disabled={!!busy}
+            disabled={blocked}
             onClick={() => request('sensitivity')}
           >
             {busy === 'sensitivity' ? 'Calculating…' : 'Calculate sensitivity'}
@@ -365,13 +390,12 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
           <NumberField
             label="Grid resolution"
             value={range.resolution}
-            min={3}
-            max={15}
             onChange={(n) => setRange({ ...range, resolution: n })}
+            hint="3–15 points per axis"
           />
           <button
             className="secondary-button"
-            disabled={!!busy}
+            disabled={blocked}
             onClick={() => request('sweep')}
           >
             {busy === 'sweep' ? 'Solving the grid…' : 'Calculate fate map'}
@@ -387,20 +411,10 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
                 {map.map((s, i) => (
                   <button
                     key={i}
-                    aria-label={`w0=${s.w0.toFixed(3)}, wa=${s.wa.toFixed(3)}: ${s.outcome}`}
-                    style={{
-                      background: s.outcome.includes('Rip')
-                        ? '#c78277'
-                        : s.status === 'limited'
-                          ? '#475362'
-                          : s.outcome.includes('de Sitter')
-                            ? '#83d5c2'
-                            : s.outcome.includes('accelerated')
-                              ? '#769bbc'
-                              : '#bcaf71',
-                    }}
+                    aria-label={`w0=${s.w0.toFixed(3)}, wa=${s.wa.toFixed(3)}: ${cellOutcome(s)}`}
+                    style={{ background: fateCellColor(s.status, s.outcome) }}
                     onClick={() => setSelected(s)}
-                    title={`${s.w0.toFixed(3)}, ${s.wa.toFixed(3)}: ${s.outcome}`}
+                    title={`${s.w0.toFixed(3)}, ${s.wa.toFixed(3)}: ${cellOutcome(s)}`}
                   />
                 ))}
               </div>
@@ -409,13 +423,14 @@ export function AnalysisPanel({ config }: { config: Configuration }) {
               </small>
               <p className="fine-print">
                 Rose: finite phantom branch · mint: de Sitter · blue:
-                accelerated · sand: other resolved expansion · gray: unresolved.
+                accelerated · sand: other resolved expansion · gray: unresolved
+                or invalid.
               </p>
               {selected && (
                 <p className="map-selection">
                   w₀={format(selected.w0)}, wₐ={format(selected.wa)}
                   <br />
-                  {selected.outcome}
+                  {cellOutcome(selected)}
                 </p>
               )}
               <button

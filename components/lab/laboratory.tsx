@@ -20,6 +20,7 @@ import {
   CircleHelp,
   FileText,
   SlidersHorizontal,
+  TriangleAlert,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
@@ -43,10 +44,12 @@ import {
 } from './detail-panels';
 import { compute } from './compute';
 import {
+  inspectConfig,
   isResult,
   loadStored,
-  readSharedConfig,
-  saveStored,
+  parseShareHash,
+  saveBench,
+  saveConfig,
   shareHash,
 } from './persistence';
 import { defaultConfig } from '@/src/science/defaults';
@@ -60,6 +63,32 @@ import {
   type CosmicEvent,
 } from '@/src/science/types';
 const colors = ['#8ce8bf', '#8bb5e9', '#e5b979', '#ca98d2', '#ea9995'];
+const BENCH_SLOTS = 4;
+const STORAGE_WARNINGS = {
+  config:
+    'This browser is not saving the configuration (storage is full or disabled); it will not survive a reload.',
+  bench:
+    'The comparison bench is too large to persist in this browser. Export the results you want to keep; they will not survive a reload.',
+};
+type StorageKind = keyof typeof STORAGE_WARNINGS;
+/**
+ * Calls save after a quiet period, or earlier when the page is hidden, so
+ * typing does not write to storage on every keystroke. Returns the cleanup.
+ */
+function scheduleSave(save: () => void, delay: number) {
+  let done = false;
+  const flush = () => {
+    if (done) return;
+    done = true;
+    save();
+  };
+  const timer = window.setTimeout(flush, delay);
+  window.addEventListener('pagehide', flush);
+  return () => {
+    window.clearTimeout(timer);
+    window.removeEventListener('pagehide', flush);
+  };
+}
 type Metric =
   | 'expansion'
   | 'hubble'
@@ -150,7 +179,8 @@ export default function Laboratory() {
     [result, setResult] = useState<Result>(() => simulate(defaultConfig())),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
-    [notice, setNotice] = useState('');
+    [notice, setNotice] = useState(''),
+    [warning, setWarning] = useState('');
   const [tab, setTab] = useState('observatory'),
     [metric, setMetric] = useState<Metric>('expansion'),
     [view, setView] = useState('full'),
@@ -159,55 +189,117 @@ export default function Laboratory() {
     [comparisons, setComparisons] = useState<Result[]>([]),
     [showConfig, setShowConfig] = useState(false),
     [restored, setRestored] = useState(false);
-  const resultFile = useRef<HTMLInputElement>(null);
+  const resultFile = useRef<HTMLInputElement>(null),
+    plotPanel = useRef<HTMLElement>(null);
+  // Only the most recent run may update the screen; older ones are ignored.
+  const runSeq = useRef(0);
+  // The committed bench, advanced immediately by additions so that a slow
+  // import cannot write back a stale copy.
+  const bench = useRef<Result[]>([]);
+  const storageFailed = useRef<Record<StorageKind, boolean>>({
+    config: false,
+    bench: false,
+  });
+  const issues = useMemo(() => validate(config), [config]);
+  /** Displays a calculated or inspected universe and makes the URL match. */
+  const showResult = useCallback((data: Result) => {
+    setResult(data);
+    setEvent(null);
+    setEpoch(Math.min(11, data.samples.at(-1)?.logYears ?? 11));
+    // The address bar always identifies the universe on screen.
+    if (!data.errors.length)
+      window.history.replaceState(null, '', shareHash(data.config));
+  }, []);
   const run = useCallback(
     async (override?: Configuration) => {
-      const target = override ?? config;
+      const target = override ?? config,
+        token = ++runSeq.current;
       setBusy(true);
       setError('');
       setNotice('');
       try {
         const data = await compute<Result>('deterministic', target);
-        setResult(data);
-        setEvent(null);
-        setEpoch(Math.min(11, data.samples.at(-1)?.logYears ?? 11));
+        if (token !== runSeq.current) return;
+        if (data.status === 'invalid') {
+          // Keep the last valid universe; the form shows the field errors.
+          setError(data.errors.join(' ') || 'The configuration is invalid.');
+          return;
+        }
+        showResult(data);
         if (data.errors.length) setError(data.errors.join(' '));
-        else {
+        else
           setNotice(
             'Simulation calculated. Exports retain this configuration and its provenance.',
           );
-          // The address bar always identifies the last calculated universe.
-          window.history.replaceState(null, '', shareHash(data.config));
-        }
         setShowConfig(false);
       } catch (e) {
-        setError((e as Error).message);
+        if (token === runSeq.current) setError((e as Error).message);
       } finally {
-        setBusy(false);
+        if (token === runSeq.current) setBusy(false);
       }
     },
-    [config],
+    [config, showResult],
   );
-  // Restore a shared link (takes precedence) or the previous browser session.
-  // Browser storage and the URL are external systems, so the restore happens
-  // in a scheduled callback rather than synchronously in the effect body.
+  // Restore a shared link or the previous browser session. Browser storage
+  // and the URL are external systems, so the restore happens in a scheduled
+  // callback rather than synchronously in the effect body.
   useEffect(() => {
     if (restored) return;
     let cancelled = false;
     void Promise.resolve().then(() => {
       if (cancelled) return;
-      const shared = readSharedConfig(window.location.hash);
-      const stored = loadStored();
-      if (stored.comparisons?.length) setComparisons(stored.comparisons);
-      const restoredConfig = shared ?? stored.config;
-      if (restoredConfig && !validate(restoredConfig).errors.length) {
-        setConfig(restoredConfig);
-        if (hashConfig(restoredConfig) !== hashConfig(defaultConfig()))
-          void run(restoredConfig);
-      } else if (shared)
-        setError(
-          'The shared link contains an invalid configuration; the default reference universe is shown instead.',
+      const hash = window.location.hash,
+        link = parseShareHash(hash),
+        stored = loadStored(),
+        notes: string[] = [];
+      if (stored.comparisons?.length) {
+        bench.current = stored.comparisons;
+        setComparisons(stored.comparisons);
+      }
+      if (stored.droppedComparisons)
+        notes.push(
+          `${stored.droppedComparisons} stored comparison ${
+            stored.droppedComparisons === 1 ? 'entry was' : 'entries were'
+          } unreadable and removed.`,
         );
+      // `calculate` is the universe to compute, `draft` the one to edit.
+      let calculate: Configuration | undefined,
+        draft: Configuration | undefined;
+      const valid = (c: Configuration) => !validate(c).errors.length;
+      if (link.kind === 'ok' && hash === stored.lastRunHash && stored.config) {
+        // This browser wrote the link itself: keep its uncalculated edits.
+        calculate = valid(link.config) ? link.config : undefined;
+        draft = stored.config;
+      } else if (link.kind === 'ok') {
+        const errors = validate(link.config).errors;
+        if (errors.length)
+          notes.push(
+            `The shared link contains an invalid configuration (${errors[0]}) The previous or default universe is shown instead.`,
+          );
+        else {
+          calculate = draft = link.config;
+          const ignored = [...link.unknown, ...link.invalid];
+          if (ignored.length)
+            notes.push(
+              `The shared link has fields this version cannot read; reference values are used for: ${ignored.join(', ')}.`,
+            );
+        }
+      } else if (link.kind === 'invalid')
+        notes.push(
+          'The shared link is incomplete or corrupted. The previous or default universe is shown instead.',
+        );
+      if (!draft && stored.config) {
+        draft = stored.config;
+        calculate = valid(stored.config) ? stored.config : undefined;
+      }
+      if (draft === stored.config && stored.configIssues)
+        notes.push(
+          `Some saved settings could not be read and were reset to reference values: ${stored.configIssues.join(', ')}.`,
+        );
+      if (draft) setConfig(draft);
+      if (calculate && hashConfig(calculate) !== hashConfig(defaultConfig()))
+        void run(calculate);
+      if (notes.length) setWarning(notes.join(' '));
       setRestored(true);
     });
     return () => {
@@ -215,8 +307,28 @@ export default function Laboratory() {
     };
   }, [restored, run]);
   useEffect(() => {
-    if (restored) saveStored({ config, comparisons });
-  }, [restored, config, comparisons]);
+    bench.current = comparisons;
+  }, [comparisons]);
+  useEffect(() => {
+    if (!restored) return;
+    // The URL holds the last calculated universe; storing it lets a reload
+    // tell this browser's own link apart from a shared one.
+    return scheduleSave(() => {
+      const ok = saveConfig(config, window.location.hash),
+        warn = !ok && !storageFailed.current.config;
+      storageFailed.current.config = !ok;
+      if (warn) setWarning(STORAGE_WARNINGS.config);
+    }, 400);
+  }, [restored, config]);
+  useEffect(() => {
+    if (!restored) return;
+    return scheduleSave(() => {
+      const ok = saveBench(comparisons),
+        warn = !ok && !storageFailed.current.bench;
+      storageFailed.current.bench = !ok;
+      if (warn) setWarning(STORAGE_WARNINGS.bench);
+    }, 100);
+  }, [restored, comparisons]);
   const dirty = hashConfig(config) !== result.metadata.configurationHash,
     maxTime = result.samples.at(-1)?.logYears ?? config.endLogYears;
   const xMax =
@@ -249,44 +361,76 @@ export default function Laboratory() {
     }
   }
   function addComparison(r: Result) {
-    if (comparisons.length >= 4) {
+    if (r.status === 'invalid' || !r.samples.length) {
+      setError('Only calculated universes can be added to the comparison.');
+      return false;
+    }
+    if (bench.current.length >= BENCH_SLOTS) {
       setNotice(
         'Four comparison slots are occupied. Remove one in Compare to add another.',
       );
       return false;
     }
-    setComparisons([...comparisons, structuredClone(r)]);
+    const entry = structuredClone(r);
+    bench.current = [...bench.current, entry];
+    setComparisons((prev) =>
+      prev.length >= BENCH_SLOTS ? prev : [...prev, entry],
+    );
     return true;
   }
   async function importResult(file: File | undefined) {
     if (!file) return;
+    // A message about an earlier import must not remain next to this one.
+    setError('');
+    setNotice('');
     try {
       if (file.size > 20e6) throw new Error('Result file exceeds 20 MB.');
-      const v: unknown = JSON.parse(await file.text());
+      let v: unknown;
+      try {
+        v = JSON.parse(await file.text());
+      } catch {
+        throw new Error(`${file.name} is not valid JSON.`);
+      }
       if (!isResult(v))
         throw new Error(
           'This file is not a complete result. Configuration-only files load through Import JSON in the configuration panel.',
         );
-      const check = validate(v.config);
+      const { config: imported, unknown } = inspectConfig(v.config);
+      const check = validate(imported);
       if (check.errors.length) throw new Error(check.errors.join(' '));
-      if (addComparison(v))
+      if (addComparison({ ...v, config: imported }))
         setNotice(
-          `Imported ${v.config.name}${
+          `Imported ${imported.name}${
             v.metadata.version !== VERSION
               ? ` (computed with software version ${v.metadata.version}; current is ${VERSION})`
               : ''
-          } into the comparison bench.`,
+          } into the comparison bench.${
+            unknown.length
+              ? ` Unrecognized configuration fields were ignored: ${unknown.join(', ')}.`
+              : ''
+          }`,
         );
     } catch (e) {
       setError((e as Error).message);
     }
+  }
+  function inspect(r: Result) {
+    // Supersede any run still in flight so it cannot replace this universe.
+    runSeq.current++;
+    setBusy(false);
+    setError('');
+    setConfig(r.config);
+    showResult(r);
+    setTab('observatory');
   }
   function saveUniverse() {
     if (addComparison(result))
       setNotice(`Saved ${result.config.name} for comparison.`);
   }
   function saveChart(kind: 'svg' | 'png') {
-    const svg = document.querySelector<SVGSVGElement>('[data-export-chart]');
+    const svg = plotPanel.current?.querySelector<SVGSVGElement>(
+      '[data-export-chart]',
+    );
     if (!svg) return;
     if (kind === 'svg')
       download(
@@ -366,10 +510,12 @@ export default function Laboratory() {
       <div className={`workspace ${showConfig ? 'show-config' : ''}`}>
         <ConfigurationPanel
           config={config}
+          issues={issues}
           setConfig={setConfig}
           run={() => void run()}
           busy={busy}
           onError={setError}
+          onNotice={setNotice}
         />
         <main className="main-surface">
           <div className="workspace-heading">
@@ -408,11 +554,33 @@ export default function Laboratory() {
               <span>
                 <span className="status-dot amber-dot" /> Configuration changed.
                 Results show the last calculated universe.
+                {issues.errors.length > 0 &&
+                  ' Correct the highlighted inputs to run it.'}
               </span>
-              <button disabled={busy} onClick={() => void run()}>
+              <button
+                disabled={busy || issues.errors.length > 0}
+                title={
+                  issues.errors.length
+                    ? 'Resolve the configuration errors first'
+                    : undefined
+                }
+                onClick={() => void run()}
+              >
                 Run updated model <ArrowUpRight size={14} />
               </button>
             </div>
+          )}
+          {warning && (
+            <output className="notice-banner warning-banner">
+              <TriangleAlert size={14} />
+              <span>{warning}</span>
+              <button
+                onClick={() => setWarning('')}
+                aria-label="Dismiss warning"
+              >
+                <X size={14} />
+              </button>
+            </output>
           )}
           {error && (
             <div role="alert" className="error-banner">
@@ -460,7 +628,7 @@ export default function Laboratory() {
                 </TabsTrigger>
               ))}
             </TabsList>
-            <TabsContent value="observatory">
+            <TabsContent value="observatory" keepMounted>
               <section
                 className={`fate-card ${result.status === 'limited' ? 'fate-limited' : ''}`}
               >
@@ -527,7 +695,7 @@ export default function Laboratory() {
                   <p>Ultimate fate is not a measured probability</p>
                 </div>
               </div>
-              <section className="panel main-plot-panel">
+              <section className="panel main-plot-panel" ref={plotPanel}>
                 <div className="panel-heading">
                   <div>
                     <span className="eyebrow">
@@ -619,6 +787,9 @@ export default function Laboratory() {
                     <div className="epoch-slider">
                       <Slider
                         aria-label="Inspect elapsed log years"
+                        getAriaValueText={(_, v) =>
+                          `10^${v.toFixed(2)} years from today`
+                        }
                         value={[Math.min(epoch, maxTime)]}
                         min={0}
                         max={maxTime || 1}
@@ -656,10 +827,10 @@ export default function Laboratory() {
                           Full timeline <ArrowUpRight size={14} />
                         </button>
                       </div>
-                      {result.events.slice(0, 4).map((e) => (
+                      {result.events.slice(0, 4).map((e, i) => (
                         <button
                           className="landmark"
-                          key={e.id}
+                          key={`${i}:${e.id}`}
                           onClick={() => {
                             setEvent(e);
                             setEpoch(e.logYears);
@@ -721,8 +892,9 @@ export default function Laboratory() {
                 }}
               />
             </TabsContent>
-            <TabsContent value="analysis">
-              <AnalysisPanel config={config} />
+            {/* Kept mounted so results and running jobs survive tab changes. */}
+            <TabsContent value="analysis" keepMounted>
+              <AnalysisPanel config={config} configError={issues.errors[0]} />
             </TabsContent>
             <TabsContent value="compare">
               <div className="panel">
@@ -798,8 +970,8 @@ export default function Laboratory() {
                               className="icon-button"
                               aria-label={`Remove ${r.config.name}`}
                               onClick={() =>
-                                setComparisons(
-                                  comparisons.filter((_, j) => j !== i),
+                                setComparisons((prev) =>
+                                  prev.filter((_, j) => j !== i),
                                 )
                               }
                             >
@@ -816,11 +988,7 @@ export default function Laboratory() {
                           </p>
                           <button
                             className="text-button"
-                            onClick={() => {
-                              setConfig(r.config);
-                              setResult(r);
-                              setTab('observatory');
-                            }}
+                            onClick={() => inspect(r)}
                           >
                             Inspect this universe <ArrowUpRight size={14} />
                           </button>
@@ -855,7 +1023,11 @@ export default function Laboratory() {
               </div>
             </TabsContent>
             <TabsContent value="equations">
-              <EquationPanel result={result} loadBranch={loadBranch} />
+              <EquationPanel
+                result={result}
+                loadBranch={loadBranch}
+                busy={busy}
+              />
             </TabsContent>
             <TabsContent value="sources">
               <SourcesPanel />

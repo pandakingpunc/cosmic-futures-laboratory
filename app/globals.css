@@ -2293,3 +2293,49 @@ pre {
     margin-left: auto;
   }
 }
+
+/* Storage warnings, analysis gating and crash recovery (added 2026-09) */
+.notice-banner.warning-banner {
+  background: #231e15;
+  color: #d1b784;
+  border-color: #4b4430;
+}
+.warning-banner svg {
+  flex-shrink: 0;
+}
+.analysis-blocked {
+  display: block;
+  margin: 0 0 18px;
+}
+.crash-screen {
+  max-width: 640px;
+  margin: 12vh auto;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.crash-screen > svg {
+  color: #507d80;
+}
+.crash-screen pre {
+  margin: 0;
+}
+.crash-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+.crash-actions .run-button {
+  width: auto;
+  padding: 12px 18px;
+}
+@media (max-width: 760px) {
+  /* 16 px text keeps iOS Safari from zooming the page on every focus. */
+  input,
+  textarea,
+  .source-search input {
+    font-size: 16px;
+  }
+}

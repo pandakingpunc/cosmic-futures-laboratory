@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { parseNumberList, parseNumeric, sameNumbers } from './numeric';
 export function Choice({
   label,
   value,
@@ -32,7 +33,7 @@ export function Choice({
       >
         <SelectTrigger aria-label={label} className="lab-select">
           <SelectValue>
-            {options.find((o) => o.value === value)?.label ?? value}
+            {options.find((o) => o.value === value)?.label ?? String(value)}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -51,26 +52,20 @@ export function NumberField({
   label,
   value,
   onChange,
-  step = 'any',
   hint,
-  min,
-  max,
   error,
 }: {
   label: string;
   value: number;
   onChange: (n: number) => void;
-  step?: number | 'any';
   hint?: string;
-  min?: number;
-  max?: number;
   error?: string;
 }) {
   const [draft, setDraft] = useState(String(value));
   const [previousValue, setPreviousValue] = useState(value);
   if (!Object.is(previousValue, value)) {
     setPreviousValue(value);
-    if (!Number.isNaN(value) && Number(draft) !== value)
+    if (!Number.isNaN(value) && parseNumeric(draft) !== value)
       setDraft(String(value));
   }
   return (
@@ -80,15 +75,66 @@ export function NumberField({
         aria-label={label}
         aria-invalid={error ? true : undefined}
         type="text"
-        inputMode="decimal"
+        inputMode="text"
+        autoComplete="off"
+        autoCapitalize="off"
+        spellCheck={false}
         className="mono"
-        step={step}
-        min={min}
-        max={max}
         value={draft}
         onChange={(e) => {
           setDraft(e.target.value);
-          onChange(e.target.value === '' ? NaN : Number(e.target.value));
+          onChange(parseNumeric(e.target.value));
+        }}
+      />
+      {hint && <small>{hint}</small>}
+      {error && (
+        <small className="field-error" role="alert">
+          {error}
+        </small>
+      )}
+    </label>
+  );
+}
+/**
+ * A list of numbers edited as text. The value is committed on blur and only
+ * when it changed, so passing through the field leaves the configuration
+ * untouched; unreadable text stays visible next to its validation error.
+ */
+export function NumberListField({
+  label,
+  value,
+  onChange,
+  hint,
+  error,
+}: {
+  label: string;
+  value: number[];
+  onChange: (list: number[]) => void;
+  hint?: string;
+  error?: string;
+}) {
+  const [draft, setDraft] = useState(value.join(', '));
+  const [previousValue, setPreviousValue] = useState(value);
+  if (previousValue !== value) {
+    setPreviousValue(value);
+    if (!sameNumbers(parseNumberList(draft), value)) setDraft(value.join(', '));
+  }
+  return (
+    <label className={`control ${error ? 'has-error' : ''}`}>
+      <span>{label}</span>
+      <input
+        aria-label={label}
+        aria-invalid={error ? true : undefined}
+        type="text"
+        inputMode="text"
+        autoComplete="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          const next = parseNumberList(draft);
+          if (!sameNumbers(next, value)) onChange(next);
         }}
       />
       {hint && <small>{hint}</small>}
@@ -173,31 +219,44 @@ export function downloadSvgAsPng(
     const [, , w, h] = (svg.getAttribute('viewBox') ?? '0 0 940 360')
       .split(/\s+/)
       .map(Number);
+    // An explicit intrinsic size lets every browser draw the SVG image.
+    const copy = svg.cloneNode(true) as SVGSVGElement;
+    copy.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    copy.setAttribute('width', String(w));
+    copy.setAttribute('height', String(h));
     const image = new Image();
     image.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = w * scale;
-      canvas.height = h * scale;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return reject(new Error('Canvas is unavailable.'));
-      ctx.scale(scale, scale);
-      ctx.drawImage(image, 0, 0, w, h);
-      canvas.toBlob((blob) => {
-        if (!blob) return reject(new Error('PNG encoding failed.'));
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = name;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        resolve();
-      }, 'image/png');
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = w * scale;
+        canvas.height = h * scale;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas is unavailable.'));
+        ctx.scale(scale, scale);
+        ctx.drawImage(image, 0, 0, w, h);
+        canvas.toBlob((blob) => {
+          if (!blob) return reject(new Error('PNG encoding failed.'));
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = name;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          resolve();
+        }, 'image/png');
+      } catch (e) {
+        reject(
+          new Error(
+            `The chart could not be rasterized: ${(e as Error).message}`,
+          ),
+        );
+      }
     };
     image.onerror = () =>
       reject(new Error('The chart could not be rasterized.'));
     image.src =
       'data:image/svg+xml;charset=utf-8,' +
-      encodeURIComponent(new XMLSerializer().serializeToString(svg));
+      encodeURIComponent(new XMLSerializer().serializeToString(copy));
   });
 }
 export function format(n: number | null | undefined, digits = 3) {
