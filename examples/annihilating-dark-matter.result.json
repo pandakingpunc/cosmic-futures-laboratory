@@ -6955,9 +6955,9 @@
     "tail": "Matched constant-fluid asymptote, ρ ∝ a^(0.0000), subdominant fraction < 10⁻⁸. Future source ratios cannot overtake the dominant term. Numeric integration ends at log10(elapsed yr)=12.02179."
   },
   "metadata": {
-    "version": "0.2.0",
+    "version": "0.3.0",
     "datasetVersion": "2026-09-05.1",
-    "timestamp": "2026-09-14T00:00:00.000Z",
+    "timestamp": "2026-09-24T00:00:00.000Z",
     "solver": "Dormand–Prince 5(4); log-scale-factor expansion; regular time-domain contraction; matched constant-fluid asymptotes",
     "timeOrigin": "Elapsed proper years from a(t₀)=1, not total age since the Big Bang",
     "equations": [

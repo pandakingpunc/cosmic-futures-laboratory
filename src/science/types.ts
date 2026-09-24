@@ -187,7 +187,7 @@ export interface Source {
   notes: string;
   parameters: Record<string, unknown>;
 }
-export const VERSION = '0.2.0';
+export const VERSION = '0.3.0';
 export const DATASET_VERSION = '2026-09-05.1';
 export const EQUATIONS = [
   'H²/H₀² = (Ωb + Ων,massive) a⁻³ + ρdm/ρc,0 + ρr/ρc,0 + ρde/ρc,0 + Ωk a⁻²',

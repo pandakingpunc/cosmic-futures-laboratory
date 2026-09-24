@@ -1,15 +1,15 @@
 {
   "title": "Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures",
   "upload_type": "software",
-  "description": "Version 0.2.0 research software preview. This version runs the numerical core in a browser worker, refines output samples with a bracketed Newton iteration, and adds shareable configuration links, browser persistence, inline validation and PNG export. An interactive homogeneous FLRW simulator with adaptive numerical integration, conservative dark-matter-to-radiation transfers, conditional extreme-time asymptotes, astrophysical tracers, seeded uncertainty sampling, scientific references and reproducible exports. It does not calculate a unique actual cosmic fate, run an N-body model or fit an observational likelihood. Methodology and limitations are documented in the archive.",
+  "description": "Version 0.3.0 research software preview. This version restructures the numerical engine into layered modules (bit-identical results, about 2.5–3× faster), fixes 73 defects confirmed by an independent audit, locates cosmic events exactly on the continuous solution, adds the Gibbons–Hawking temperature and Nariai black-hole mass bounds, continues CPL dark-energy laws only where a proof applies (labelled literal extrapolations of the fit ansatz), and adds golden-master, property-based and coverage-gated tests, bounded HTTP API work and an extended independent SciPy reference. An interactive homogeneous FLRW simulator with adaptive numerical integration, conservative dark-matter-to-radiation transfers, conditional extreme-time asymptotes, astrophysical tracers, seeded uncertainty sampling, scientific references and reproducible exports. It does not calculate a unique actual cosmic fate, run an N-body model or fit an observational likelihood. Methodology, validation and limitations are documented in the archive.",
   "creators": [
     {
       "name": "Karatum, Mustafa",
       "affiliation": "Independent researcher"
     }
   ],
-  "version": "0.2.0",
-  "publication_date": "2026-09-14",
+  "version": "0.3.0",
+  "publication_date": "2026-09-24",
   "license": "mit",
   "access_right": "open",
   "related_identifiers": [
@@ -25,7 +25,9 @@
     "dark energy",
     "numerical simulation",
     "reproducibility",
-    "scientific visualization"
+    "scientific visualization",
+    "Friedmann equations",
+    "research software"
   ],
   "language": "eng"
 }

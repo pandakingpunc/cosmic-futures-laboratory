@@ -5,9 +5,8 @@ message: >-
 title: 'Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures'
 type: software
 repository-code: 'https://github.com/pandakingpunc/cosmic-futures-laboratory'
-version: 0.2.0
-doi: 10.5281/zenodo.22750182
-date-released: '2026-09-14'
+version: 0.3.0
+date-released: '2026-09-24'
 identifiers:
   - type: doi
     value: 10.5281/zenodo.22343411
@@ -25,10 +24,14 @@ authors:
     affiliation: Independent researcher
 abstract: >-
   An interactive FLRW background simulator with adaptive numerical integration,
-  conservative dark-matter transfers, conditional asymptotic continuation,
-  astrophysical tracer approximations, uncertainty sampling and versioned
-  observational provenance. A research software preview, not a unique forecast
-  of the actual cosmic fate or an externally peer-reviewed solver.
+  conservative dark-matter transfers, conditional asymptotic continuation
+  (including proof-based continuation of CPL dark-energy laws), exactly located
+  cosmic events, de Sitter horizon thermodynamics, astrophysical tracer
+  approximations, uncertainty sampling and versioned observational provenance.
+  Verified by analytic benchmarks, an independent SciPy reference, a golden
+  master of example outputs and property-based tests. A research software
+  preview, not a unique forecast of the actual cosmic fate or an externally
+  peer-reviewed solver.
 keywords:
   - cosmology
   - FLRW
@@ -36,6 +39,8 @@ keywords:
   - numerical simulation
   - reproducibility
   - scientific visualization
+  - Friedmann equations
+  - research software
 references:
   - type: article
     title: 'Planck 2018 results. VI. Cosmological parameters'
