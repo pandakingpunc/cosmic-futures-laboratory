@@ -50,7 +50,18 @@ const cases: Record<string, Partial<Configuration>> = {
     expression: '-1 + 0.05 * tanh(log(a))',
     endLogYears: 30,
   },
+  // CPL continuations (validate_scipy.py): extinction of wₐ < 0 dark energy,
+  // a finite-time Big Rip for wₐ > 0 and a closed recollapse in proper time.
   'cpl-extrapolation': { deModel: 'cpl', w0: -0.95, wa: -0.3, endLogYears: 30 },
+  'cpl-big-rip': { deModel: 'cpl', w0: -0.9, wa: 0.3, endLogYears: 12 },
+  'cpl-closed-recollapse': {
+    deModel: 'cpl',
+    w0: -0.821,
+    wa: -0.65,
+    omegaK: -0.01,
+    omegaDE: defaultConfig().omegaDE + 0.01,
+    endLogYears: 14,
+  },
   // 1 − Ωde ≈ 4×10⁻⁸ at ln a = 60, between the tail threshold and 10⁻⁷.
   'dominance-threshold-edge': { deModel: 'constant', w0: -0.09 },
   // Negative stiff dark energy stops the collapse at a classical bounce.
@@ -62,6 +73,35 @@ const cases: Record<string, Partial<Configuration>> = {
     deModel: 'constant',
     w0: 1,
     endLogYears: 11.2,
+  },
+  // Located event times with closed forms, rechecked by validate_scipy.py:
+  // flat matter+Λ equality (sinh solution), the closed-dust cycloid with
+  // cooling and reheating crossings, pure de Sitter (Δτ = Δln a, horizon
+  // temperature in the tail) and the matter tail (Δτ = (e^{1.5Δx} − 1)/1.5E*).
+  'matter-lambda-equality': {
+    ...empty,
+    omegaB: 0.7,
+    omegaDE: 0.3,
+    endLogYears: 11,
+  },
+  'closed-dust-hawking-crossings': {
+    ...empty,
+    omegaB: 2,
+    omegaK: -1,
+    blackHoleMasses: [1e-8, 3e-8, 4e-8],
+    endLogYears: 12,
+  },
+  'de-sitter-horizon-temperature': {
+    ...empty,
+    omegaDE: 1,
+    blackHoleMasses: [1e-6, 1e20],
+    endLogYears: 13,
+  },
+  'matter-tail-hawking-crossing': {
+    ...empty,
+    omegaB: 1,
+    blackHoleMasses: [1e-6, 1e20],
+    endLogYears: 60,
   },
 };
 const entries: CorpusCase[] = Object.entries(cases).map(([id, patch]) => {

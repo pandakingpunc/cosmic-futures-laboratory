@@ -33,6 +33,98 @@
       "reference": "SciPy DOP853, cosmic-time a/C/R variables",
       "rtol": 2e-12,
       "atol": 1e-14
+    },
+    {
+      "case": "event: matter-lambda equality",
+      "events": [
+        "equality"
+      ],
+      "max_absolute_log10_time_error": 1.4287238059296214e-10
+    },
+    {
+      "case": "event: closed-dust cycloid crossings",
+      "events": [
+        "cool-3e-8",
+        "cool-4e-8",
+        "warm-1e-8",
+        "warm-3e-8",
+        "warm-4e-8"
+      ],
+      "max_absolute_log10_time_error": 4.7414516757271485e-11
+    },
+    {
+      "case": "event: de Sitter crossings and horizon temperature",
+      "events": [
+        "cool-0.000001",
+        "cool-100000000000000000000",
+        "horizon-temperature"
+      ],
+      "max_absolute_log10_time_error": 0.0
+    },
+    {
+      "case": "event: matter-only crossings",
+      "events": [
+        "cool-0.000001",
+        "cool-100000000000000000000"
+      ],
+      "max_absolute_log10_time_error": 4.384759222375578e-11
+    },
+    {
+      "case": "event: observational-baseline crossings",
+      "events": [
+        "cool-10",
+        "cool-100000",
+        "cool-1000000000",
+        "horizon-temperature"
+      ],
+      "max_absolute_log10_time_error": 1.6928680679484387e-12
+    },
+    {
+      "case": "event: DESI CPL equality",
+      "events": [
+        "equality"
+      ],
+      "max_absolute_log10_time_error": 6.120508544427139e-10
+    },
+    {
+      "case": "CPL extinction: DESI 2026 example",
+      "max_absolute_log10_rho_de_error": 4.375095841169241e-10,
+      "max_absolute_log10a_error_at_fixed_tau": 4.798964481372523e-10,
+      "extinction_scale_factor": 38.749355136255986,
+      "extinction_w": 23.71608083856639,
+      "extinction_weighted_fraction": 1.7331337579527852e-23,
+      "reference": "closed-form CPL density; SciPy quad of dx/E through the extinction and the matched matter tail"
+    },
+    {
+      "case": "event: CPL Big Rip time",
+      "events": [
+        "rip"
+      ],
+      "max_absolute_log10_time_error": 1.0116352200384426e-11
+    },
+    {
+      "case": "CPL Big Rip: sample times",
+      "samples": 16,
+      "max_absolute_log10_time_error": 4.588507351854787e-11,
+      "rip_gyr": 25.947158016323026
+    },
+    {
+      "case": "event: closed CPL turnaround and collapse equalities",
+      "events": [
+        "equality",
+        "equality-2",
+        "equality-3",
+        "turn"
+      ],
+      "max_absolute_log10_time_error": 2.5859847596620966e-10
+    },
+    {
+      "case": "de Sitter thermodynamics: observational baseline",
+      "max_absolute_log10_temperature_error": 0.0,
+      "max_absolute_log10_entropy_error": 0.0,
+      "nariai_mass_msun": 2.1631120102077894e+22,
+      "nariai_relative_error": 2.220446049250313e-16,
+      "reference": "scipy.constants CODATA; solar mass 1.98847e30 kg"
     }
   ]
 }

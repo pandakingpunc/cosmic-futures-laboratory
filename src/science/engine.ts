@@ -1,26 +1,35 @@
-import { cosmicEvents } from './astrophysics';
+import { blackHoleMassLimit, cosmicEvents } from './astrophysics';
 import {
   BOUNDARY_CLASSIFICATION,
   INTERVENTION_BOUNDARY,
   INTERVENTION_NOTE,
-  OSCILLATING,
   UNDETERMINED,
   classifyFinite,
-  classifyRecollapse,
   classifyTail,
+  literalCpl,
   type Fate,
 } from './classify';
+import { LN10 } from './core/constants';
 import { hashConfig } from './core/hash';
 import { BudgetExceededError, type WorkBudget } from './core/limits';
-import { canonicalConfig } from './defaults';
-import { asymptote, neverTurnsAround } from './model/asymptote';
+import {
+  contract,
+  continueRip,
+  present,
+  setFate,
+  setStop,
+  type Run,
+} from './continuation';
+import { copyConfiguration } from './defaults';
+import { DOMINANCE, asymptote, neverTurnsAround } from './model/asymptote';
+import { EXTINCTION } from './model/cpl';
 import { background, createModel, type Model } from './model/background';
-import { initialSegment, type Stop } from './model/segment';
+import { darkEnergyLaw } from './model/segment';
 import { validate } from './model/validate';
-import { integrateContraction } from './solver/contraction';
 import type { SimulationCounters } from './solver/counters';
+import { locateExpansion, noEvents } from './solver/crossings';
 import { integrateExpansion } from './solver/expanding';
-import { sampleExpansion, toSample } from './solver/sampling';
+import { distinctTimes, sampleExpansion, toSample } from './solver/sampling';
 import { extendTail } from './solver/tail';
 import {
   DATASET_VERSION,
@@ -28,6 +37,7 @@ import {
   VERSION,
   type Configuration,
   type CosmicEvent,
+  type CplContinuation,
   type PhysicsEvent,
   type Result,
 } from './types';
@@ -52,6 +62,11 @@ export interface SimulateOptions {
    * unchanged bit for bit.
    */
   budget?: WorkBudget;
+  /**
+   * Threshold ε of the CPL extinction proof, |Ωde|(1 + 3w) < ε (default
+   * 10⁻²⁰), for sensitivity checks; only numbers in (0, 10⁻¹²] are used.
+   */
+  extinctionThreshold?: number;
 }
 const LESS_THAN_A_YEAR =
   ' Less than one elapsed year was resolved; only the present state is reported.';
@@ -66,9 +81,12 @@ export function simulate(
   options?: SimulateOptions | null,
 ): Result {
   const run = options ?? {};
-  const canonical = canonicalConfig(input);
-  const c = structuredClone(canonical.config),
-    { errors, warnings } = validate(c);
+  const canonical = copyConfiguration(input);
+  const c = canonical.config,
+    { errors, warnings }: { errors: string[]; warnings: string[] } =
+      canonical.problem
+        ? { errors: [canonical.problem], warnings: [] }
+        : validate(c);
   if (canonical.unknown.length)
     warnings.push(
       `Ignored unknown configuration keys: ${canonical.unknown
@@ -107,8 +125,10 @@ export function simulate(
     },
   };
   if (errors.length) return result;
-  const special: CosmicEvent[] = [];
-  let executed = 0;
+  const special: CosmicEvent[] = [],
+    located = noEvents(c);
+  let executed = 0,
+    cpl: CplContinuation | null = null;
   const vacuumLog = drawVacuumLog(c);
   try {
     const model = createModel(c);
@@ -117,21 +137,35 @@ export function simulate(
       .filter((e) => e.logTime <= effectiveEnd)
       .sort((a, b) => a.logTime - b.logTime);
     // Only events that can run choose the solver. Closed models whose
-    // expansion provably never halts stay on the expanding branch.
+    // expansion provably never halts stay on the expanding branch; a closed
+    // CPL law with wₐ < 0 always recollapses (its dark energy dies out).
+    const law = darkEnergyLaw(c);
     const canContract =
-      (c.omegaDE < 0 || c.omegaK < 0) &&
-      ['lambda', 'constant'].includes(c.deModel) &&
       c.dmModel === 'stable' &&
       queue.length === 0 &&
-      !provablyExpanding(model);
-    if (canContract) contract(result, model, effectiveEnd, special, run);
-    else executed = expand(result, model, effectiveEnd, queue, special, run);
+      (law === 'cpl'
+        ? c.wa < 0 && c.omegaK < 0 && c.omegaDE !== 0
+        : (c.omegaDE < 0 || c.omegaK < 0) &&
+          ['lambda', 'constant'].includes(law) &&
+          !provablyExpanding(model));
+    const branch: Run = {
+      result,
+      model,
+      effectiveEnd,
+      special,
+      located,
+      counters: run.counters,
+      budget: run.budget,
+    };
+    if (canContract) contract(branch);
+    else ({ executed, cpl } = expand(branch, queue, run.extinctionThreshold));
   } catch (e) {
     if (e instanceof BudgetExceededError) throw e;
     const d = result.diagnostics;
     result.status = 'limited';
     d.reason = `${d.reason ? d.reason + ' ' : ''}Numerical failure: ${(e as Error).message} No data invented beyond the last reconstructed sample.`;
   }
+  result.samples = distinctTimes(result.samples);
   const lastLog = result.samples.at(-1)?.logYears ?? 0;
   const vacuum =
     result.status === 'complete'
@@ -147,12 +181,12 @@ export function simulate(
     result.classification = BOUNDARY_CLASSIFICATION;
   if (c.sandbox && executed) result.explanation += INTERVENTION_NOTE;
   result.events = [
-    ...cosmicEvents(c, result.samples, lastLog),
+    ...cosmicEvents(c, result.samples, lastLog, located),
     ...special,
   ].sort((a, b) => a.logYears - b.logYears);
   if (
     result.status === 'terminated' &&
-    result.classification === 'Big Crunch approach'
+    result.classification.startsWith('Big Crunch approach')
   )
     result.events.push({
       id: 'crunch',
@@ -162,51 +196,43 @@ export function simulate(
       reliability: 'Model dependent',
       sources: ['friedmann1922'],
     });
+  const bound = blackHoleMassLimit(c);
+  result.derived = {
+    nariaiMass: bound.nariai,
+    blackHoleMassLimit: bound.limit,
+    ...(darkEnergyLaw(c) === 'cpl' && { cplContinuation: cpl }),
+  };
   return result;
-}
-/** The expanding-branch state y = [τ, R, ln|ρde|, J] today. */
-function initialState(c: Configuration): number[] {
-  const de = Math.log(Math.abs(c.omegaDE));
-  return [0, c.omegaR, Number.isFinite(de) ? de : 0, 0];
-}
-/** The initial segment and today's background. */
-function present(model: Model) {
-  const segment = initialSegment(model.c);
-  return { segment, b: background(0, initialState(model.c), segment, model) };
 }
 function provablyExpanding(model: Model): boolean {
   const today = present(model);
   return neverTurnsAround(model, today.b, today.segment);
 }
-function setFate(result: Result, fate: Fate) {
-  result.classification = fate.classification;
-  result.explanation = fate.explanation;
-}
-function setStop(result: Result, stop: Stop | null) {
-  if (!stop) return;
-  result.status = stop.status;
-  result.diagnostics.reason = stop.reason;
-}
 /**
- * Log-scale-factor integration, output sampling and the matched tail.
- * Returns the number of custom events executed.
+ * Log-scale-factor integration, output sampling and the matched tail, or a
+ * proven CPL continuation. Returns the number of custom events executed and
+ * the CPL theorem applied.
  */
 function expand(
-  result: Result,
-  model: Model,
-  effectiveEnd: number,
+  run: Run,
   queue: readonly PhysicsEvent[],
-  special: CosmicEvent[],
-  { counters, budget }: SimulateOptions = {},
-): number {
+  threshold?: number,
+): { executed: number; cpl: CplContinuation | null } {
+  const { result, model, effectiveEnd, special, located, counters, budget } =
+    run;
   const { c } = model,
-    d = result.diagnostics;
+    d = result.diagnostics,
+    epsilon =
+      threshold !== undefined && threshold > 0 && threshold <= 1e-12
+        ? threshold
+        : EXTINCTION;
   const expansion = integrateExpansion(
     model,
     queue,
     effectiveEnd,
     counters,
     budget,
+    epsilon,
   );
   d.acceptedSteps = expansion.acceptedSteps;
   d.rejectedSteps = expansion.rejectedSteps;
@@ -215,6 +241,20 @@ function expand(
   special.push(...expansion.events);
   if (expansion.stop?.status === 'terminated')
     setFate(result, INTERVENTION_BOUNDARY);
+  const law = expansion.continuation;
+  const cpl: CplContinuation | null = law && {
+    theorem: law.theorem,
+    logYears: Math.max(0, law.logYears),
+    logA: law.x / LN10,
+    w: law.w,
+    omegaDE: law.omegaDE,
+    threshold: law.theorem === 'extinction' ? epsilon : DOMINANCE,
+    ripLogYears: null,
+  };
+  const done = (executed: number) => ({ executed, cpl });
+  // A fate proven through a CPL theorem is labelled a literal extrapolation.
+  const fate = (f: Fate) =>
+    setFate(result, law ? literalCpl(f, law.theorem) : f);
   const final = expansion.nodes[expansion.nodes.length - 1];
   const finalLog =
     final.y[0] > 0 ? Math.log10(final.y[0]) - model.logH0 : -Infinity;
@@ -222,8 +262,14 @@ function expand(
   const b = background(final.x, final.y, final.segment, model);
   // A phantom asymptote packs most of ln a into the last log-time interval;
   // extra samples even in ln a resolve the approach to the Big Rip.
-  const fate = asymptote(model, b, final.segment);
-  const phantom = 'n' in fate && fate.n < 0;
+  const limit = asymptote(model, b, final.segment);
+  const phantom = 'n' in limit && limit.n < 0;
+  const crossings = locateExpansion(model, expansion.nodes, counters, budget);
+  Object.assign(located, crossings.events);
+  if (crossings.unresolved)
+    result.warnings.push(
+      `Event location skipped ${crossings.unresolved} accepted step(s) whose interior could not be evaluated; an equality or temperature crossing inside them is not reported.`,
+    );
   const sampling = sampleExpansion(
     model,
     expansion.nodes,
@@ -231,6 +277,10 @@ function expand(
     phantom ? Math.ceil(c.samples / 4) : 0,
     counters,
     budget,
+    // A dropped dark energy keeps a sample of the state that proved it.
+    law?.theorem === 'extinction'
+      ? [...crossings.points, law]
+      : crossings.points,
   );
   result.samples = sampling.samples;
   if (sampling.failure) {
@@ -238,14 +288,18 @@ function expand(
       status: 'limited',
       reason: `Output sample reconstruction failed: ${sampling.failure} Samples end at the last reconstructed time.`,
     });
-    return expansion.eventIndex;
+    return done(expansion.eventIndex);
   }
   if (!(finalLog >= 0) && result.status !== 'complete')
     d.reason += LESS_THAN_A_YEAR;
-  if (result.status !== 'complete') return expansion.eventIndex;
+  if (result.status !== 'complete') return done(expansion.eventIndex);
+  if (cpl?.theorem === 'big-rip') {
+    continueRip(run, final, finalLog, crossings.pending, cpl);
+    return done(expansion.eventIndex);
+  }
   if (!(effectiveEnd > finalLog + 1e-8)) {
-    setFate(result, classifyFinite(model, b, final.segment));
-    return expansion.eventIndex;
+    fate(classifyFinite(model, b, final.segment));
+    return done(expansion.eventIndex);
   }
   const tail = extendTail({
     model,
@@ -259,53 +313,25 @@ function expand(
     endLog: effectiveEnd,
     queue,
     eventIndex: expansion.eventIndex,
+    pending: crossings.pending,
   });
   if (!tail.proven) {
     setStop(result, { status: 'limited', reason: tail.reason });
-    return expansion.eventIndex;
+    return done(expansion.eventIndex);
   }
   d.tail = tail.tail;
-  setFate(
-    result,
+  fate(
     classifyTail(tail.exponent, tail.nonstandard, tail.rip, tail.finalExponent),
   );
   result.samples.push(...tail.samples);
   special.push(...tail.events);
+  tail.crossings.cool.forEach((t, i) => {
+    if (t !== null) located.cool[i].push(t);
+  });
+  located.horizon ??= tail.crossings.horizon;
   setStop(result, tail.stop);
   if (tail.stop?.status === 'terminated' && !tail.rip)
     setFate(result, INTERVENTION_BOUNDARY);
   result.warnings.push(...tail.warnings);
-  return tail.eventIndex;
-}
-/** Proper-time integration of recollapsing constant-fluid models. */
-function contract(
-  result: Result,
-  model: Model,
-  effectiveEnd: number,
-  special: CosmicEvent[],
-  { counters, budget }: SimulateOptions = {},
-) {
-  const d = result.diagnostics;
-  const contraction = integrateContraction(
-    model,
-    effectiveEnd,
-    counters,
-    budget,
-  );
-  d.acceptedSteps = contraction.acceptedSteps;
-  d.rejectedSteps = contraction.rejectedSteps;
-  d.maxConstraintResidual = contraction.maxConstraintResidual;
-  d.numericalUntilLogYears = contraction.numericalUntilLogYears;
-  result.samples = contraction.samples;
-  special.push(...contraction.events);
-  setStop(result, contraction.stop);
-  const today = present(model);
-  setFate(
-    result,
-    contraction.bounced
-      ? OSCILLATING
-      : contraction.turned
-        ? classifyRecollapse(contraction.crunch)
-        : classifyFinite(model, today.b, today.segment),
-  );
+  return done(tail.eventIndex);
 }

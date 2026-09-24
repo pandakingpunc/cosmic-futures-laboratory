@@ -1,6 +1,13 @@
 import { ln } from '../core/numeric';
 import { background, derivative, type Model } from '../model/background';
 import {
+  EXTINCTION,
+  altersDarkEnergy,
+  cplTheorem,
+  extinctionEvent,
+  type CplTheorem,
+} from '../model/cpl';
+import {
   applyNumericalIntervention,
   initialSegment,
   undefinedBranchReason,
@@ -27,7 +34,25 @@ export interface ExpansionOutcome {
   /** Index of the first queued event not yet executed. */
   eventIndex: number;
   events: CosmicEvent[];
+  /** The accepted state where a CPL proof applied, or null. */
+  continuation: Continuation | null;
 }
+/**
+ * A CPL state that satisfies a continuation theorem. For extinction the
+ * branch goes on with the dark energy removed (a second node at the same x);
+ * for big-rip the numerical branch ends here. A closed model stops at its
+ * extinction instead, since its CPL density would grow back after the
+ * turnaround.
+ */
+export interface Continuation extends Node {
+  theorem: CplTheorem;
+  /** log₁₀ elapsed years; negative within the first year. */
+  logYears: number;
+  w: number;
+  omegaDE: number;
+}
+const CLOSED_EXTINCTION =
+  'The CPL dark energy has become negligible, but this closed model must later recollapse, and on a contracting branch the CPL density, a function of a alone, grows back. The proper-time solver that integrates it supports only stable dark matter without custom events; no continuation is asserted.';
 const MAX_TRIES = 40000,
   MIN_STEP = 1e-11,
   MAX_X = 60;
@@ -35,7 +60,10 @@ const MAX_TRIES = 40000,
  * Adaptive log-scale-factor integration of y = [τ, R, ln|ρde|, J] up to
  * ln a = 60 or the requested elapsed time, executing queued interventions at
  * accepted-step boundaries. The first stage of each step reuses the previous
- * step's last stage (FSAL) until an intervention changes the segment.
+ * step's last stage (FSAL) until an intervention changes the segment. A CPL
+ * law is tested at every accepted state against its continuation theorems
+ * (model/cpl.ts) unless a custom event changes w or the vacuum; the big-rip
+ * proof also requires that no custom event remains.
  */
 export function integrateExpansion(
   model: Model,
@@ -43,8 +71,12 @@ export function integrateExpansion(
   effectiveEnd: number,
   counters?: SimulationCounters,
   budget?: WorkBudget,
+  threshold = EXTINCTION,
 ): ExpansionOutcome {
   const { c, logH0 } = model;
+  const cpl =
+    initialSegment(c).deModel === 'cpl' && !queue.some(altersDarkEnergy);
+  let continuation: Continuation | null = null;
   const deInitial = ln(Math.abs(c.omegaDE));
   let x = 0,
     y: readonly number[] = [
@@ -164,6 +196,33 @@ export function integrateExpansion(
       stop = { status: 'limited', reason: 'Time failed to advance.' };
       break;
     }
+    if (!cpl || segment.signDE === 0) continue;
+    const logYears = Math.log10(y[0]) - logH0;
+    if (!(logYears < effectiveEnd)) continue;
+    const b = background(x, y, segment, model),
+      theorem = cplTheorem(b, segment, threshold);
+    if (!theorem || (theorem === 'big-rip' && eventIndex < queue.length))
+      continue;
+    if (theorem === 'extinction' && model.signK < 0) {
+      // A closed model must later recollapse, and its CPL density, a
+      // function of a alone, grows back on the contracting branch.
+      stop = { status: 'limited', reason: CLOSED_EXTINCTION };
+      break;
+    }
+    continuation = {
+      theorem,
+      x,
+      y,
+      segment,
+      logYears,
+      w: b.w,
+      omegaDE: b.fractions[3],
+    };
+    if (theorem === 'big-rip') break;
+    events.push(extinctionEvent(logYears, Math.exp(x), b.w, b.fractions[3]));
+    segment = { ...segment, signDE: 0 };
+    k1 = undefined;
+    snapshot();
   }
   if (tries >= MAX_TRIES)
     stop = {
@@ -179,5 +238,6 @@ export function integrateExpansion(
     maxErrorNorm,
     eventIndex,
     events,
+    continuation,
   };
 }

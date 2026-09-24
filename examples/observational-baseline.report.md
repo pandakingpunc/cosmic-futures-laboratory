@@ -70,24 +70,28 @@ Dormand–Prince 5(4); log-scale-factor expansion; regular time-domain contracti
 - dD/d ln a = −3wDM D − ΓD/H − ξD − A D² a⁻³/(H/H₀)
 - dR/d ln a = a[ΓD/H + ξD + A D² a⁻³/(H/H₀)]
 - Tγ = Tγ,0/a; TH = ℏc³/(8πGkB M); tevap = 5120πG²M³/(ℏc⁴)
+- de Sitter limit: TGH = ℏH/(2πkB); S/kB = πc⁵/(ℏ gG H²)
 
 Approximation: Matched constant-fluid asymptote, ρ ∝ a^(0.0000), subdominant fraction < 10⁻⁸. Future source ratios cannot overtake the dominant term. Numeric integration ends at log10(elapsed yr)=12.02179.
 
 ## Cosmic Evolution
 
-201 samples. Status: complete.
+205 samples. Status: complete.
+
+Equality and temperature-crossing times are located on the continuous solution, independent of the output grid. Black-hole masses are limited to 2.163e+22 M☉: the Nariai mass, the largest Schwarzschild–de Sitter black hole of the cosmological constant.
 
 ## Major Events
 
-- **CMB cooler than 1e+1 M☉ Hawking temperature**: ~10^11.7 yr. Temperature crossing only: suggests the background changes from hotter to colder than this ideal black hole. It is not a complete net-accretion calculation. [Model dependent; hawking1975]
-- **CMB cooler than 1e+5 M☉ Hawking temperature**: ~10^11.8 yr. Temperature crossing only: suggests the background changes from hotter to colder than this ideal black hole. It is not a complete net-accretion calculation. [Model dependent; hawking1975]
-- **CMB cooler than 1e+9 M☉ Hawking temperature**: ~10^11.9 yr. Temperature crossing only: suggests the background changes from hotter to colder than this ideal black hole. It is not a complete net-accretion calculation. [Model dependent; hawking1975]
+- **CMB cooler than 1e+1 M☉ Hawking temperature**: ~10^11.5 yr. Located temperature crossing: the redshifted CMB changes from hotter to colder than this ideal black hole. It is not a complete net-accretion calculation. [Model dependent; hawking1975]
+- **CMB cooler than 1e+5 M☉ Hawking temperature**: ~10^11.7 yr. Located temperature crossing: the redshifted CMB changes from hotter to colder than this ideal black hole. It is not a complete net-accretion calculation. [Model dependent; hawking1975]
+- **CMB cooler than 1e+9 M☉ Hawking temperature**: ~10^11.8 yr. Located temperature crossing: the redshifted CMB changes from hotter to colder than this ideal black hole. It is not a complete net-accretion calculation. [Model dependent; hawking1975]
 - **Star formation becomes scarce**: ~10^12.0 yr (indicative range 10^11–10^13 yr). Illustrative depletion range for gas and long-lived stellar populations; not a computed galaxy-formation history. [Model dependent; adams1997]
+- **CMB photons fall below the de Sitter horizon temperature**: ~10^12.1 yr. The adiabatically redshifted photon temperature Tγ,0/a falls below the Gibbons–Hawking temperature ħH/(2πk_B), defined here only while dark energy with w = −1 dominates to 10⁻⁸. The horizon radiation is not added to the background. [Model dependent; gibbons1977]
 - **Long-lived normal stars fade**: ~10^14.0 yr (indicative range 10^13–10^14.5 yr). Low-mass stellar lifetimes motivate this broad transition into a remnant-rich era. The plotted stellar fraction is a phenomenological proxy. [Model dependent; adams1997]
 - **Bound systems may disperse**: ~10^20.0 yr (indicative range 10^19–10^22 yr). Repeated gravitational encounters can eject members of bound stellar systems. Environment-dependent order-of-magnitude range. [Model dependent; adams1997]
-- **1e+1 M☉ black hole: ideal evaporation**: ~10^70.3 yr. Isolated, uncharged, nonrotating Hawking blackbody estimate. Background accretion, greybody factors and changing particle species are omitted; the endpoint is uncertain. [Model dependent; hawking1975, page1976]
-- **1e+5 M☉ black hole: ideal evaporation**: ~10^82.3 yr. Isolated, uncharged, nonrotating Hawking blackbody estimate. Background accretion, greybody factors and changing particle species are omitted; the endpoint is uncertain. [Model dependent; hawking1975, page1976]
-- **1e+9 M☉ black hole: ideal evaporation**: ~10^94.3 yr. Isolated, uncharged, nonrotating Hawking blackbody estimate. Background accretion, greybody factors and changing particle species are omitted; the endpoint is uncertain. [Model dependent; hawking1975, page1976]
+- **1e+1 M☉ black hole: ideal evaporation**: ~10^70.3 yr. Isolated, uncharged, nonrotating Hawking blackbody estimate. Background accretion, greybody factors and changing particle species are omitted; net evaporation also requires the hole to be hotter than any horizon radiation (T_H > T_GH). The endpoint is uncertain. [Model dependent; hawking1975, page1976]
+- **1e+5 M☉ black hole: ideal evaporation**: ~10^82.3 yr. Isolated, uncharged, nonrotating Hawking blackbody estimate. Background accretion, greybody factors and changing particle species are omitted; net evaporation also requires the hole to be hotter than any horizon radiation (T_H > T_GH). The endpoint is uncertain. [Model dependent; hawking1975, page1976]
+- **1e+9 M☉ black hole: ideal evaporation**: ~10^94.3 yr. Isolated, uncharged, nonrotating Hawking blackbody estimate. Background accretion, greybody factors and changing particle species are omitted; net evaporation also requires the hole to be hotter than any horizon radiation (T_H > T_GH). The endpoint is uncertain. [Model dependent; hawking1975, page1976]
 - **Selected black-hole population depleted**: ~10^94.3 yr. The largest selected representative mass reaches its ideal evaporation endpoint. Stable matter and degenerate remnants may remain. [Model dependent; adams1997, page1976]
 
 ## Ultimate Fate
@@ -105,7 +109,7 @@ This deterministic trajectory does not assign a probability to the actual cosmic
 - Massive neutrinos are pressureless over this future-only integration. Ωr is an independently specified photons + effective massless-neutrino density. Tcmb and Neff do not silently recompute Ωr.
 - Stellar populations and remnant eras are phenomenological proxies; no N-body dynamics, stellar population synthesis, or exact entropy budget is computed.
 
-Null fields explicitly mean absent, undefined, unavailable, or out-of-range quantities; no finite substitute has been fabricated. CMB temperature is redshifted photon temperature, not the de Sitter horizon thermal response. Black-hole entropy and population proxies are not a total cosmic entropy.
+Null fields explicitly mean absent, undefined, unavailable, or out-of-range quantities; no finite substitute has been fabricated. CMB temperature is redshifted photon temperature; the de Sitter horizon temperature ħH/(2πk_B) is reported separately, only in the explicit de Sitter limit. Black-hole entropy and population proxies are not a total cosmic entropy.
 
 ## Reproducibility
 
@@ -131,6 +135,11 @@ The versioned source registry is data/observations/sources.json; full primary-so
 - F. C. Adams and G. Laughlin (1997). A Dying Universe: The Long-Term Fate and Evolution of Astrophysical Objects. https://arxiv.org/abs/astro-ph/9701131 — DOI 10.1103/RevModPhys.69.337
 - M. E. Caplan (2020). Black dwarf supernova in the far future. https://arxiv.org/abs/2008.02296 — DOI 10.1093/mnras/staa2262
 - R. R. Caldwell, M. Kamionkowski and N. N. Weinberg (2003). Phantom Energy and Cosmic Doomsday. https://arxiv.org/abs/astro-ph/0302506 — DOI 10.1103/PhysRevLett.91.071301
+- M. Chevallier and D. Polarski (2001). Accelerating Universes with Scaling Dark Matter. https://arxiv.org/abs/gr-qc/0009008 — DOI 10.1142/S0218271801000822
+- E. V. Linder (2003). Exploring the Expansion History of the Universe. https://arxiv.org/abs/astro-ph/0208512 — DOI 10.1103/PhysRevLett.90.091301
+- S. Nojiri, S. D. Odintsov and S. Tsujikawa (2005). Properties of singularities in (phantom) dark energy universe. https://arxiv.org/abs/hep-th/0501025 — DOI 10.1103/PhysRevD.71.063004
 - G. Hiller, T. Höhne, D. F. Litim and T. Steudtner (2024). Vacuum Stability in the Standard Model and Beyond. https://arxiv.org/abs/2401.08811 — DOI 10.1103/PhysRevD.110.115017
 - G. W. Gibbons and S. W. Hawking (1977). Cosmological event horizons, thermodynamics, and particle creation. https://doi.org/10.1103/PhysRevD.15.2738 — DOI 10.1103/PhysRevD.15.2738
+- R. Bousso and S. W. Hawking (1998). (Anti-)Evaporation of Schwarzschild-de Sitter Black Holes. https://arxiv.org/abs/hep-th/9709224 — DOI 10.1103/PhysRevD.57.2436
 - A. Friedmann (1922). On the curvature of space. https://doi.org/10.1007/BF01332580 — DOI 10.1007/BF01332580
+- E. Tiesinga, P. J. Mohr, D. B. Newell and B. N. Taylor (2021-06-30). CODATA recommended values of the fundamental physical constants: 2018. https://physics.nist.gov/cuu/pdf/RevModPhys.93.025010.pdf — DOI 10.1103/RevModPhys.93.025010

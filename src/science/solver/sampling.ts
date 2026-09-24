@@ -1,16 +1,39 @@
 import { astrophysics } from '../astrophysics';
-import { C_KM_S, LN10, logDeSitterEntropy } from '../core/constants';
+import {
+  C_KM_S,
+  LN10,
+  logDeSitterEntropy,
+  logHorizonTemperature,
+} from '../core/constants';
 import type { WorkBudget } from '../core/limits';
 import { ln, safe } from '../core/numeric';
-import { isVacuumW } from '../model/asymptote';
-import { background, derivative, type Model } from '../model/background';
+import { DOMINANCE, isVacuumW } from '../model/asymptote';
+import {
+  background,
+  derivative,
+  type Background,
+  type Model,
+} from '../model/background';
 import type { Segment } from '../model/segment';
 import type { Sample } from '../types';
 import { counted, rethrowBudget, type SimulationCounters } from './counters';
 import { dopriStep, type Derivative } from './dopri5';
 import type { Node } from './expanding';
-/** Largest deviation from exact dominance accepted as a single-fluid limit. */
-export const DOMINANCE = 1e-8;
+export { DOMINANCE } from '../model/asymptote';
+/**
+ * The explicit de Sitter criterion of the horizon entropy and temperature: a
+ * positive vacuum whose w is −1 to rounding, as in the matched tails, and
+ * that dominates to the tail threshold. Laws such as w₀+wₐ(1−1/a) with
+ * w₀+wₐ = −1 qualify once w(a) itself rounds to −1, so the numerical branch
+ * and its tail agree.
+ */
+export function isDeSitter(b: Background, segment: Segment): boolean {
+  return (
+    segment.signDE > 0 &&
+    isVacuumW(b.w, segment) &&
+    Math.abs(1 - b.fractions[3]) <= DOMINANCE
+  );
+}
 /** Observable quantities of a numerical state at the given elapsed time. */
 export function toSample(
   x: number,
@@ -25,14 +48,7 @@ export function toSample(
     logA = x / LN10,
     logH = Math.log10(c.H0) + b.logE / LN10;
   const radius = Math.log10(C_KM_S) - logH;
-  // Horizon entropy is defined for de Sitter space: a vacuum whose w is −1
-  // to rounding, as in the matched tails, and that dominates to the same
-  // threshold. Laws such as w₀+wₐ(1−1/a) with w₀+wₐ = −1 qualify once w(a)
-  // itself rounds to −1, so the numerical branch and its tail agree.
-  const deSitter =
-    segment.signDE > 0 &&
-    isVacuumW(b.w, segment) &&
-    Math.abs(1 - b.fractions[3]) <= DOMINANCE;
+  const deSitter = isDeSitter(b, segment);
   return {
     logYears,
     isPresent: y[0] === 0,
@@ -57,6 +73,7 @@ export function toSample(
     logHubbleRadiusMpc: radius,
     logComovingHubbleMpc: radius - logA,
     logHorizonEntropy: deSitter ? logDeSitterEntropy(radius, segment.g) : null,
+    logHorizonTemperature: deSitter ? logHorizonTemperature(logH) : null,
     ...astrophysics(y[0] === 0 ? -Infinity : logYears, c),
     regime,
     constraintResidual: 0,
@@ -67,12 +84,22 @@ export interface Sampling {
   /** Why reconstruction stopped before the last target, or null. */
   failure: string | null;
 }
+/** A located event state that receives its own output sample. */
+export interface EventPoint {
+  x: number;
+  y: readonly number[];
+  segment: Segment;
+  logYears: number;
+}
 /**
  * Samples the present and `samples` elapsed times spread evenly in log time
  * up to numericalEnd; a negative numericalEnd leaves only the present. Each
  * sample is an exact partial Dormand–Prince step from the preceding node,
  * placed by a bracketed Newton iteration on τ(x). `extra` further samples,
- * evenly spaced in ln a over the resolved branch, resolve a Big Rip approach.
+ * evenly spaced in ln a over the branch that log time still resolves,
+ * resolve a Big Rip approach. Located events inside [0, numericalEnd], or up
+ * to the last reconstructed time where reconstruction fails, add their own
+ * samples unless a sample already has their time.
  */
 export function sampleExpansion(
   model: Model,
@@ -81,6 +108,7 @@ export function sampleExpansion(
   extra = 0,
   counters?: SimulationCounters,
   budget?: WorkBudget,
+  events: readonly EventPoint[] = [],
 ): Sampling {
   const { c, logH0 } = model;
   const targets = [
@@ -121,6 +149,8 @@ export function sampleExpansion(
     k1 = t.k1;
     return t;
   };
+  const added: Sample[] = [];
+  let failure: string | null = null;
   try {
     for (const lt of targets) {
       const tau = lt === -Infinity ? 0 : 10 ** (lt + logH0);
@@ -163,8 +193,13 @@ export function sampleExpansion(
       samples.push(toSample(px, py, segment, lt === -Infinity ? 0 : lt, model));
     }
     if (extra > 0 && numericalEnd >= 0) {
-      const added: Sample[] = [],
-        xEnd = nodes[nodes.length - 1].x;
+      // Approaching a Big Rip, τ reaches its limit in floating point before
+      // ln a does; beyond the first node at the final log time, samples even
+      // in ln a could not be told apart in time.
+      const lt = (n: Node) => Math.log10(n.y[0]) - logH0;
+      let r = nodes.length - 1;
+      while (r > 0 && lt(nodes[r - 1]) === lt(nodes[nodes.length - 1])) r--;
+      const xEnd = nodes[r].x;
       j = 0;
       for (let k = 1; k < extra; k++) {
         const x = (xEnd * k) / extra;
@@ -176,16 +211,40 @@ export function sampleExpansion(
         if (lt >= 0 && lt <= numericalEnd)
           added.push(toSample(x, y, segment, lt, model));
       }
-      // The present stays first; the added samples interleave by time and,
-      // where a Big Rip approach exhausts the resolution of τ, by scale factor.
-      const present = samples.shift()!;
-      samples.push(...added);
-      samples.sort((a, b) => a.logYears - b.logYears || a.logA! - b.logA!);
-      samples.unshift(present);
     }
   } catch (e) {
     rethrowBudget(e);
-    return { samples, failure: (e as Error).message };
+    failure = (e as Error).message;
+    added.length = 0;
   }
-  return { samples, failure: null };
+  // Located events keep their own sample up to the last reconstructed time,
+  // also where reconstruction stopped early; their states are already known.
+  const last =
+    failure === null ? numericalEnd : (samples.at(-1)?.logYears ?? -1);
+  const times = new Set(samples.map((s) => s.logYears));
+  for (const p of events)
+    if (p.logYears >= 0 && p.logYears <= last && !times.has(p.logYears))
+      added.push(toSample(p.x, p.y, p.segment, p.logYears, model));
+  if (added.length) {
+    // The present stays first; the added samples interleave by time and,
+    // where a Big Rip approach exhausts the resolution of τ, by scale factor.
+    const present = samples.shift()!;
+    samples.push(...added);
+    samples.sort((a, b) => a.logYears - b.logYears || a.logA! - b.logA!);
+    samples.unshift(present);
+  }
+  return { samples, failure };
+}
+/**
+ * The samples after the present in strictly increasing time: a sample whose
+ * log time equals its predecessor's cannot be placed on the time axis, which
+ * happens where elapsed time runs out of floating-point resolution.
+ */
+export function distinctTimes(samples: readonly Sample[]): Sample[] {
+  return samples.filter(
+    (s, i) =>
+      i === 0 ||
+      samples[i - 1].isPresent ||
+      s.logYears > samples[i - 1].logYears,
+  );
 }

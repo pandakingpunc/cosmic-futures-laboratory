@@ -1,3 +1,4 @@
+import { blackHoleMassLimit } from '../astrophysics';
 import { hasControl } from '../core/text';
 import { compileExpression } from '../expression';
 import type { Configuration } from '../types';
@@ -10,11 +11,37 @@ export interface Validation {
 }
 /** Ids of built-in timeline events, and prefixes of their families. */
 const RESERVED_EVENT_ID =
-  /^(?:starformation|laststars|relaxation|proton|electron|dark|equality|rip|turn|bounce|crunch|vacuum)$|^(?:bh|cool|equality)-/;
+  /^(?:starformation|laststars|relaxation|proton|electron|dark|equality|rip|turn|bounce|crunch|vacuum|horizon-temperature|de-extinct)$|^(?:bh|cool|warm|equality)-/;
 /** Largest |Ω|: beyond it closure cancellation exceeds double precision. */
 const DENSITY_LIMIT = 1e12;
 /** Largest |w| of the supported dark-energy equations. */
 const W_LIMIT = 1e5;
+const mass = (m: number) => m.toPrecision(3);
+/**
+ * Black holes must fit the background: at most the Nariai mass of a positive
+ * cosmological constant and the mass whose horizon is today's Hubble radius.
+ * Beyond 10⁻³ of that bound the horizons interact and a warning follows.
+ */
+function horizonBounds(
+  c: Configuration,
+  fail: (field: ValidationField, message: string) => void,
+  warnings: string[],
+) {
+  const { limit, nariai } = blackHoleMassLimit(c),
+    largest = Math.max(...c.blackHoleMasses);
+  const byNariai = nariai !== null && nariai <= limit;
+  if (largest > limit)
+    fail(
+      'blackHoleMasses',
+      byNariai
+        ? `Black-hole masses cannot exceed the Nariai mass ${mass(limit)} M☉, the largest Schwarzschild–de Sitter black hole for this cosmological constant (H_Λ = H₀√Ωde); a heavier hole's horizon would not fit inside the de Sitter horizon.`
+        : `Black-hole masses cannot exceed ${mass(limit)} M☉, whose Schwarzschild radius equals today's Hubble radius c/H₀; an isolated hole in the homogeneous background needs a far smaller horizon.`,
+    );
+  else if (largest > 1e-3 * limit)
+    warnings.push(
+      `A selected black hole exceeds 10⁻³ of the ${byNariai ? 'Nariai' : 'Hubble-radius'} mass ${mass(limit)} M☉, so its horizon is not negligible against the cosmological horizon; the isolated evaporation estimate ignores this interaction.${nariai === null ? '' : ` Net evaporation also requires T_H > T_GH, i.e. M < c³/(4GH_Λ) = ${mass((nariai * 3 * Math.sqrt(3)) / 4)} M☉.`}`,
+    );
+}
 export function validate(c: Configuration): Validation {
   const errors: string[] = [],
     warnings: string[] = [],
@@ -118,6 +145,8 @@ export function validate(c: Configuration): Validation {
     );
   else if (new Set(c.blackHoleMasses).size !== c.blackHoleMasses.length)
     fail('blackHoleMasses', 'Black-hole masses must be distinct.');
+  else if (c.H0 > 0 && Number.isFinite(c.H0) && Number.isFinite(c.omegaDE))
+    horizonBounds(c, fail, warnings);
   if (!['hawking', 'disabled', 'remnant'].includes(c.evaporation))
     fail('evaporation', 'Unknown black-hole evaporation model.');
   if (typeof c.name !== 'string') fail('name', 'Universe name must be text.');
@@ -218,9 +247,9 @@ export function validate(c: Configuration): Validation {
       fail('expression', (e as Error).message);
     }
   }
-  if (c.deModel === 'cpl')
+  if (c.deModel === 'cpl' && c.wa !== 0)
     warnings.push(
-      'CPL is an observational parametrization, w(a)=w₀+wₐ(1−a), and generally diverges as a→∞. Its simulated future is an unvalidated mathematical extrapolation.',
+      'CPL is an observational fit ansatz, w(a)=w₀+wₐ(1−a), that diverges as a→∞. Its simulated future, including a proven dark-energy extinction or Big Rip, is a literal mathematical extrapolation of the fit, not a prediction.',
     );
   if (c.deModel === 'bounded')
     warnings.push(

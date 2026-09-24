@@ -1,5 +1,26 @@
 # Validation record
 
+## Unreleased — proof-based CPL continuation
+
+Checks added with the CPL extinction and Big Rip continuations and the proper-time integration of closed CPL models (`tests/cpl.test.ts`, `tests/quadrature.test.ts`; SciPy rows below):
+
+- Integrated ln ρde against the closed form |Ωde| a^(−3(1+w₀+wₐ)) exp(3wₐ(a−1)) on the DESI numerical branch: 4.4×10⁻¹⁰ dex at rtol = 10⁻⁸ (test 10⁻⁹) and 5×10⁻¹³ at rtol = 10⁻¹² (test 10⁻¹²). τ(a) through the dark-energy drop (a = 38.75) and the matter tail against quadrature of dx/E with the full CPL density: 4.8×10⁻¹⁰ in log₁₀ a at fixed τ (test 10⁻⁹), in an independent Simpson rule and in SciPy quad.
+- Extinction threshold 10⁻²⁰ against 10⁻³⁰: the same classification, explanation and status, and samples at common times equal to 10⁻¹² (identical bits at rtol = 10⁻⁸). After the drop, the omitted q term ½(1+3w)Ωde stays below ε(1.02+0.52√K)/2 at every numerical sample.
+- Big Rip for (w₀, wₐ) = (−0.9, 0.3) and (−1.1, 0.2) on the DESI base: 25.9158799 and 23.3486282 Gyr after today. They agree with Simpson and SciPy quad of ∫₀^∞dx/E to 2.4×10⁻¹¹ and 1.0×10⁻¹⁰ relative at rtol = 10⁻⁸ (test 10⁻⁹) and to 1.2×10⁻¹⁴ and 9.2×10⁻¹⁴ at rtol = 10⁻¹² (test 10⁻¹²). Every sample time agrees with the same integral at its scale factor, and samples stop strictly before the rip.
+- CPL with wₐ = 0 gives results identical to constant w, for flat, closed and negative-vacuum models.
+- Closed DESI-like CPL (Ωk = −0.001 and −0.01): the turnaround agrees with a SciPy DOP853 proper-time solution at rtol = 3×10⁻¹⁴ to 2.3×10⁻⁹ dex at rtol = 10⁻⁸ (a_max = 313; the proper-time constraint drift, 1.0×10⁻⁸) and to 4.8×10⁻¹⁰ dex at rtol = 10⁻¹²; the test asserts 10⁻⁸ dex against a substitution Simpson rule.
+- Runs that end before a CPL proof applies, and all non-CPL runs, are bit-identical to the previous engine (checked on the DESI preset to 10^12.5 and 10^12.6 yr with 1000 samples, a Big Rip law to 10^10.41 yr, and the Λ, constant, bounded, custom and closed-dust defaults). Only the CPL warning text changed.
+- Property tests add CPL invariants. `derived.cplContinuation` is present exactly for CPL with wₐ ≠ 0, and its record is consistent with its theorem. No sample lies beyond a rip, and a CPL continuation stops strictly before it. Dark energy is absent after `de-extinct`, and there is no extinction event in a closed model. 21,000 extra fuzz configurations (seeds 21–27) passed.
+- Independent review with SciPy quad of dx/E on 13 further rip cases: (w₀, wₐ) from (−1.3, 10⁻³) to (−0.5, 2) and (−1, 10⁻⁶), (−1.2, 5×10⁻³²⁴), (−1, 10⁻³⁰⁰); open, closed and radiation-heavy compositions; warm (w = 1/3) and ξ = 2 interacting dark matter, the latter with exact radiation feeding. Rip times agree to at most 1.7×10⁻¹⁰ relative and sample times to 1.2×10⁻⁹ dex at rtol = 10⁻⁸. Extinction states (w, Ωde, time) of eight flat or open cases, including negative dark energy and wₐ = −10⁴, agree with the closed form to the rtol level. Turnaround and crunch times of six closed recollapses (turnaround at a = 4 to 330, one with negative dark energy) agree to 2.3×10⁻⁹ dex, but differ by 3.3×10⁻⁶ dex for Ωk = −10⁻⁴, wₐ = −0.01 (turnaround at a ≈ 3100, residual 2.4×10⁻⁶; see methodology). A fresh fuzz seed (4242, 1500 configurations) passed.
+
+## Unreleased — located events and de Sitter thermodynamics
+
+Checks added with exact event location, the Gibbons–Hawking temperature and the black-hole mass bounds (tests in `tests/events.test.ts`, `tests/thermodynamics.test.ts`; SciPy rows below):
+
+- Located times against closed forms at the default rtol=10⁻⁸: flat matter+Λ equality 1.4×10⁻¹⁰ dex, bit-identical for 40/240/1000 samples and endpoints 10¹¹/10¹⁰⁰/10¹⁰⁰⁰ yr; flat ΛCDM CMB/Hawking crossings ≤ 8.5×10⁻¹² dex in the numerical branch and the de Sitter tail; matter-only ≤ 4.6×10⁻¹¹ dex including the matter tail; pure de Sitter exact to rounding; closed-dust cycloid cooling and reheating crossings ≤ 4.7×10⁻¹¹ dex. Tests assert 10⁻⁹ dex. Repeated time-domain crossings (a bounce with `cool-M-2`; closed quintessence with `equality-2`) agree with an independent SciPy a″ solution to 1.6×10⁻⁹ dex at rtol = 10⁻⁸ and 2×10⁻¹¹ dex at rtol = 10⁻¹⁰; that test asserts 5×10⁻⁹ dex.
+- T_GH and S_dS agree with scipy.constants (CODATA) to rounding; S·T_GH²·g is constant to 10⁻¹³ across a G change and the tail boundary; the Planck-preset Nariai mass is 2.163112×10²² M☉.
+- Property tests check strictly increasing sample times, T_GH under the entropy criterion, consistent mass bounds and a sample at every located event; 10,000 extra fuzz configurations (seeds 99 and 5) passed. In a differential check of 944 valid random configurations on 1000-sample grids, all 674 strict sign changes between grid samples contain a located crossing; the only located crossings without a grid bracket sit at the last representable time of a Big Rip or of a limited run.
+
 ## Version 0.2.0 — validated 2026-09-13
 
 Archived on Zenodo on 2026-09-14 from GitHub release `v0.2.0` with version DOI [10.5281/zenodo.22750182](https://doi.org/10.5281/zenodo.22750182); the public record lists version 0.2.0, the author, affiliation and MIT license under concept DOI 10.5281/zenodo.22343411.
@@ -43,7 +64,9 @@ Regression cases additionally verify continuous tail density matching, simultane
 | Matter benchmark | 2.709×10⁻¹¹ |
 | Radiation benchmark | 7.657×10⁻¹¹ |
 
-The decaying-matter radiation comparison has maximum absolute log-density difference 1.048×10⁻¹⁰. Full-precision results and sample counts are in [scipy-validation.json](scipy-validation.json). Python/SciPy dependencies are pinned in `requirements-validation.txt`.
+The decaying-matter radiation comparison has maximum absolute log-density difference 1.048×10⁻¹⁰.
+
+Located event times are compared with SciPy root finding and quadrature (maximum |Δ log₁₀ t|): flat matter+Λ equality from `brentq` on a dense DOP853 solution, 1.43×10⁻¹⁰; closed-dust crossings from `brentq` on an independent a″ = −1/a² solution and the cycloid, 4.74×10⁻¹¹; observational-baseline CMB/Hawking and horizon-temperature crossings from `quad` of dx/E and a `brentq` root of ln Tγ,0 − x = ln T_GH(H(x)), 1.69×10⁻¹²; DESI CPL equality, with w(a) varying along the numerical branch, from `brentq` for ρm = ρde and `quad` of dx/E, 6.12×10⁻¹⁰ (the rtol = 10⁻⁸ integration error, not the locator); CPL Big Rip time (golden `cpl-big-rip`) from `quad` of dx/E to infinity, 1.01×10⁻¹¹, and its sample times at their scale factors, 4.59×10⁻¹¹; closed CPL turnaround and the three equalities (golden `cpl-closed-recollapse`, ρde returning during the collapse) from a DOP853 proper-time solution with the closed-form ρde(a), 2.59×10⁻¹⁰; matter-only and pure de Sitter closed forms, 4.39×10⁻¹¹ and 0. The DESI example also has ln ρde checked against the closed form to 4.375×10⁻¹⁰ dex, and τ(a) through the dark-energy drop and the matter tail checked to 4.799×10⁻¹⁰ in log₁₀ a at fixed τ. Full-precision results and sample counts are in [scipy-validation.json](scipy-validation.json). Python/SciPy dependencies are pinned in `requirements-validation.txt`.
 
 ## Application and production checks
 

@@ -1,10 +1,17 @@
-import { astrophysics } from '../astrophysics';
-import { C_KM_S, H0_YEAR, LN10, logDeSitterEntropy } from '../core/constants';
+import { astrophysics, horizonGap } from '../astrophysics';
+import {
+  C_KM_S,
+  H0_YEAR,
+  LN10,
+  logDeSitterEntropy,
+  logHorizonTemperature,
+} from '../core/constants';
 import { ln, safe } from '../core/numeric';
 import { asymptote } from '../model/asymptote';
 import { background, type Model } from '../model/background';
 import type { Stop } from '../model/segment';
 import type { CosmicEvent, PhysicsEvent, Sample } from '../types';
+import { pieceCrossings, type Pending, type TailCrossings } from './crossings';
 import type { Node } from './expanding';
 import { DOMINANCE } from './sampling';
 import {
@@ -22,6 +29,8 @@ export interface TailInput {
   endLog: number;
   queue: readonly PhysicsEvent[];
   eventIndex: number;
+  /** Crossings the numerical branch left to the tail. */
+  pending?: Pending;
 }
 export type TailOutcome =
   | { proven: false; reason: string }
@@ -42,6 +51,7 @@ export type TailOutcome =
       /** Index of the first queued event not yet executed. */
       eventIndex: number;
       warnings: string[];
+      crossings: TailCrossings;
     };
 const EXTREME_RANGE =
   'Some log10(a), density logs and temperature logs themselves exceed IEEE-754 range. They are explicitly null; the nested-log expansion coordinate remains valid. Null also denotes absent components or quantities not justified in this regime.';
@@ -123,12 +133,44 @@ export function extendTail(input: TailInput): TailOutcome {
         .map((e) => e.logTime),
     ]),
   ].sort((a, b) => a - b);
-  for (const lt of allTargets) {
+  const grid = new Set(allTargets),
+    pending = input.pending,
+    crossings: TailCrossings = {
+      cool: c.blackHoleMasses.map(() => null),
+      horizon: null,
+    };
+  let anchorX = final.x,
+    armed = pending?.horizonArmed ?? false;
+  /** Crossings under the current law that receive a sample of their own. */
+  const locate = (): number[] => {
+    const next = queue[eventIndex];
+    const found = pieceCrossings(
+      c,
+      { x: anchorX, logYears: anchorLog, logH: state.anchorH, n: state.n },
+      next && next.logTime <= endLog ? next.logTime : endLog,
+      pending,
+      crossings,
+      armed,
+    );
+    // A sample just before an intervention would take over its re-anchoring.
+    return found
+      .filter(
+        (lt) => lt >= 0 && !(next && lt > next.logTime - 1e-9) && !grid.has(lt),
+      )
+      .sort((a, b) => a - b);
+  };
+  let located = locate(),
+    gi = 0,
+    li = 0;
+  while (gi < allTargets.length || li < located.length) {
+    const lt = Math.min(allTargets[gi] ?? Infinity, located[li] ?? Infinity);
+    if (allTargets[gi] === lt) gi++;
+    else li++;
     const { anchor, anchorA, anchorH } = state;
     const dtLog = lt + Math.log10(-Math.expm1((anchorLog - lt) * LN10));
     const heLog = anchorH + Math.log10(H0_YEAR),
       p = state.n / 2;
-    let newA: number, logLogA: number, newH: number, deltaA: number;
+    let newA: number, logLogA: number, newH: number, deltaA: number, dx: number;
     if (p < 0) {
       const tailLog = -(Math.log10(-p) + heLog);
       const ripLog =
@@ -155,7 +197,7 @@ export function extendTail(input: TailInput): TailOutcome {
         break;
       }
       const u = 10 ** (Math.log10(-p) + heLog + dtLog);
-      const dx = Math.log1p(-u) / p;
+      dx = Math.log1p(-u) / p;
       deltaA = dx / LN10;
       newA = anchorA + deltaA;
       logLogA = Number.isFinite(newA)
@@ -171,11 +213,12 @@ export function extendTail(input: TailInput): TailOutcome {
             10 ** (dxLog - Math.max(anchorLogLogA, dxLog)),
         );
       deltaA = dxLog < 307 ? 10 ** dxLog : Infinity;
+      dx = deltaA * LN10;
       newA = logLogA < 307 ? 10 ** logLogA : Infinity;
       newH = anchorH;
     } else {
       const productLog = Math.log10(p) + heLog + dtLog;
-      const dx =
+      dx =
         (productLog > 30 ? productLog * LN10 : Math.log1p(10 ** productLog)) /
         p;
       deltaA = dx / LN10;
@@ -210,6 +253,7 @@ export function extendTail(input: TailInput): TailOutcome {
       logHubbleRadiusMpc: safe(radius),
       logComovingHubbleMpc: safe(radius - newA),
       logHorizonEntropy: n === 0 ? logDeSitterEntropy(radius, state.g) : null,
+      logHorizonTemperature: n === 0 ? logHorizonTemperature(newH) : null,
       omegaM: fraction(0, anchor.omegaM),
       omegaR: fraction(1, anchor.omegaR),
       omegaDE: fraction(2, anchor.omegaDE),
@@ -239,10 +283,14 @@ export function extendTail(input: TailInput): TailOutcome {
     if (c.dmModel === 'annihilation') s.logRhoR = null;
     samples.push(s);
     lastTail = s;
-    if (eventIndex < queue.length && queue[eventIndex].logTime <= lt + 1e-9) {
+    const reanchor =
+      eventIndex < queue.length && queue[eventIndex].logTime <= lt + 1e-9;
+    if (reanchor) {
       // Re-anchor at this sample before the interventions apply.
       anchorLog = lt;
       anchorLogLogA = logLogA;
+      anchorX += dx;
+      armed = crossings.horizon === null && horizonGap(c, newA, newH) >= 0;
       state = { ...state, anchorA: newA, anchorH: newH, anchor: { ...s } };
     }
     while (
@@ -267,6 +315,14 @@ export function extendTail(input: TailInput): TailOutcome {
       nonstandard = true;
     }
     if (stop) break;
+    if (reanchor) {
+      // A jump of H can move the horizon temperature above the CMB at once.
+      const gap = horizonGap(c, state.anchorA, state.anchorH);
+      if (armed && gap < 0 && state.n === 0) crossings.horizon = lt;
+      armed = crossings.horizon === null && gap >= 0;
+      located = locate().filter((t) => t > lt);
+      li = 0;
+    }
   }
   return {
     proven: true,
@@ -280,5 +336,6 @@ export function extendTail(input: TailInput): TailOutcome {
     rip,
     eventIndex,
     warnings: lastTail.logA === null ? [EXTREME_RANGE] : [],
+    crossings,
   };
 }

@@ -1,3 +1,4 @@
+import type { CplTheorem } from './model/cpl';
 import { asymptote, neverTurnsAround, type Asymptote } from './model/asymptote';
 import type { Background, Model } from './model/background';
 import type { Segment } from './model/segment';
@@ -120,3 +121,33 @@ export const OSCILLATING: Fate = {
   explanation:
     'A negative-density component that grows fastest at small scale factor halts the contraction at a finite minimum, and the Universe re-expands. For stable constant-w fluids the acceleration equation depends on a alone, so the classical solution is time-reversible and oscillates between its turnaround and bounce. It requires an exotic negative-energy fluid, and quantum or dissipative effects are not included.',
 };
+/** Label of fates that follow from a CPL law continued by proof. */
+export const LITERAL_CPL = 'literal CPL extrapolation';
+const CPL_PROOF: Record<CplTheorem | 'recollapse', string> = {
+  extinction:
+    'With wₐ < 0, w(a) grows without bound. Once w ≥ 1/3 no supported component dilutes faster than the dark energy, so its density fraction can never grow again; it was dropped from the background once below the extinction threshold (event “Dark energy becomes dynamically negligible”). ',
+  'big-rip':
+    'With wₐ > 0, w(a) falls without bound. Once w ≤ −1 with the dark energy dominant to 10⁻⁸, its density grows super-exponentially and the remaining proper time ∫dx/E converges. ',
+  recollapse:
+    'With wₐ < 0, w(a) grows without bound as a grows, so the dark energy dies out and the closed curvature must halt the expansion. The closed-form density depends on a alone, so it returns on the contracting branch, where it is integrated in proper time. ',
+};
+/**
+ * A fate proven for a CPL law extrapolated literally: the classification is
+ * labelled and the explanation states that it is not a prediction.
+ */
+export function literalCpl(
+  fate: Fate,
+  theorem: CplTheorem | 'recollapse',
+): Fate {
+  return {
+    classification: `${fate.classification} · ${LITERAL_CPL}`,
+    explanation: `Literal extrapolation of the observational CPL fit ansatz w(a)=w₀+wₐ(1−a) to arbitrarily large a: a mathematical consequence of the ansatz, not a prediction. ${CPL_PROOF[theorem]}${fate.explanation}`,
+  };
+}
+/** The finite-time singularity of a CPL law at 10^ripLog elapsed years. */
+export function cplRip(ripLog: number, reached: boolean): Fate {
+  return {
+    classification: 'Big Rip',
+    explanation: `The scale factor, the Hubble rate and the dark-energy density diverge at 10^${ripLog.toFixed(4)} elapsed years${reached ? '' : ', after the selected endpoint'}, a finite-time singularity of the extrapolated law. Its time is the quadrature of dx/E over the closed-form density; samples stop before it.`,
+  };
+}

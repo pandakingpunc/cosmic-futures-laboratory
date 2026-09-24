@@ -3,23 +3,23 @@
     "id": "observational-baseline",
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
-    "samples": 201,
+    "samples": 205,
     "configurationHash": "eac426f0",
     "reason": ""
   },
   {
     "id": "desi-2026-cpl",
-    "status": "limited",
-    "classification": "Undetermined · numerical/model boundary",
-    "samples": 101,
+    "status": "complete",
+    "classification": "Long-lived decelerating expansion · literal CPL extrapolation",
+    "samples": 206,
     "configurationHash": "002255dc",
-    "reason": "Dark-energy equation exceeded its supported finite range. Explicit solver reached minimum step; possible stiffness or a singular branch. No data invented beyond this point."
+    "reason": ""
   },
   {
     "id": "mild-phantom",
     "status": "terminated",
     "classification": "Big Rip",
-    "samples": 125,
+    "samples": 128,
     "configurationHash": "1739ea4a",
     "reason": "Finite future-time integral; singularity boundary reached."
   },
@@ -27,7 +27,7 @@
     "id": "strong-phantom",
     "status": "terminated",
     "classification": "Big Rip",
-    "samples": 125,
+    "samples": 128,
     "configurationHash": "1568cd45",
     "reason": "Finite future-time integral; singularity boundary reached."
   },
@@ -35,7 +35,7 @@
     "id": "decaying-dark-matter",
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
-    "samples": 201,
+    "samples": 205,
     "configurationHash": "84cef2e1",
     "reason": ""
   },
@@ -43,7 +43,7 @@
     "id": "annihilating-dark-matter",
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
-    "samples": 201,
+    "samples": 205,
     "configurationHash": "0b4ee1b0",
     "reason": ""
   },
@@ -51,7 +51,7 @@
     "id": "interacting-dark-matter",
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
-    "samples": 201,
+    "samples": 205,
     "configurationHash": "3bf6a23a",
     "reason": ""
   },
@@ -59,7 +59,7 @@
     "id": "bounded-quintessence",
     "status": "complete",
     "classification": "Eternal accelerated power-law expansion",
-    "samples": 201,
+    "samples": 204,
     "configurationHash": "fc1382ac",
     "reason": ""
   },
@@ -83,7 +83,7 @@
     "id": "stable-proton-extreme-future",
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
-    "samples": 201,
+    "samples": 205,
     "configurationHash": "409e819b",
     "reason": ""
   },
@@ -91,7 +91,7 @@
     "id": "hypothetical-proton-decay",
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
-    "samples": 201,
+    "samples": 205,
     "configurationHash": "25a897a1",
     "reason": ""
   },
@@ -99,7 +99,7 @@
     "id": "black-hole-remnants",
     "status": "complete",
     "classification": "Asymptotic de Sitter expansion",
-    "samples": 201,
+    "samples": 205,
     "configurationHash": "121125a3",
     "reason": ""
   },
@@ -107,7 +107,7 @@
     "id": "nonstandard-w-event",
     "status": "complete",
     "classification": "Custom / nonstandard evolution",
-    "samples": 202,
+    "samples": 206,
     "configurationHash": "d02998c2",
     "reason": ""
   },

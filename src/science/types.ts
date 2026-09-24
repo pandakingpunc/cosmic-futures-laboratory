@@ -82,6 +82,12 @@ export interface Sample {
   logHubbleRadiusMpc: number | null;
   logComovingHubbleMpc: number | null;
   logHorizonEntropy: number | null;
+  /**
+   * log₁₀ of the Gibbons–Hawking temperature ħH/(2πk_B) in kelvin, under the
+   * same de Sitter criterion as logHorizonEntropy; absent in files written
+   * before it was introduced.
+   */
+  logHorizonTemperature?: number | null;
   stellarFraction: number;
   baryonSurvival: number;
   electronSurvival: number;
@@ -97,6 +103,45 @@ export interface CosmicEvent {
   detail: string;
   reliability: Reliability;
   sources: string[];
+}
+/** Scalars derived from a valid configuration and its solution. */
+export interface DerivedQuantities {
+  /**
+   * Nariai mass in M☉, the largest Schwarzschild–de Sitter black hole, for a
+   * positive cosmological constant with H_Λ = H₀√Ωde; null otherwise.
+   */
+  nariaiMass: number | null;
+  /**
+   * Largest black-hole mass validation accepts, in M☉: the smaller of the
+   * Nariai mass and the mass c³/(2GH₀) whose horizon is today's Hubble radius.
+   */
+  blackHoleMassLimit: number;
+  /**
+   * For a CPL law (wₐ ≠ 0): the proof-based continuation applied, or null
+   * when neither theorem's conditions were met within the run or a custom
+   * event changes w or the vacuum; always null for closed models with
+   * wₐ < 0, whose recollapse is integrated in proper time. Absent for other
+   * laws and older files.
+   */
+  cplContinuation?: CplContinuation | null;
+}
+/** The accepted state at which a CPL continuation theorem applied. */
+export interface CplContinuation {
+  /** 'extinction' for wₐ < 0, 'big-rip' for wₐ > 0. */
+  theorem: 'extinction' | 'big-rip';
+  /** log₁₀ elapsed years there; 0 within the first year. */
+  logYears: number;
+  logA: number;
+  /** w(a) and the signed dark-energy density fraction there. */
+  w: number;
+  omegaDE: number;
+  /**
+   * The threshold verified: ε with |Ωde|(1+3w) < ε for extinction, or the
+   * largest non-dark-energy fraction sum (10⁻⁸) for big-rip.
+   */
+  threshold: number;
+  /** log₁₀ elapsed years of the finite-time singularity; null for extinction. */
+  ripLogYears: number | null;
 }
 export interface Result {
   config: Configuration;
@@ -126,6 +171,8 @@ export interface Result {
     seed: number;
     configurationHash: string;
   };
+  /** Absent in invalid results and in files written before it was introduced. */
+  derived?: DerivedQuantities;
 }
 export interface Source {
   id: string;
@@ -150,4 +197,5 @@ export const EQUATIONS = [
   'dD/d ln a = −3wDM D − ΓD/H − ξD − A D² a⁻³/(H/H₀)',
   'dR/d ln a = a[ΓD/H + ξD + A D² a⁻³/(H/H₀)]',
   'Tγ = Tγ,0/a; TH = ℏc³/(8πGkB M); tevap = 5120πG²M³/(ℏc⁴)',
+  'de Sitter limit: TGH = ℏH/(2πkB); S/kB = πc⁵/(ℏ gG H²)',
 ];

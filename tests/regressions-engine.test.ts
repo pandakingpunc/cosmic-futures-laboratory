@@ -11,6 +11,7 @@ import { createModel } from '../src/science/model/background';
 import { initialSegment } from '../src/science/model/segment';
 import { sampleExpansion } from '../src/science/solver/sampling';
 import { sweep } from '../src/science/analysis';
+import { runAnalysis } from '../src/science/dispatch';
 import type { Configuration, Result } from '../src/science/types';
 import { near, pure } from './helpers';
 // Regression tests named after the verified audit findings they close.
@@ -158,7 +159,8 @@ test('horizon-entropy-g-discontinuity and entropy-g-path-mismatch: one helper se
     );
 });
 test('planck-length-constant-truncated and planck-length-truncated: CODATA 2018 constants', () => {
-  const hbar = 1.054571817e-34,
+  // ħ = h/2π is exact in the 2019 SI; 1.054571817e-34 is its 10-digit print.
+  const hbar = 6.62607015e-34 / (2 * Math.PI),
     G = 6.6743e-11,
     c = 299792458,
     Mpc = 3.085677581491367e22;
@@ -309,4 +311,45 @@ test('simulate accepts null options and non-object input without throwing', () =
   );
   assert.equal(simulate(null as unknown as Configuration).status, 'invalid');
   assert.equal(simulate([] as unknown as Configuration).status, 'invalid');
+});
+test('simulate-deep-input: unclonable configurations are invalid, never a thrown error', () => {
+  let deep: unknown = 0;
+  for (let i = 0; i < 20000; i++) deep = [deep];
+  const cyclic: Record<string, unknown> = { id: 'x' };
+  cyclic.self = cyclic;
+  // 40 levels of shared references write out as 2⁴⁰ JSON values; the check
+  // must stop at its value budget instead of walking every path.
+  let shared: unknown = 0;
+  for (let i = 0; i < 40; i++) shared = { a: shared, b: shared };
+  for (const patch of [
+    { events: deep },
+    { name: deep },
+    { events: [cyclic] },
+    { events: [shared] },
+    { H0: BigInt(70) },
+    { name: () => 'x' },
+  ]) {
+    const r = simulate({ ...base, ...patch } as unknown as Configuration);
+    assert.equal(r.status, 'invalid');
+    assert.match(r.errors[0], /cannot be read as JSON data/);
+    assert.equal(r.samples.length, 0);
+    // The result stays serializable and keeps the readable fields.
+    assert.equal(JSON.parse(JSON.stringify(r)).config.omegaB, base.omegaB);
+  }
+  // The worker and API entry point completes partial input the same way.
+  const viaWorker = runAnalysis('deterministic', {
+    events: deep,
+  } as unknown as Configuration) as Result;
+  assert.equal(viaWorker.status, 'invalid');
+  // Shallow nesting in an unknown event key is still accepted, unchanged.
+  const extra = {
+    ...base,
+    sandbox: true,
+    events: [
+      { id: 'w', logTime: 5, action: 'change-w', value: -1, note: [[1]] },
+    ],
+  } as unknown as Configuration;
+  const kept = simulate(extra);
+  assert.equal(kept.status, 'complete');
+  assert.deepEqual(kept.config.events, extra.events);
 });

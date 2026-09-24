@@ -10,8 +10,8 @@ import ts from 'typescript';
 //   1 model/, expression.ts,           validation, segments, background equations,
 //     astrophysics.ts, defaults.ts     tracers and observational presets
 //   2 solver/, integrator.ts           integrators, sampling, tails, contraction
-//   3 classify.ts, vacuum.ts,          outcome classification and the orchestrator
-//     engine.ts
+//   3 classify.ts, vacuum.ts,          outcome classification, branch continuations
+//     continuation.ts, engine.ts       and the orchestrator
 //   4 analysis.ts, report.ts,          ensembles, sweeps and serialization
 //     compare.ts
 //   5 dispatch.ts                      shared entry for the API and the worker
@@ -24,7 +24,7 @@ const LAYERS = [
   [1, /^(expression|astrophysics|defaults)\.ts$/],
   [2, /^solver\//],
   [2, /^integrator\.ts$/],
-  [3, /^(classify|vacuum|engine)\.ts$/],
+  [3, /^(classify|vacuum|continuation|engine)\.ts$/],
   [4, /^(analysis|report|compare)\.ts$/],
   [5, /^dispatch\.ts$/],
   [6, /^(worker|index)\.ts$/],

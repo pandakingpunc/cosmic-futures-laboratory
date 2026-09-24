@@ -1,4 +1,8 @@
-import { BOUNDARY_CLASSIFICATION } from '../../src/science/classify';
+import {
+  BOUNDARY_CLASSIFICATION,
+  LITERAL_CPL,
+} from '../../src/science/classify';
+import { logHorizonTemperature } from '../../src/science/core/constants';
 import { compileExpression } from '../../src/science/expression';
 import { simulate, validate } from '../../src/science/engine';
 import { csv, report } from '../../src/science/report';
@@ -69,13 +73,44 @@ export function engineViolations(c: Configuration): string[] {
       const t = r.samples[i].logYears;
       if (!(t >= 0 && t <= end + 1e-8))
         fail(`sample ${i} at ${t} outside [0, ${end}]`);
-      if (i && t < r.samples[i - 1].logYears)
-        fail(`sample ${i} goes back in time`);
+      // After the present sentinel, time strictly increases.
+      if (i > 1 && !(t > r.samples[i - 1].logYears))
+        fail(`sample ${i} does not advance in time`);
+      if (i === 1 && t < 0) fail('the first sample precedes the present');
+      const s = r.samples[i];
+      if ((s.logHorizonTemperature === null) !== (s.logHorizonEntropy === null))
+        fail(`sample ${i} reports T_GH and S_dS under different criteria`);
+      if (
+        s.logHorizonTemperature != null &&
+        !(
+          s.logH !== null &&
+          Math.abs(s.logHorizonTemperature - logHorizonTemperature(s.logH)) <=
+            1e-12
+        )
+      )
+        fail(`sample ${i} has T_GH inconsistent with its H`);
     }
+    const d = r.derived;
+    if (!d) fail('a valid run has no derived quantities');
+    else if (
+      !(d.blackHoleMassLimit > 0) ||
+      !(d.nariaiMass === null || d.nariaiMass >= d.blackHoleMassLimit) ||
+      r.config.blackHoleMasses.some((m) => m > d.blackHoleMassLimit)
+    )
+      fail('derived black-hole bounds are inconsistent');
+    // Located crossings carry an output sample at their time.
+    for (const e of r.events)
+      if (
+        /^(equality|cool-|warm-|horizon-temperature)/.test(e.id) &&
+        e.logYears > 0 &&
+        !r.samples.some((s) => Math.abs(s.logYears - e.logYears) <= 1e-9)
+      )
+        fail(`event ${e.id} at ${e.logYears} has no sample`);
     if (r.diagnostics.numericalUntilLogYears < 0)
       fail('negative numerical reach');
     if (r.status === 'limited' && r.classification !== BOUNDARY_CLASSIFICATION)
       fail('a limited run keeps a fate');
+    cplViolations(r).forEach(fail);
   }
   const ids = r.events.map((e) => e.id);
   if (new Set(ids).size !== ids.length)
@@ -83,6 +118,11 @@ export function engineViolations(c: Configuration): string[] {
   for (const e of r.events)
     if (!(e.logYears >= 0 && e.logYears <= end + 1e-8))
       fail(`event ${e.id} at ${e.logYears} outside [0, ${end}]`);
+  for (let i = 1; i < r.events.length; i++)
+    if (r.events[i].logYears < r.events[i - 1].logYears)
+      fail(`event ${r.events[i].id} is out of time order`);
+  if (r.status === 'invalid' && r.derived !== undefined)
+    fail('an invalid run has derived quantities');
   try {
     const text = csv(r),
       lines = text ? text.split('\n').length : 0;
@@ -102,6 +142,57 @@ export function engineViolations(c: Configuration): string[] {
     fail('the configuration does not survive a JSON round trip');
   if (!sameJson(simulate(c, { timestamp: 'fuzz' }), r))
     fail('not deterministic');
+  return problems;
+}
+/** Invariants of the CPL continuations and of every Big Rip boundary. */
+function cplViolations(r: Result): string[] {
+  const problems: string[] = [],
+    { config: c } = r,
+    proof = r.derived?.cplContinuation;
+  if ((proof !== undefined) !== (c.deModel === 'cpl' && c.wa !== 0))
+    problems.push('cplContinuation is not present exactly for CPL with wₐ ≠ 0');
+  if (proof) {
+    if (
+      proof.theorem === 'extinction'
+        ? proof.ripLogYears !== null || !(proof.w >= 1 / 3)
+        : !(proof.w <= -1) ||
+          (r.status !== 'limited' && proof.ripLogYears === null)
+    )
+      problems.push(`inconsistent ${proof.theorem} record`);
+    if (!(proof.logYears >= 0 && proof.logYears <= c.endLogYears))
+      problems.push('continuation outside the run');
+  }
+  if (r.classification.includes(LITERAL_CPL) && c.deModel !== 'cpl')
+    problems.push('literal CPL label on another law');
+  const rip = r.events.find((e) => e.id === 'rip');
+  if (rip) {
+    if (r.status !== 'terminated') problems.push('a rip without termination');
+    // Constant-phantom samples may reach the rip's log time, to rounding,
+    // where elapsed time runs out of resolution; the CPL continuation
+    // stops strictly before it.
+    const strict = proof?.theorem === 'big-rip';
+    if (
+      r.samples.some((s) =>
+        strict
+          ? !s.isPresent && !(s.logYears < rip.logYears)
+          : s.logYears > rip.logYears + 1e-12,
+      )
+    )
+      problems.push('a sample beyond the rip');
+  }
+  const drop = r.events.find((e) => e.id === 'de-extinct');
+  if (drop) {
+    if (proof?.theorem !== 'extinction' || c.omegaK < 0)
+      problems.push('extinction without its proof, or in a closed model');
+    if (
+      r.samples.some(
+        (s) =>
+          s.logYears > drop.logYears &&
+          ((s.omegaDE !== 0 && s.omegaDE !== null) || s.w !== null),
+      )
+    )
+      problems.push('dark energy present after its extinction');
+  }
   return problems;
 }
 const TOKENS = [

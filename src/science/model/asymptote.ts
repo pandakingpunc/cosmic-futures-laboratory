@@ -18,6 +18,8 @@ export interface Asymptote {
    */
   tailReason: string | null;
 }
+/** Largest deviation from exact dominance accepted as a single-fluid limit. */
+export const DOMINANCE = 1e-8;
 export const UNSUPPORTED =
   'No proven constant-fluid asymptote for this model. Numerical expansion stops at ln(a)=60; arbitrary CPL/custom extrapolation is not continued.';
 const NEGATIVE_DE =
@@ -55,7 +57,7 @@ export function isVacuumW(w: number, s: Segment): boolean {
   return snap(w, scale) === -1;
 }
 /** Density exponents n of ρ ∝ a⁻ⁿ; dark energy only for a proven limit. */
-function exponents(model: Model, s: Segment): number[] {
+export function exponents(model: Model, s: Segment): number[] {
   const { c } = model,
     w = asymptoticW(s);
   return [

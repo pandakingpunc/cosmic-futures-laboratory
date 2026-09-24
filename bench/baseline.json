@@ -6,11 +6,11 @@
     "default-240-samples-1e100": {
       "counters": {
         "derivativeEvaluations": 3607,
-        "samplingEvaluations": 4593,
+        "samplingEvaluations": 4614,
         "rootIterations": 757
       },
-      "medianMs": 5.84,
-      "p90Ms": 7.55
+      "medianMs": 5.92,
+      "p90Ms": 6.76
     },
     "samples-1000-1e11": {
       "counters": {
@@ -18,62 +18,62 @@
         "samplingEvaluations": 19917,
         "rootIterations": 3309
       },
-      "medianMs": 8.15,
-      "p90Ms": 11.35
+      "medianMs": 7.84,
+      "p90Ms": 9.16
     },
     "desi-2026-cpl": {
       "counters": {
-        "derivativeEvaluations": 991,
-        "samplingEvaluations": 18165,
-        "rootIterations": 3009
+        "derivativeEvaluations": 3632,
+        "samplingEvaluations": 29397,
+        "rootIterations": 4862
       },
-      "medianMs": 7.07,
-      "p90Ms": 7.22
+      "medianMs": 10.94,
+      "p90Ms": 12.57
     },
     "closed-dust-recollapse": {
       "counters": {
-        "derivativeEvaluations": 2377,
+        "derivativeEvaluations": 2383,
         "samplingEvaluations": 1908,
         "rootIterations": 42
       },
-      "medianMs": 1.62,
-      "p90Ms": 2.69
+      "medianMs": 1.8,
+      "p90Ms": 2.54
     },
     "strong-phantom-w-1.5": {
       "counters": {
         "derivativeEvaluations": 3613,
-        "samplingEvaluations": 4961,
-        "rootIterations": 755
+        "samplingEvaluations": 5001,
+        "rootIterations": 757
       },
-      "medianMs": 3.29,
+      "medianMs": 3.63,
       "p90Ms": 4.18
     },
     "de-sitter-tail-1e1000": {
       "counters": {
         "derivativeEvaluations": 3607,
-        "samplingEvaluations": 4593,
+        "samplingEvaluations": 4614,
         "rootIterations": 757
       },
-      "medianMs": 3.22,
-      "p90Ms": 3.57
+      "medianMs": 3.8,
+      "p90Ms": 4.42
     },
     "ensemble-64-seed-1": {
       "counters": {
         "derivativeEvaluations": 230848,
-        "samplingEvaluations": 96992,
+        "samplingEvaluations": 98336,
         "rootIterations": 15956
       },
-      "medianMs": 126.68,
-      "p90Ms": 137.33
+      "medianMs": 137.88,
+      "p90Ms": 156.12
     },
     "sweep-9x9": {
       "counters": {
         "derivativeEvaluations": 292383,
-        "samplingEvaluations": 149018,
-        "rootIterations": 24199
+        "samplingEvaluations": 151945,
+        "rootIterations": 24366
       },
-      "medianMs": 152.84,
-      "p90Ms": 216.43
+      "medianMs": 233.93,
+      "p90Ms": 245.35
     },
     "sensitivity": {
       "counters": {
@@ -81,8 +81,8 @@
         "samplingEvaluations": 9560,
         "rootIterations": 1575
       },
-      "medianMs": 6.99,
-      "p90Ms": 7.62
+      "medianMs": 8.3,
+      "p90Ms": 8.51
     }
   }
 }

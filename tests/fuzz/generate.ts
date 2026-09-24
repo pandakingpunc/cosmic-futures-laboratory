@@ -51,6 +51,9 @@ const W_PAIRS = [
   [-1.4, 0.4],
   [-1.13, 0.13],
   [-0.9, -0.1],
+  // CPL: the DESI 2026 fit (extinction) and a Big Rip.
+  [-0.821, -0.65],
+  [-0.9, 0.3],
   [-1 / 3, 0],
   [-1.05, 0],
   [-1.5, 0],
@@ -205,7 +208,18 @@ export function generateConfig(ch: Chooser): Configuration {
     electronLogLifetime: uniform(0, 60),
     evaporation: pick(['hawking', 'disabled', 'remnant'] as const),
     evaporationFactor: logUniform(1e-3, 1e3),
-    blackHoleMasses: pick([[10, 1e5, 1e9], [15], [1e-8, 3e6], [1e12, 14]]),
+    // Small masses cross the CMB temperature again in a collapse; 10²⁰ M☉
+    // crosses in a matched tail and can exceed the Nariai bound.
+    blackHoleMasses: pick([
+      [10, 1e5, 1e9],
+      [15],
+      [1e-8, 3e6],
+      [1e12, 14],
+      [3e-8, 4e-8],
+      [1e20, 10],
+    ]),
+    // A cold CMB crosses the de Sitter temperature inside the numerical branch.
+    Tcmb: chance(0.1) ? pick([1e-20, 1e-29]) : 2.7255,
     vacuumDecay: chance(0.25),
     vacuumLogLifetime: uniform(0, 120),
     sandbox: false,

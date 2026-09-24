@@ -32,11 +32,18 @@ export const lifetimeReason = (c: Configuration) =>
   c.dmModel !== 'decay'
     ? 'A lifetime switch requires an already active decay model.'
     : 'Lifetime discontinuity reached. Donor survival history requires a new matched interacting segment; this version stops explicitly.';
+/**
+ * The dark-energy law of a configuration. CPL with wₐ = 0 is the constant-w
+ * law: w₀ + 0·(1 − a) equals w₀ bit for bit, so it shares its asymptote.
+ */
+export function darkEnergyLaw(c: Configuration): DarkEnergy {
+  return c.deModel === 'cpl' && c.wa === 0 ? 'constant' : c.deModel;
+}
 export function initialSegment(c: Configuration): Segment {
   return {
     g: 1,
     signDE: Math.sign(c.omegaDE),
-    deModel: c.deModel,
+    deModel: darkEnergyLaw(c),
     w0: c.w0,
     wa: c.wa,
   };

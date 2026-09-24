@@ -147,7 +147,10 @@ function isSample(v: unknown) {
     typeof v.regime === 'string' &&
     Array.isArray(v.bhMassFractions) &&
     v.bhMassFractions.every(isNumberOrNull) &&
-    NUMERIC_SAMPLE_FIELDS.every((k) => isNumberOrNull(v[k]))
+    NUMERIC_SAMPLE_FIELDS.every((k) => isNumberOrNull(v[k])) &&
+    // Added after 0.2.0; older files omit it.
+    (v.logHorizonTemperature === undefined ||
+      isNumberOrNull(v.logHorizonTemperature))
   );
 }
 function isEvent(v: unknown) {
@@ -208,7 +211,8 @@ export function isResult(value: unknown): value is Result {
       'configurationHash',
     ].every((k) => typeof m[k] === 'string') &&
     isStringArray(m.equations) &&
-    typeof m.seed === 'number'
+    typeof m.seed === 'number' &&
+    (value.derived === undefined || isObject(value.derived))
   );
 }
 /** A recognized result with unknown configuration fields removed. */

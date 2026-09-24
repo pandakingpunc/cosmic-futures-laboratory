@@ -279,6 +279,45 @@
     "parameters": {}
   },
   {
+    "id": "chevallier2001",
+    "title": "Accelerating Universes with Scaling Dark Matter",
+    "authors": "M. Chevallier and D. Polarski",
+    "date": "2001",
+    "url": "https://arxiv.org/abs/gr-qc/0009008",
+    "doi": "10.1142/S0218271801000822",
+    "arxiv": "gr-qc/0009008",
+    "dataset": "Dark-energy equation-of-state parametrization",
+    "selectedBecause": "Origin of the linear-in-a parametrization w(a)=w₀+wₐ(1−a) (CPL), whose density has the closed form used by the proof-based CPL continuation.",
+    "notes": "Int. J. Mod. Phys. D 10, 213–224. The parametrization is a fit ansatz for the observed expansion history; its behaviour as a→∞ is a literal extrapolation, not a prediction.",
+    "parameters": {}
+  },
+  {
+    "id": "linder2003",
+    "title": "Exploring the Expansion History of the Universe",
+    "authors": "E. V. Linder",
+    "date": "2003",
+    "url": "https://arxiv.org/abs/astro-ph/0208512",
+    "doi": "10.1103/PhysRevLett.90.091301",
+    "arxiv": "astro-ph/0208512",
+    "dataset": "Dark-energy equation-of-state parametrization",
+    "selectedBecause": "Introduces w(a)=w₀+wₐ(1−a) as a two-parameter description of the observed expansion history (with Chevallier & Polarski 2001).",
+    "notes": "Phys. Rev. Lett. 90, 091301. Motivated by data at a ≤ 1; the laboratory's continuation to a→∞ is labelled a literal extrapolation.",
+    "parameters": {}
+  },
+  {
+    "id": "nojiri2005",
+    "title": "Properties of singularities in (phantom) dark energy universe",
+    "authors": "S. Nojiri, S. D. Odintsov and S. Tsujikawa",
+    "date": "2005",
+    "url": "https://arxiv.org/abs/hep-th/0501025",
+    "doi": "10.1103/PhysRevD.71.063004",
+    "arxiv": "hep-th/0501025",
+    "dataset": "Classification of finite-time future singularities",
+    "selectedBecause": "Classifies finite-time singularities; the CPL phantom continuation ends in a Type I (Big Rip) singularity, where a, ρ and |p| diverge at finite time.",
+    "notes": "Phys. Rev. D 71, 063004. Cited for the singularity type only; the time itself is computed by quadrature of the closed-form CPL density.",
+    "parameters": {}
+  },
+  {
     "id": "vacuum2024",
     "title": "Vacuum Stability in the Standard Model and Beyond",
     "authors": "G. Hiller, T. Höhne, D. F. Litim and T. Steudtner",
@@ -301,7 +340,20 @@
     "arxiv": null,
     "dataset": "Semiclassical cosmological horizon theory",
     "selectedBecause": "de Sitter horizon temperature and entropy, with restricted domain.",
-    "notes": "T_dS=ℏH/(2πkB); this is distinct from redshifted CMB T. The Hubble radius is not generally the event horizon. Horizon entropy shown only for the de Sitter limit.",
+    "notes": "T_GH=ℏH/(2πkB) and the horizon entropy are reported only under an explicit de Sitter criterion (w=−1 to rounding, dark-energy fraction within 10⁻⁸ of unity); T_GH is distinct from the redshifted CMB temperature. The Hubble radius is not generally the event horizon.",
+    "parameters": {}
+  },
+  {
+    "id": "bousso1998",
+    "title": "(Anti-)Evaporation of Schwarzschild-de Sitter Black Holes",
+    "authors": "R. Bousso and S. W. Hawking",
+    "date": "1998",
+    "url": "https://arxiv.org/abs/hep-th/9709224",
+    "doi": "10.1103/PhysRevD.57.2436",
+    "arxiv": "hep-th/9709224",
+    "dataset": "Semiclassical Schwarzschild–de Sitter black holes",
+    "selectedBecause": "Black holes in de Sitter space up to the degenerate Nariai limit, where the black-hole and cosmological horizons coincide; context for the Nariai mass bound.",
+    "notes": "The bound M_N=c³/(3√3 G H_Λ) follows from the double root of the Schwarzschild–de Sitter metric function 1−2GM/(c²r)−H_Λ²r²/c². The app uses it only to validate black-hole masses and does not evolve such holes.",
     "parameters": {}
   },
   {
@@ -316,5 +368,39 @@
     "selectedBecause": "Foundational homogeneous expansion and recollapse equations.",
     "notes": "The simulator assumes an isotropic homogeneous background with specified fluid equations of state. It does not evolve perturbations.",
     "parameters": {}
+  },
+  {
+    "id": "codata2018",
+    "title": "CODATA recommended values of the fundamental physical constants: 2018",
+    "authors": "E. Tiesinga, P. J. Mohr, D. B. Newell and B. N. Taylor",
+    "date": "2021-06-30",
+    "url": "https://physics.nist.gov/cuu/pdf/RevModPhys.93.025010.pdf",
+    "doi": "10.1103/RevModPhys.93.025010",
+    "arxiv": null,
+    "dataset": "Fundamental physical constants",
+    "selectedBecause": "Single source of ħ, G, c and kB for Hawking and de Sitter temperatures, horizon entropy and black-hole mass bounds.",
+    "notes": "c, h and kB are exact in the 2019 SI, so ħ=h/2π is exact; G carries a relative standard uncertainty of 2.2×10⁻⁵. The tracer solar mass 1.98847×10³⁰ kg and the IAU megaparsec are not CODATA values.",
+    "parameters": {
+      "c": {
+        "value": 299792458,
+        "unit": "m/s",
+        "exact": true
+      },
+      "h": {
+        "value": 6.62607015e-34,
+        "unit": "J s",
+        "exact": true
+      },
+      "k_B": {
+        "value": 1.380649e-23,
+        "unit": "J/K",
+        "exact": true
+      },
+      "G": {
+        "value": 6.6743e-11,
+        "sigma": 1.5e-15,
+        "unit": "m^3 kg^-1 s^-2"
+      }
+    }
   }
 ]

@@ -9,6 +9,7 @@ export const FINGERPRINT_FIELDS = [
   'logRhoDE',
   'omegaDE',
   'q',
+  'logHorizonTemperature',
 ] as const;
 export interface Fingerprint {
   status: Result['status'];

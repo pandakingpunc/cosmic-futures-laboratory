@@ -1,16 +1,28 @@
-import { astrophysics } from '../astrophysics';
-import { C_KM_S } from '../core/constants';
+import type { LocatedEvents } from '../astrophysics';
 import type { WorkBudget } from '../core/limits';
-import { safe } from '../core/numeric';
 import type { Model } from '../model/background';
 import type { Stop } from '../model/segment';
 import type { CosmicEvent, Sample } from '../types';
 import { counted, rethrowBudget, type SimulationCounters } from './counters';
+import {
+  hawkingTargets,
+  noEvents,
+  passages,
+  type TimePoint,
+} from './crossings';
 import { dopriStep, type Derivative } from './dopri5';
+import {
+  collapseTimes,
+  equalities,
+  timeDomainFluids,
+  timeDomainSample,
+} from './time-domain';
 export interface ContractionOutcome {
   samples: Sample[];
   /** The first turnaround and the first bounce, when resolved. */
   events: CosmicEvent[];
+  /** Equality and CMB/Hawking crossings located on the resolved branch. */
+  located: LocatedEvents;
   stop: Stop | null;
   turned: boolean;
   /** The contraction reversed into a new expansion at a finite minimum. */
@@ -23,11 +35,16 @@ export interface ContractionOutcome {
   numericalUntilLogYears: number;
 }
 const MAX_STEPS = 30000;
+/** Largest Friedmann residual |E² − Σuᵢ|/Σ|uᵢ| of a trusted time-domain state. */
+const CONSTRAINT_LIMIT = 1e-4;
+const DRIFT_REASON =
+  'Friedmann-constraint drift exceeded 10⁻⁴; time-domain solution requires tighter tolerances.';
 const FIRST_YEAR =
   ' It occurs within the first elapsed year and is shown at one year.';
 /**
- * Integrates constant-fluid models with negative dark energy or curvature in
- * proper time u = ln(1 + τ), with z = [a, da/dτ]. The acceleration equation
+ * Integrates models with negative dark energy or curvature whose fluids
+ * depend on a alone (constant w, or a closed-form CPL density) in proper
+ * time u = ln(1 + τ), with z = [a, da/dτ]. The acceleration equation
  * crosses H = 0 without selecting an unphysical square root; the Friedmann
  * constraint is checked independently at every sample.
  */
@@ -38,21 +55,14 @@ export function integrateContraction(
   budget?: WorkBudget,
 ): ContractionOutcome {
   const { c, logH0 } = model;
-  const n = c.deModel === 'lambda' ? 0 : 3 * (1 + c.w0),
-    M = model.matter + c.omegaDM;
-  const density = (a: number) => [
-    M / a ** 3,
-    c.omegaR / a ** 4,
-    c.omegaDE / a ** n,
-    c.omegaK / a ** 2,
-  ];
+  const { density, residual, weight } = timeDomainFluids(model);
   const f: Derivative = (u, z) => {
     const [a, v] = z;
     if (a <= 0) throw new Error('Scale factor reached zero.');
     const [m, r, d] = density(a);
     return [
       Math.exp(u) * v,
-      -0.5 * Math.exp(u) * a * (m + 2 * r + (n - 2) * d),
+      -0.5 * Math.exp(u) * a * (m + 2 * r + weight(a) * d),
     ];
   };
   const integrationF = counted(f, counters, 'derivativeEvaluations', budget),
@@ -77,9 +87,27 @@ export function integrateContraction(
       if (rising ? at.y[1] < 0 : at.y[1] > 0) lo = mid;
       else hi = mid;
     }
-    const rootU = u0 + (lo + hi) / 2,
+    const mid = (lo + hi) / 2,
+      rootU = u0 + mid,
       raw = Math.log10(Math.expm1(rootU)) - logH0;
-    return { logYears: Math.max(0, raw), early: !(raw >= 0) };
+    const z = dopriStep(integrationF, u0, z0, mid, c.rtol, c.atol, k0).y;
+    return { logYears: Math.max(0, raw), early: !(raw >= 0), z };
+  };
+  let rejectedTurn = 0;
+  /**
+   * A velocity root is a turning point only where the constraint confirms
+   * that ΣΩ vanishes there to the trusted residual; otherwise the sign
+   * change is integration drift and the branch stops without an event.
+   */
+  const confirmed = (at: { logYears: number; z: number[] }) => {
+    const drift = residual(at.z);
+    if (drift <= CONSTRAINT_LIMIT) return true;
+    rejectedTurn = drift;
+    stop = {
+      status: 'limited',
+      reason: `${DRIFT_REASON} The velocity changes sign near 10^${at.logYears.toPrecision(5)} yr where the densities do not sum to zero (residual ${drift.toPrecision(2)}), so no turning point is asserted.`,
+    };
+    return false;
   };
   let u = 0,
     z = [1, 1],
@@ -92,7 +120,7 @@ export function integrateContraction(
     acceptedSteps = 0,
     rejectedSteps = 0,
     steps = 0;
-  const pts: { u: number; z: number[] }[] = [{ u, z: [...z] }];
+  const pts: TimePoint[] = [{ u, z: [...z] }];
   while (steps++ < MAX_STEPS && u < endU) {
     h = Math.min(h, endU - u);
     let s;
@@ -126,6 +154,10 @@ export function integrateContraction(
     pts.push({ u, z: [...z] });
     if (!turned && z[1] < 0) {
       const at = root(previousU, previousZ, previousK1, h, false);
+      if (!confirmed(at)) {
+        pts.pop();
+        break;
+      }
       turned = true;
       events.push({
         id: 'turn',
@@ -139,6 +171,10 @@ export function integrateContraction(
       });
     } else if (turned && !bounced && previousZ[1] <= 0 && z[1] > 0) {
       const at = root(previousU, previousZ, previousK1, h, true);
+      if (!confirmed(at)) {
+        pts.pop();
+        break;
+      }
       bounced = true;
       events.push({
         id: 'bounce',
@@ -227,56 +263,51 @@ export function integrateContraction(
       reason: `Output sample reconstruction failed: ${(e as Error).message} Samples end at the last reconstructed time.`,
     };
   }
+  // Crossings depend on a alone: equality at the roots of ρm = ρde (see
+  // timeDomainFluids) and CMB/Hawking crossings at a* = Tγ,0/T_H. Each gets
+  // its own output point.
+  const located = noEvents(c),
+    extra: TimePoint[] = [],
+    lastOutput = outputPoints[outputPoints.length - 1].u;
+  const stateAt = (i: number, v: number) =>
+    dopriStep(samplingF, pts[i].u, pts[i].z, v - pts[i].u, c.rtol, c.atol).y;
+  const locate = (target: number, list: (rising: boolean) => number[]) => {
+    for (const p of passages(pts, stateAt, target, counters)) {
+      if (!(p.u > 0)) continue;
+      const raw = Math.log10(Math.expm1(p.u)) - logH0;
+      list(p.rising).push(raw);
+      if (raw >= 0 && p.u <= lastOutput) extra.push(p);
+    }
+  };
+  hawkingTargets(c).forEach((t, i) =>
+    locate(Math.exp(t), (rising) =>
+      rising ? located.cool[i] : located.warm[i],
+    ),
+  );
+  for (const target of equalities(model))
+    locate(target, () => located.equality);
+  outputPoints.push(...extra);
+  outputPoints.sort((p, q) => p.u - q.u);
   const samples: Sample[] = [];
   let maxConstraintResidual = 0;
   for (const p of outputPoints) {
-    const a = p.z[0],
-      v = p.z[1],
-      tau = Math.expm1(p.u),
+    const tau = Math.expm1(p.u),
       lt = tau > 0 ? Math.max(0, Math.log10(tau) - logH0) : 0;
     if (lt > effectiveEnd + 1e-9) continue;
-    const [m, r, d, k] = density(a),
-      E = v / a,
-      scale = Math.abs(m) + r + Math.abs(d) + Math.abs(k),
-      residual = Math.abs(E * E - (m + r + d + k)) / Math.max(1e-300, scale);
-    const la = Math.log10(a),
-      eh = E === 0 ? null : Math.log10(c.H0 * Math.abs(E));
-    maxConstraintResidual = Math.max(maxConstraintResidual, residual);
-    samples.push({
-      logYears: lt,
-      isPresent: tau === 0,
-      logA: la,
-      expansionIndex: Math.sign(la) * Math.log10(1 + Math.abs(la)),
-      logH: eh,
-      logRhoB: safe(Math.log10(c.omegaB) - 3 * la),
-      logRhoDM: safe(Math.log10(c.omegaDM) - 3 * la),
-      logRhoR: safe(Math.log10(c.omegaR) - 4 * la),
-      logRhoDE: safe(Math.log10(Math.abs(c.omegaDE)) - n * la),
-      omegaM: E * E > 1e-20 ? m / (E * E) : null,
-      omegaR: E * E > 1e-20 ? r / (E * E) : null,
-      omegaDE: E * E > 1e-20 ? d / (E * E) : null,
-      omegaK: E * E > 1e-20 ? k / (E * E) : null,
-      logTcmb: Math.log10(c.Tcmb) - la,
-      logRadiationEffectiveT: c.omegaR > 0 ? Math.log10(c.Tcmb) - la : null,
-      q: E * E > 1e-20 ? (0.5 * (m + 2 * r + (n - 2) * d)) / (E * E) : null,
-      w: c.omegaDE === 0 ? null : c.deModel === 'lambda' ? -1 : c.w0,
-      logHubbleRadiusMpc: eh === null ? null : Math.log10(C_KM_S) - eh,
-      logComovingHubbleMpc: eh === null ? null : Math.log10(C_KM_S) - eh - la,
-      logHorizonEntropy: null,
-      ...astrophysics(tau === 0 ? -Infinity : lt, c),
-      regime: v < 0 ? 'contraction' : 'numerical',
-      constraintResidual: residual,
-    });
+    const sample = timeDomainSample(model, p, lt);
+    maxConstraintResidual = Math.max(
+      maxConstraintResidual,
+      sample.constraintResidual,
+    );
+    samples.push(sample);
   }
-  if (maxConstraintResidual > 1e-4)
-    stop = {
-      status: 'limited',
-      reason:
-        'Friedmann-constraint drift exceeded 10⁻⁴; time-domain solution requires tighter tolerances.',
-    };
+  maxConstraintResidual = Math.max(maxConstraintResidual, rejectedTurn);
+  if (maxConstraintResidual > CONSTRAINT_LIMIT && !rejectedTurn)
+    stop = { status: 'limited', reason: DRIFT_REASON };
   return {
     samples,
     events,
+    located,
     stop,
     turned,
     bounced,
@@ -286,35 +317,4 @@ export function integrateContraction(
     maxConstraintResidual,
     numericalUntilLogYears: Math.max(0, reached),
   };
-}
-/**
- * Output times that resolve the collapse after the turnaround, spaced about
- * evenly in log₁₀ a from the maximum down to a = 10⁻⁴. Each time is placed
- * by linear interpolation of log₁₀ a in u inside an accepted step; the
- * sample itself is then computed exactly at that time.
- */
-function collapseTimes(
-  pts: readonly { u: number; z: number[] }[],
-  samples: number,
-  logH0: number,
-  stopLog: number,
-): number[] {
-  let top = 0;
-  for (let i = 1; i < pts.length; i++) if (pts[i].z[0] > pts[top].z[0]) top = i;
-  const count = Math.ceil(samples / 4),
-    laTop = Math.log10(pts[top].z[0]),
-    times: number[] = [];
-  let j = top;
-  for (let k = 1; k <= count; k++) {
-    const la = laTop + ((-4 - laTop) * k) / count;
-    while (j + 1 < pts.length && Math.log10(pts[j].z[0]) > la) j++;
-    if (j === top || Math.log10(pts[j].z[0]) > la) break;
-    const a0 = Math.log10(pts[j - 1].z[0]),
-      a1 = Math.log10(pts[j].z[0]);
-    const u =
-      pts[j - 1].u + ((pts[j].u - pts[j - 1].u) * (a0 - la)) / (a0 - a1);
-    const lt = Math.log10(Math.expm1(u)) - logH0;
-    if (lt >= 0 && lt <= stopLog) times.push(lt);
-  }
-  return times;
 }

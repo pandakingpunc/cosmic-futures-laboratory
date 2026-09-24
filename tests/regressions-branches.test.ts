@@ -244,3 +244,46 @@ test('loose tolerances on the time-domain branch are reported as constraint drif
   assert.ok(r.diagnostics.maxConstraintResidual > 1e-4);
   assert.match(r.diagnostics.reason, /constraint drift/);
 });
+test('drift-spurious-turnaround: a velocity root the constraint does not confirm is no turning point', () => {
+  // a²E² = 1.774/a − 0.774 a^(−3.67) > 0 for every a ≥ 1: no turnaround.
+  const drifting = pure({
+    omegaB: 1.774,
+    omegaDE: -0.774,
+    deModel: 'constant',
+    w0: 0.89,
+    endLogYears: 30,
+    samples: 240,
+  });
+  const r = simulate(drifting);
+  assert.equal(r.status, 'limited');
+  assert.ok(!r.events.some((e) => ['turn', 'bounce'].includes(e.id)));
+  assert.match(r.diagnostics.reason, /constraint drift/);
+  assert.match(r.diagnostics.reason, /no turning point is asserted/);
+  assert.ok(r.diagnostics.maxConstraintResidual > 1e-4);
+  assert.ok(r.samples.every((s) => s.regime !== 'contraction'));
+  // Confirmed turning points are unaffected.
+  const dust = simulate(pure({ omegaB: 2, omegaK: -1, endLogYears: 12 }));
+  assert.ok(dust.events.some((e) => e.id === 'turn'));
+  assert.equal(dust.status, 'terminated');
+});
+test('rip-duplicate-times: samples after the present have strictly increasing times', () => {
+  const rip = simulate({
+    ...base,
+    deModel: 'constant',
+    w0: -1.5,
+    samples: 100,
+  });
+  assert.equal(rip.classification, 'Big Rip');
+  for (let i = 2; i < rip.samples.length; i++)
+    assert.ok(rip.samples[i].logYears > rip.samples[i - 1].logYears);
+  // The extra samples still resolve the approach where time is resolvable.
+  assert.ok(rip.samples.filter((s) => s.logA! > 2).length >= 20);
+  for (const c of [
+    pure({ omegaB: 1.1, omegaDE: -0.1, endLogYears: 12, samples: 100 }),
+    pure({ omegaB: 1e10 + 1, omegaDE: -1e10, endLogYears: 12 }),
+  ]) {
+    const r = simulate(c);
+    for (let i = 2; i < r.samples.length; i++)
+      assert.ok(r.samples[i].logYears > r.samples[i - 1].logYears);
+  }
+});

@@ -67,6 +67,63 @@ export function canonicalConfig(input: unknown): {
     unknown: Object.keys(source).filter((k) => !known.has(k)),
   };
 }
+/** Deeper nesting is rejected before any recursive copy is attempted. */
+const MAX_DEPTH = 64;
+/**
+ * So are more values than this, counted as JSON writes them: an object
+ * shared by several parents counts once per parent, so shared references
+ * cannot make the traversal or the JSON text grow exponentially.
+ */
+const MAX_VALUES = 100_000;
+/**
+ * Why objects nest deeper than MAX_DEPTH (or cyclically) or hold more than
+ * MAX_VALUES values, checked iteratively; null when neither holds.
+ */
+function copyProblem(value: unknown): string | null {
+  const stack: [unknown, number][] = [[value, 0]];
+  let values = 0;
+  while (stack.length) {
+    const [v, depth] = stack.pop()!;
+    if (!v || typeof v !== 'object') continue;
+    if (depth >= MAX_DEPTH)
+      return `values are nested deeper than ${MAX_DEPTH} levels.`;
+    const children = Object.values(v);
+    values += children.length;
+    if (values > MAX_VALUES) return `it holds more than ${MAX_VALUES} values.`;
+    for (const child of children) stack.push([child, depth + 1]);
+  }
+  return null;
+}
+/**
+ * An independent copy of the known keys of `input`, as canonicalConfig
+ * selects them. Values that cannot be copied as JSON data (nesting deeper
+ * than 64 levels, cycles, more than 10⁵ values as JSON would write them,
+ * BigInts, functions or objects that refuse to be cloned) are never cloned
+ * recursively: `problem` then explains why, and the copy keeps only the
+ * fields that are JSON primitives.
+ */
+export function copyConfiguration(input: unknown): {
+  config: Configuration;
+  unknown: string[];
+  problem: string | null;
+} {
+  const { config, unknown } = canonicalConfig(input);
+  let problem: string;
+  try {
+    const reason = copyProblem(config);
+    if (reason) throw new Error(reason);
+    const copy = structuredClone(config);
+    JSON.stringify(copy);
+    return { config: copy, unknown, problem: null };
+  } catch (e) {
+    problem = `The configuration cannot be read as JSON data: ${(e as Error).message}`;
+  }
+  const primitive: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(config))
+    if (v === null || ['number', 'string', 'boolean'].includes(typeof v))
+      primitive[k] = v;
+  return { config: primitive as unknown as Configuration, unknown, problem };
+}
 /**
  * A complete configuration from a partial one: its known keys over the named
  * preset when `preset` is a known id, otherwise over the default preset.
