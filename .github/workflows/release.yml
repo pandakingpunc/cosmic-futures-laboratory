@@ -7,7 +7,7 @@ permissions:
 jobs:
   release-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -15,11 +15,23 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24'
+          cache: npm
       - run: npm ci
-      - run: npm test
-      - run: node scripts/release-check.mjs
-      - run: npm run build
       - name: Verify tag matches package version
         run: node -e "if(process.env.GITHUB_REF_NAME !== 'v'+require('./package.json').version)process.exit(1)"
+      - name: Check version, dataset, citation and changelog metadata
+        run: npm run release:check
+      - name: Run the tests, including the golden-master comparison
+        run: npm test
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run check:arch
+      - name: Check deterministic solver work counters against bench/baseline.json
+        run: npm run bench -- --check-counters --counters-only
+      - run: npm run format:check
+      - run: npm run examples
+      - name: Check that committed examples match the engine
+        run: git diff --exit-code -- examples/
+      - run: npm run build
       - name: Check source archive can be produced
         run: git archive --format=tar.gz --output=cosmic-futures-source.tar.gz HEAD

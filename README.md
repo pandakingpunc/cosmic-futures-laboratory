@@ -82,7 +82,7 @@ The explicit ODE solver does not automatically solve every stiff model. It rejec
 
 ## Reproducibility and examples
 
-Each JSON result includes the complete input, software/data versions, equations, tolerances, seed, time origin, configuration fingerprint, event list and approximation diagnostics. The fingerprint is a noncryptographic FNV-1a identifier, not a security checksum. Preserve the JSON together with the source release and `package-lock.json`.
+Each JSON result includes the complete input, software/data versions, equations, tolerances, seed, time origin, configuration fingerprint, event list and approximation diagnostics. The fingerprint is a noncryptographic 32-bit FNV-1a-style hash (offset basis 2166136261, prime 16777619) over the UTF-16 code units of `JSON.stringify` of the canonical configuration (recognised keys only, in their fixed order), printed as eight hexadecimal digits; it is an identifier, not a security checksum. Preserve the JSON together with the source release and `package-lock.json`.
 
 `npm run examples` regenerates 16 configurations and computed outputs. See [examples/manifest.json](examples/manifest.json), the [baseline report](examples/observational-baseline.report.md), and configurations for phantom energy, recollapse, decaying dark matter, particle decay, remnants and nonstandard interventions. Timestamps are fixed to `SOURCE_DATE_EPOCH` when it is set, otherwise to the release date in `CITATION.cff`, so regeneration is deterministic; CI fails when the committed examples differ from a fresh run.
 

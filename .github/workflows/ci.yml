@@ -5,8 +5,13 @@ on:
 permissions:
   contents: read
 jobs:
-  validate:
-    runs-on: ubuntu-latest
+  test:
+    name: Tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -18,12 +23,26 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run check:arch
       - name: Check deterministic solver work counters against bench/baseline.json
         run: npm run bench -- --check-counters --counters-only
       - run: npm run format:check
+      - name: Run the tests with line, branch and function coverage thresholds
+        run: npm run coverage
       - run: npm run examples
       - name: Check that committed examples match the engine
         run: git diff --exit-code -- examples/
@@ -31,3 +50,19 @@ jobs:
       - run: npm run build:vercel
       - run: npm run validate:vercel
       - run: npm audit --audit-level=high
+  scipy:
+    name: Independent SciPy reference
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-validation.txt
+      - run: pip install -r requirements-validation.txt
+      - name: Compare the committed examples with SciPy DOP853 and docs/scipy-validation.json
+        run: python scripts/validate_scipy.py --check

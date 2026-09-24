@@ -38,12 +38,12 @@ Regression cases additionally verify continuous tail density matching, simultane
 
 | Case | Maximum absolute difference in log₁₀(a) |
 | --- | ---: |
-| Observational reference | 4.363×10⁻¹¹ |
-| Decaying dark matter | 4.222×10⁻¹¹ |
+| Observational reference | 4.362×10⁻¹¹ |
+| Decaying dark matter | 4.221×10⁻¹¹ |
 | Matter benchmark | 2.709×10⁻¹¹ |
 | Radiation benchmark | 7.657×10⁻¹¹ |
 
-The decaying-matter radiation comparison has maximum absolute log-density difference 1.049×10⁻¹⁰. Full-precision results and sample counts are in [scipy-validation.json](scipy-validation.json). Python/SciPy dependencies are pinned in `requirements-validation.txt`.
+The decaying-matter radiation comparison has maximum absolute log-density difference 1.048×10⁻¹⁰. Full-precision results and sample counts are in [scipy-validation.json](scipy-validation.json). Python/SciPy dependencies are pinned in `requirements-validation.txt`.
 
 ## Application and production checks
 

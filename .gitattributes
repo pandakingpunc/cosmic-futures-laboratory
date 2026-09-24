@@ -1,3 +1,9 @@
 * text=auto
 *.sh text eol=lf
+# Golden outputs, examples, benchmarks and datasets are compared byte for
+# byte (and by CI drift checks), so they keep LF on every platform.
+examples/** text eol=lf
+tests/golden/** text eol=lf
+bench/*.json text eol=lf
+data/**/*.json text eol=lf
 *.png binary

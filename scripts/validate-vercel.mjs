@@ -66,14 +66,56 @@ assert.equal(
   400,
 );
 assert.equal(
-  (
-    await request('/api/simulate', {
-      method: 'POST',
-      body: 'x'.repeat(1_000_001),
-    })
-  ).status,
+  (await request('/api/simulate', { method: 'POST', body: 'null' })).status,
+  400,
+);
+// Request limits: 64 KiB bodies, counted in bytes while streaming even without
+// Content-Length, at most 64 ensemble runs, and a per-request work budget.
+assert.equal(
+  (await request('/api/simulate', { method: 'POST', body: ' '.repeat(65_537) }))
+    .status,
   413,
 );
+const euros = new TextEncoder().encode('€'.repeat(30_000));
+const streamed = await request('/api/simulate', {
+  method: 'POST',
+  body: new ReadableStream({
+    start(controller) {
+      controller.enqueue(euros);
+      controller.close();
+    },
+  }),
+  duplex: 'half',
+});
+assert.equal(streamed.status, 413);
+const heavy = {
+  config: {
+    endLogYears: 1000,
+    rtol: 1e-12,
+    atol: 1e-14,
+    deModel: 'custom',
+    expression: '-1 + 0.3*sin(2000*log(a))',
+  },
+  mode: 'ensemble',
+  options: {
+    runs: 8,
+    seed: 1,
+    distribution: 'gaussian',
+    sigmas: [0, 0, 0, 0],
+    interval: 0.9,
+  },
+};
+const tooMany = await simulate({
+  ...heavy,
+  options: { ...heavy.options, runs: 65 },
+});
+assert.equal(tooMany.status, 422);
+assert.equal((await tooMany.json()).code, 'api-limit');
+const started = performance.now();
+const overBudget = await simulate(heavy);
+assert.equal(overBudget.status, 422);
+assert.equal((await overBudget.json()).code, 'work-budget');
+assert.ok(performance.now() - started < 10_000, 'work budget took over 10 s');
 
 const ensemble = await simulate({
   config,
@@ -104,5 +146,5 @@ const observations = await request('/api/observations');
 assert.equal(observations.status, 200);
 assert.match(await observations.text(), /67\.36/);
 console.log(
-  `PASS Vercel routing, SSR, ${assets.size} referenced assets, simulation, all analysis modes and request validation.`,
+  `PASS Vercel routing, SSR, ${assets.size} referenced assets, simulation, all analysis modes, request validation and limits (413/422).`,
 );

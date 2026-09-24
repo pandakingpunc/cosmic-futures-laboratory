@@ -10,6 +10,8 @@
     "build": "vinext build",
     "build:vercel": "vite build --config vite.vercel.config.ts",
     "validate:vercel": "node scripts/validate-vercel.mjs",
+    "validate:api": "node scripts/validate-api.mjs",
+    "release:check": "node scripts/release-check.mjs",
     "start": "wrangler dev --config dist/server/wrangler.json",
     "lint": "oxlint",
     "check:arch": "node scripts/check-architecture.mjs",
@@ -21,6 +23,7 @@
     "examples": "node scripts/run-ts.mjs scripts/generate-examples.ts",
     "golden:update": "node scripts/run-ts.mjs scripts/golden-corpus.ts",
     "bench": "node scripts/run-ts.mjs scripts/bench.ts",
+    "fuzz": "node scripts/run-ts.mjs scripts/fuzz.ts",
     "check": "npm test && npm run typecheck && npm run lint && npm run check:arch && npm run bench -- --check-counters --counters-only && npm run format:check && npm run examples"
   },
   "dependencies": {
