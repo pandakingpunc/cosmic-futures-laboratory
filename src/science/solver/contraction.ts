@@ -1,5 +1,6 @@
 import type { LocatedEvents } from '../astrophysics';
 import type { WorkBudget } from '../core/limits';
+import { pow10 } from '../core/pow';
 import type { Model } from '../model/background';
 import type { Stop } from '../model/segment';
 import type { CosmicEvent, Sample } from '../types';
@@ -68,7 +69,7 @@ export function integrateContraction(
   const integrationF = counted(f, counters, 'derivativeEvaluations', budget),
     samplingF = counted(f, counters, 'samplingEvaluations', budget);
   const endU =
-    effectiveEnd + logH0 > 300 ? 700 : Math.log1p(10 ** (effectiveEnd + logH0));
+    effectiveEnd + logH0 > 300 ? 700 : Math.log1p(pow10(effectiveEnd + logH0));
   const events: CosmicEvent[] = [];
   /** Event at the root of v inside the accepted step from (u0, z0). */
   const root = (
@@ -235,7 +236,7 @@ export function integrateContraction(
   const outputPoints = [pts[0]];
   try {
     for (const lt of times) {
-      const targetU = Math.min(lastU, Math.log1p(10 ** (lt + logH0)));
+      const targetU = Math.min(lastU, Math.log1p(pow10(lt + logH0)));
       while (pointIndex + 1 < pts.length && pts[pointIndex + 1].u < targetU)
         pointIndex++;
       const start = pts[pointIndex];

@@ -1,4 +1,5 @@
 import { LN10 } from '../core/constants';
+import { pow10 } from '../core/pow';
 import type { SimulationCounters } from './counters';
 /** Brackets narrower than this, relative to max(1, |x|), end a root search. */
 const WIDTH = 4 * Number.EPSILON;
@@ -51,7 +52,7 @@ export function illinois(
 /** log₁₀(10^a + 10^b) without overflow; −∞ terms are absent. */
 export function logSum(a: number, b: number): number {
   const m = Math.max(a, b);
-  return m === -Infinity ? m : m + Math.log10(10 ** (a - m) + 10 ** (b - m));
+  return m === -Infinity ? m : m + Math.log10(pow10(a - m) + pow10(b - m));
 }
 /**
  * log₁₀ of the proper time Δt in years for ln a to grow by dx ≥ 0 along a

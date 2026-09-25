@@ -7,6 +7,7 @@ import {
   logHorizonTemperature,
   nariaiMass,
 } from './core/constants';
+import { pow10, powPortable } from './core/pow';
 import { asymptoticW } from './model/asymptote';
 import { darkEnergyLaw } from './model/segment';
 import type { Configuration, CosmicEvent, Sample } from './types';
@@ -14,7 +15,7 @@ export const BH_LIFETIME_LOG = SOLAR_EVAPORATION_LOG_YEARS;
 export const BH_TEMPERATURE = SOLAR_HAWKING_TEMPERATURE;
 export function survival(logYears: number, logLifetime: number): number {
   const d = logYears - logLifetime;
-  return d > 3 ? 0 : d < -15 ? 1 : Math.exp(-(10 ** d));
+  return d > 3 ? 0 : d < -15 ? 1 : Math.exp(-pow10(d));
 }
 export function blackHoleLifetime(logMass: number, factor = 1): number {
   return BH_LIFETIME_LOG + 3 * logMass - Math.log10(factor);
@@ -25,13 +26,13 @@ export function blackHoleFraction(
   c: Configuration,
 ): number {
   if (c.evaporation === 'disabled') return 1;
-  const ratio =
-    10 **
+  const ratio = pow10(
     Math.min(
       4,
       logYears - blackHoleLifetime(Math.log10(mass), c.evaporationFactor),
-    );
-  const remaining = Math.max(0, 1 - ratio) ** (1 / 3);
+    ),
+  );
+  const remaining = powPortable(Math.max(0, 1 - ratio), 1 / 3);
   return c.evaporation === 'remnant'
     ? Math.max(remaining, PLANCK_MASS / (mass * SOLAR_MASS))
     : remaining;
@@ -71,7 +72,7 @@ export function blackHoleMassLimit(c: Configuration): MassLimit {
 const massLabel = (m: number) => Number(m.toPrecision(3)).toExponential();
 export function astrophysics(logYears: number, c: Configuration) {
   return {
-    stellarFraction: 1 / (1 + 10 ** Math.min(300, 1.4 * (logYears - 12.5))),
+    stellarFraction: 1 / (1 + pow10(Math.min(300, 1.4 * (logYears - 12.5)))),
     baryonSurvival: c.protonDecay ? survival(logYears, c.protonLogLifetime) : 1,
     electronSurvival: c.electronDecay
       ? survival(logYears, c.electronLogLifetime)

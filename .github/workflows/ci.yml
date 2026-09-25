@@ -66,3 +66,5 @@ jobs:
       - run: pip install -r requirements-validation.txt
       - name: Compare the committed examples with SciPy DOP853 and docs/scipy-validation.json
         run: python scripts/validate_scipy.py --check
+      - name: Recompute the exact powers of tests/reference/pow.json with Python decimal
+        run: python scripts/pow_reference.py --check

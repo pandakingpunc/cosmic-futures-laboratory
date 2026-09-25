@@ -1,3 +1,4 @@
+import { powPortable } from './pow';
 /** Converts H₀ from km s⁻¹ Mpc⁻¹ to yr⁻¹: Julian year in s over megaparsec in km. */
 export const H0_YEAR = 31557600 / (3.085677581491367 * 1e19);
 export const LN10 = Math.LN10;
@@ -25,10 +26,10 @@ export const MPC_M = 3.085677581491367e22;
 export const LOG10_MPC_M = Math.log10(MPC_M);
 /** −log₁₀ of the Planck length √(ħG/c³) in metres. */
 export const LOG10_INV_PLANCK_M =
-  -0.5 * Math.log10((HBAR * GRAVITATION) / SPEED_OF_LIGHT ** 3);
+  -0.5 * Math.log10((HBAR * GRAVITATION) / powPortable(SPEED_OF_LIGHT, 3));
 /** Hawking temperature ħc³/(8πGk_B M☉) of one solar mass, in kelvin. */
 export const SOLAR_HAWKING_TEMPERATURE =
-  (HBAR * SPEED_OF_LIGHT ** 3) /
+  (HBAR * powPortable(SPEED_OF_LIGHT, 3)) /
   (8 * Math.PI * GRAVITATION * BOLTZMANN * SOLAR_MASS);
 /**
  * log₁₀ of the ideal blackbody lifetime 5120πG²M☉³/(ħc⁴) in Julian years,
@@ -69,11 +70,14 @@ const perSecond = (H: number) => (H * 1000) / MPC_M;
  */
 export function nariaiMass(hLambda: number): number {
   return (
-    SPEED_OF_LIGHT ** 3 /
+    powPortable(SPEED_OF_LIGHT, 3) /
     (3 * Math.sqrt(3) * GRAVITATION * perSecond(hLambda) * SOLAR_MASS)
   );
 }
 /** Mass c³/(2GH) in M☉ whose Schwarzschild radius equals the Hubble radius c/H. */
 export function hubbleMass(H: number): number {
-  return SPEED_OF_LIGHT ** 3 / (2 * GRAVITATION * perSecond(H) * SOLAR_MASS);
+  return (
+    powPortable(SPEED_OF_LIGHT, 3) /
+    (2 * GRAVITATION * perSecond(H) * SOLAR_MASS)
+  );
 }

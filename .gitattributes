@@ -4,6 +4,7 @@
 # byte (and by CI drift checks), so they keep LF on every platform.
 examples/** text eol=lf
 tests/golden/** text eol=lf
+tests/reference/** text eol=lf
 bench/*.json text eol=lf
 data/**/*.json text eol=lf
 *.png binary

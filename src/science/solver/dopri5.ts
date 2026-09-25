@@ -1,3 +1,4 @@
+import { powPortable } from '../core/pow';
 export type Derivative = (x: number, y: number[]) => number[];
 // Dormand–Prince 5(4) Butcher tableau, allocated once rather than per step.
 const A: readonly (readonly number[])[] = [
@@ -101,7 +102,10 @@ export function dopriStep(
   return {
     y: next,
     error,
-    factor: error === 0 ? 4 : Math.max(0.1, Math.min(4, 0.9 * error ** -0.2)),
+    factor:
+      error === 0
+        ? 4
+        : Math.max(0.1, Math.min(4, 0.9 * powPortable(error, -0.2))),
     k1: exact ? k[0] : undefined,
     k7: k[6],
   };

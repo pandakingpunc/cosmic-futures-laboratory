@@ -1,3 +1,4 @@
+import { pow10 } from '../core/pow';
 import { asymptoticW } from '../model/asymptote';
 import {
   CURVED_G_REASON,
@@ -95,7 +96,7 @@ export function applyTailIntervention(
       changedDE === null
         ? Infinity
         : competing.reduce<number>(
-            (sum, v) => sum + (v === null ? 0 : 10 ** (v - changedDE)),
+            (sum, v) => sum + (v === null ? 0 : pow10(v - changedDE)),
             0,
           );
     if (contamination > 1e-8)

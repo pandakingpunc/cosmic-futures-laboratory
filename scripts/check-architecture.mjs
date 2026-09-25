@@ -17,6 +17,12 @@ import ts from 'typescript';
 //   5 dispatch.ts                      shared entry for the API and the worker
 //   6 worker.ts, index.ts              browser worker and public library entry
 // Components may import types, but no runtime code, from the worker module.
+// Science modules may not use `**`, `**=` or Math.pow: V8 evaluates them with
+// the C library's pow, which rounds differently on Linux and Windows, so they
+// use pow10 and powPortable from core/pow.ts instead. The same holds in
+// components/ and app/, which prepare engine input (the derived Ωr). Science
+// modules may not use Math.tanh either, which newer V8 versions also take from
+// the C library; they use tanhPortable from core/numeric.ts.
 const LAYERS = [
   [0, /^core\//],
   [0, /^types\.ts$/],
@@ -87,6 +93,61 @@ function importsOf(path, source) {
   return found;
 }
 /**
+ * Uses of `**`, `**=` and of the named Math functions (also as Math['name']
+ * or destructured from Math in a declaration).
+ */
+function platformDependentOf(path, source, functions) {
+  const file = ts.createSourceFile(path, source, ts.ScriptTarget.Latest);
+  const found = [];
+  const add = (node, what) =>
+    found.push({
+      what,
+      line: file.getLineAndCharacterOfPosition(node.getStart(file)).line + 1,
+    });
+  const isMath = (node) => ts.isIdentifier(node) && node.text === 'Math';
+  const visit = (node) => {
+    if (
+      ts.isBinaryExpression(node) &&
+      (node.operatorToken.kind === ts.SyntaxKind.AsteriskAsteriskToken ||
+        node.operatorToken.kind === ts.SyntaxKind.AsteriskAsteriskEqualsToken)
+    )
+      add(node.operatorToken, `'${node.operatorToken.getText(file)}'`);
+    else if (
+      ts.isPropertyAccessExpression(node) &&
+      isMath(node.expression) &&
+      functions.includes(node.name.text)
+    )
+      add(node, `Math.${node.name.text}`);
+    else if (
+      ts.isElementAccessExpression(node) &&
+      isMath(node.expression) &&
+      ts.isStringLiteralLike(node.argumentExpression) &&
+      functions.includes(node.argumentExpression.text)
+    )
+      add(node, `Math.${node.argumentExpression.text}`);
+    else if (
+      ts.isVariableDeclaration(node) &&
+      node.initializer &&
+      isMath(node.initializer) &&
+      ts.isObjectBindingPattern(node.name)
+    )
+      for (const e of node.name.elements) {
+        const name = (e.propertyName ?? e.name).getText(file);
+        if (functions.includes(name)) add(node, `Math.${name}`);
+      }
+    ts.forEachChild(node, visit);
+  };
+  visit(file);
+  return found;
+}
+/** Why a platform-dependent operation is rejected, and what to use instead. */
+const REMEDY = {
+  'Math.tanh':
+    "which newer V8 versions take from the operating system's C library; use tanhPortable from src/science/core/numeric.",
+};
+const POWER_REMEDY =
+  'which rounds differently on Linux and Windows; use pow10 or powPortable from src/science/core/pow.';
+/**
  * Violations for files given as { path, source } with paths relative to the
  * repository root. Science modules are those under src/science/.
  */
@@ -95,7 +156,16 @@ function checkArchitecture(files) {
   for (const { path, source } of files) {
     const file = posix(path);
     const at = (line) => `${file}:${line}`;
-    if (!file.startsWith('src/science/')) {
+    const science = file.startsWith('src/science/');
+    for (const p of platformDependentOf(
+      file,
+      source,
+      science ? ['pow', 'tanh'] : ['pow'],
+    ))
+      problems.push(
+        `${at(p.line)} uses ${p.what}, ${REMEDY[p.what] ?? POWER_REMEDY}`,
+      );
+    if (!science) {
       for (const i of importsOf(file, source))
         if (
           !i.typeOnly &&
@@ -153,9 +223,10 @@ const root =
   option > 0
     ? resolve(process.argv[option + 1])
     : resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const SOURCES = '*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}';
 const paths = [
-  ...globSync('src/science/**/*.ts', { cwd: root }),
-  ...globSync('{components,app}/**/*.{ts,tsx}', { cwd: root }),
+  ...globSync(`src/science/**/${SOURCES}`, { cwd: root }),
+  ...globSync(`{components,app}/**/${SOURCES}`, { cwd: root }),
 ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 const problems = checkArchitecture(
   paths.map((p) => ({

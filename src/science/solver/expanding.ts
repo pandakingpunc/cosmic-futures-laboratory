@@ -1,4 +1,5 @@
 import { ln } from '../core/numeric';
+import { pow10 } from '../core/pow';
 import { background, derivative, type Model } from '../model/background';
 import {
   EXTINCTION,
@@ -144,7 +145,7 @@ export function integrateExpansion(
     }
     let pending = queue[eventIndex];
     if (pending && pending.logTime + logH0 < 300) {
-      const target = 10 ** (pending.logTime + logH0);
+      const target = pow10(pending.logTime + logH0);
       if (trial.y[0] > target && y[0] < target * (1 - 1e-9)) {
         step *= Math.max(
           0.01,

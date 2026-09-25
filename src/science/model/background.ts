@@ -1,5 +1,6 @@
 import { H0_YEAR } from '../core/constants';
 import { ln } from '../core/numeric';
+import { pow10 } from '../core/pow';
 import { compileExpression } from '../expression';
 import type { Configuration } from '../types';
 import type { Segment } from './segment';
@@ -47,7 +48,7 @@ export function createModel(c: Configuration): Model {
     warm: c.dmModel === 'warm' ? c.warmW : 0,
     gamma:
       c.dmModel === 'decay'
-        ? 10 ** Math.max(-310, -c.dmLogLifetime - logH0)
+        ? pow10(Math.max(-310, -c.dmLogLifetime - logH0))
         : 0,
     xi: c.dmModel === 'interacting' ? c.interaction : 0,
     annihilating: c.dmModel === 'annihilation',

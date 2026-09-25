@@ -1,3 +1,5 @@
+import { tanhPortable } from './core/numeric';
+import { powPortable } from './core/pow';
 /** A bounded recursive-descent arithmetic interpreter; no eval or generated code. */
 type Node = { op: string; value?: number; name?: string; args?: Node[] };
 export function compileExpression(source: string): (a: number) => number {
@@ -72,7 +74,7 @@ export function compileExpression(source: string): (a: number) => number {
     log: Math.log,
     sqrt: Math.sqrt,
     abs: Math.abs,
-    tanh: Math.tanh,
+    tanh: tanhPortable,
   };
   function calc(n: Node, a: number): number {
     if (n.op === 'number') return n.value!;
@@ -91,7 +93,7 @@ export function compileExpression(source: string): (a: number) => number {
           ? left * right
           : n.op === '/'
             ? left / right
-            : left ** right;
+            : powPortable(left, right);
   }
   return (a) => {
     const w = calc(root, a);

@@ -1,4 +1,5 @@
 import { charge, type WorkBudget } from '../core/limits';
+import { pow10 } from '../core/pow';
 import { exponents } from '../model/asymptote';
 import { background, type Model } from '../model/background';
 import { cplLogDensity } from '../model/cpl';
@@ -102,7 +103,7 @@ export function ripContinuation(input: RipInput): RipOutcome {
   const gridStart = Math.max(0, startLog);
   for (let i = 0; i < c.samples; i++) {
     const lt = gridStart + ((endLog - gridStart) * (i + 1)) / c.samples,
-      target = 10 ** (lt + logH0) - tau0;
+      target = pow10(lt + logH0) - tau0;
     if (lt > startLog && lt < ripLog && target < panels.total)
       points.push({ x: solveIntegral(panels, f, target), lt });
   }
@@ -139,7 +140,7 @@ export function ripContinuation(input: RipInput): RipOutcome {
     try {
       const sample = toSample(
         p.x,
-        [10 ** (p.lt + logH0), y0[1], lnDE(p.x), y0[3]],
+        [pow10(p.lt + logH0), y0[1], lnDE(p.x), y0[3]],
         s,
         p.lt,
         model,

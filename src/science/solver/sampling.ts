@@ -7,6 +7,7 @@ import {
 } from '../core/constants';
 import type { WorkBudget } from '../core/limits';
 import { ln, safe } from '../core/numeric';
+import { pow10 } from '../core/pow';
 import { DOMINANCE, isVacuumW } from '../model/asymptote';
 import {
   background,
@@ -153,7 +154,7 @@ export function sampleExpansion(
   let failure: string | null = null;
   try {
     for (const lt of targets) {
-      const tau = lt === -Infinity ? 0 : 10 ** (lt + logH0);
+      const tau = lt === -Infinity ? 0 : pow10(lt + logH0);
       while (j + 1 < nodes.length && nodes[j + 1].y[0] < tau) j++;
       const n = nodes[j],
         next = nodes[Math.min(j + 1, nodes.length - 1)];

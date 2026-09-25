@@ -1,6 +1,7 @@
 import { astrophysics } from '../astrophysics';
 import { C_KM_S, LN10 } from '../core/constants';
 import { ln, safe } from '../core/numeric';
+import { powPortable } from '../core/pow';
 import type { Model } from '../model/background';
 import { darkEnergyLaw } from '../model/segment';
 import type { Sample } from '../types';
@@ -20,10 +21,12 @@ export function timeDomainFluids({ c, matter }: Model) {
     3 * (c.wa * (a - 1) - (1 + c.w0 + c.wa) * Math.log(a));
   /** Matter, radiation, dark-energy and curvature terms of E² at a. */
   const density = (a: number) => [
-    M / a ** 3,
-    c.omegaR / a ** 4,
-    cpl ? Math.sign(c.omegaDE) * Math.exp(lnCpl(a)) : c.omegaDE / a ** n,
-    c.omegaK / a ** 2,
+    M / powPortable(a, 3),
+    c.omegaR / powPortable(a, 4),
+    cpl
+      ? Math.sign(c.omegaDE) * Math.exp(lnCpl(a))
+      : c.omegaDE / powPortable(a, n),
+    c.omegaK / powPortable(a, 2),
   ];
   /** The dark-energy w at a and the weight 1 + 3w of its term in ä/a. */
   const w = (a: number) =>

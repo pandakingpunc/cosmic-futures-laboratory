@@ -11,6 +11,7 @@ import {
 import type { Configuration, PhysicsEvent } from '@/src/science/types';
 import { defaultConfig, presets } from '@/src/science/defaults';
 import type { Validation } from '@/src/science/engine';
+import { powPortable } from '@/src/science/core/pow';
 import {
   Choice,
   NumberField,
@@ -177,8 +178,8 @@ export function ConfigurationPanel({
             onClick={() =>
               set(
                 'omegaR',
-                (2.4728e-5 / (c.H0 / 100) ** 2) *
-                  (c.Tcmb / 2.7255) ** 4 *
+                (2.4728e-5 / powPortable(c.H0 / 100, 2)) *
+                  powPortable(c.Tcmb / 2.7255, 4) *
                   (1 + 0.2271 * Math.max(0, c.Neff - 1.0153)),
               )
             }

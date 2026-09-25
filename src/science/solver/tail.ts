@@ -7,6 +7,7 @@ import {
   logHorizonTemperature,
 } from '../core/constants';
 import { ln, safe } from '../core/numeric';
+import { pow10 } from '../core/pow';
 import { asymptote } from '../model/asymptote';
 import { background, type Model } from '../model/background';
 import type { Stop } from '../model/segment';
@@ -176,8 +177,8 @@ export function extendTail(input: TailInput): TailOutcome {
       const ripLog =
         Math.max(anchorLog, tailLog) +
         Math.log10(
-          10 ** (anchorLog - Math.max(anchorLog, tailLog)) +
-            10 ** (tailLog - Math.max(anchorLog, tailLog)),
+          pow10(anchorLog - Math.max(anchorLog, tailLog)) +
+            pow10(tailLog - Math.max(anchorLog, tailLog)),
         );
       if (lt >= ripLog - 1e-10) {
         events.push({
@@ -196,7 +197,7 @@ export function extendTail(input: TailInput): TailOutcome {
         };
         break;
       }
-      const u = 10 ** (Math.log10(-p) + heLog + dtLog);
+      const u = pow10(Math.log10(-p) + heLog + dtLog);
       dx = Math.log1p(-u) / p;
       deltaA = dx / LN10;
       newA = anchorA + deltaA;
@@ -209,17 +210,17 @@ export function extendTail(input: TailInput): TailOutcome {
       logLogA =
         Math.max(anchorLogLogA, dxLog) +
         Math.log10(
-          10 ** (anchorLogLogA - Math.max(anchorLogLogA, dxLog)) +
-            10 ** (dxLog - Math.max(anchorLogLogA, dxLog)),
+          pow10(anchorLogLogA - Math.max(anchorLogLogA, dxLog)) +
+            pow10(dxLog - Math.max(anchorLogLogA, dxLog)),
         );
-      deltaA = dxLog < 307 ? 10 ** dxLog : Infinity;
+      deltaA = dxLog < 307 ? pow10(dxLog) : Infinity;
       dx = deltaA * LN10;
-      newA = logLogA < 307 ? 10 ** logLogA : Infinity;
+      newA = logLogA < 307 ? pow10(logLogA) : Infinity;
       newH = anchorH;
     } else {
       const productLog = Math.log10(p) + heLog + dtLog;
       dx =
-        (productLog > 30 ? productLog * LN10 : Math.log1p(10 ** productLog)) /
+        (productLog > 30 ? productLog * LN10 : Math.log1p(pow10(productLog))) /
         p;
       deltaA = dx / LN10;
       newA = anchorA + deltaA;
@@ -235,7 +236,7 @@ export function extendTail(input: TailInput): TailOutcome {
       logYears: lt,
       isPresent: false,
       logA: safe(newA),
-      expansionIndex: logLogA > 12 ? logLogA : Math.log10(1 + 10 ** logLogA),
+      expansionIndex: logLogA > 12 ? logLogA : Math.log10(1 + pow10(logLogA)),
       logH: safe(newH),
       logRhoB: safe(ln(c.omegaB) / LN10 - 3 * newA),
       logRhoDM: safe((anchor.logRhoDM ?? -Infinity) - 3 * deltaA),
@@ -266,7 +267,7 @@ export function extendTail(input: TailInput): TailOutcome {
       const ratioLog = dtLog - c.dmLogLifetime;
       s.logRhoDM =
         ratioLog < 307 && s.logRhoDM !== null
-          ? s.logRhoDM - 10 ** ratioLog / LN10
+          ? s.logRhoDM - pow10(ratioLog) / LN10
           : null;
       s.logRhoR = null;
     }
