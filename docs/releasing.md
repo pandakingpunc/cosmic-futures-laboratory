@@ -2,12 +2,11 @@
 
 The project owner is **Mustafa Karatum**, GitHub username **pandakingpunc**, an **Independent researcher** with no institutional affiliation or ORCID declared. Both citation files contain this supplied metadata; ORCID is omitted. The public repository is [pandakingpunc/cosmic-futures-laboratory](https://github.com/pandakingpunc/cosmic-futures-laboratory).
 
-## Version 0.3.0 (prepared 2026-09-25, not yet tagged)
+## Version 0.3.0 (tagged 2026-09-25)
 
 - `package.json`, both `package-lock.json` root versions, `VERSION` in `src/science/types.ts`, `CITATION.cff` and `.zenodo.json` say `0.3.0`. `CITATION.cff` `date-released`, `.zenodo.json` `publication_date` and the `CHANGELOG.md` heading say `2026-09-25`. `npm run release:check` passes.
-- The 0.2.0 version DOI was removed from the top-level `doi` field of `CITATION.cff`; the earlier version DOIs stay under `identifiers`. No 0.3.0 DOI is written anywhere, because Zenodo has not assigned one.
-- If the release is published on a later day, update the three dates together. The example timestamps derive from `CITATION.cff`, so then also run `npm run examples` and `python scripts/validate_scipy.py` (without `--check`, to refresh `docs/scipy-validation.json`). Run `npm run check` and `npm run release:check` before tagging.
-- To publish: push `main`, confirm CI passes on Ubuntu and Windows, tag `v0.3.0` on that commit, and publish a GitHub release for the tag. After Zenodo archives it, record the new version DOI in `CITATION.cff` (top-level `doi` plus an `identifiers` entry), `CHANGELOG.md`, the README citation and this guide.
+- Tag `v0.3.0` points to source revision `e1dedfc`. Before the GitHub release was published, the [CI run for that commit on `main`](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/runs/36101174214) passed on Ubuntu and Windows and the [release-tag workflow](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/runs/36101349555) passed.
+- Version DOI: [10.5281/zenodo.22953979](https://doi.org/10.5281/zenodo.22953979), assigned on 2026-09-25 from the published GitHub release [`v0.3.0`](https://github.com/pandakingpunc/cosmic-futures-laboratory/releases/tag/v0.3.0). It is recorded in `CITATION.cff` (top-level `doi` and `identifiers`), `CHANGELOG.md` and the README citation.
 
 ## Version 0.2.0 (tagged 2026-09-14)
 
@@ -39,7 +38,7 @@ All files below are in the repository root unless a directory is stated.
 | Affiliation | `affiliation` in the corresponding author/creator entry in both files | Entered as Independent researcher; no institution claimed |
 | Other authors | Add entries to both author/creator arrays | Include if applicable |
 | Release date/version | `date-released` and `version` in CFF; `publication_date` and `version` in Zenodo JSON | Verify at release time |
-| Version DOI | `doi` in `CITATION.cff`; recommended citation (the README badge uses the concept DOI) | `10.5281/zenodo.22750182` for version 0.2.0; `10.5281/zenodo.22343412` for 0.1.0 |
+| Version DOI | `doi` in `CITATION.cff`; recommended citation (the README badge uses the concept DOI) | `10.5281/zenodo.22953979` for version 0.3.0; `10.5281/zenodo.22750182` for 0.2.0; `10.5281/zenodo.22343412` for 0.1.0 |
 
 These fields are publication metadata, not simulator settings. When both files are present, Zenodo uses `.zenodo.json` for GitHub archival, so keep author, title, version, date and license synchronized with `CITATION.cff`. The Zenodo JSON deliberately omits a fixed `doi` so that future releases can receive their own version DOI. See the [official Zenodo metadata guide](https://help.zenodo.org/docs/github/describe-software/zenodo-json/).
 
@@ -58,10 +57,10 @@ Use Zenodo's GitHub integration for the chosen repository or manually upload a s
 
 After Zenodo assigns a DOI, record the version DOI in the citation metadata for the appropriate release, distinguish it from the concept DOI, and update the recommended citation. Do not invent a DOI or use another software project's identifier.
 
-Recommended citation for version 0.2.0:
+Recommended citation for version 0.3.0:
 
-> Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.2.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22750182
+> Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.3.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22953979
 
-For version 0.1.0 use DOI 10.5281/zenodo.22343412 with the same form.
+For version 0.2.0 use DOI 10.5281/zenodo.22750182 and for version 0.1.0 DOI 10.5281/zenodo.22343412, with the same form.
 
 Public deployment or archival remains an explicit owner action. The application may have a separately hosted private preview; that is not GitHub publication or Zenodo archival.

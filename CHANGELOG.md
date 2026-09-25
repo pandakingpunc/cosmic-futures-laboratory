@@ -2,7 +2,7 @@
 
 ## 0.3.0 — 2026-09-25
 
-Prepared for release; not yet archived. Zenodo assigns the version DOI when the GitHub release is published, and it is recorded afterwards (see `docs/releasing.md`). Until then, cite the concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411). This release has not undergone external scientific peer review.
+Archived on Zenodo from GitHub release `v0.3.0`: version DOI [10.5281/zenodo.22953979](https://doi.org/10.5281/zenodo.22953979). The concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411) resolves to the latest archived version. This release has not undergone external scientific peer review.
 
 This version rebuilds the engine as layered modules with bit-identical results, makes every output identical on Linux and Windows with Node.js 24, fixes 73 defects confirmed by an independent audit, and adds exact event location, de Sitter thermodynamics and a proof-based continuation of CPL dark-energy laws. Every change to a numerical output is listed under **Changed (numerical outputs)**.
 

@@ -158,19 +158,17 @@ docs/                   Methodology, limits, provenance, validation, publication
 
 ## GitHub and Zenodo release
 
-Version **0.3.0** is prepared for release (dated 2026-09-25 in the citation files) but not yet archived. Zenodo will assign its version DOI when the GitHub release `v0.3.0` is published; the DOI is then recorded in `CITATION.cff`, this README and `CHANGELOG.md`. Until then, refer to 0.3.0 through the concept DOI:
+Version **0.3.0** was archived on Zenodo on **2026-09-25**, with version DOI [10.5281/zenodo.22953979](https://doi.org/10.5281/zenodo.22953979), from GitHub release [`v0.3.0`](https://github.com/pandakingpunc/cosmic-futures-laboratory/releases/tag/v0.3.0), source revision `e1dedfc`. The concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411) always resolves to the latest archived version.
 
-> Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.3.0) [Computer software]. https://doi.org/10.5281/zenodo.22343411
-
-Version **0.2.0** was archived on Zenodo on **2026-09-14**, with version DOI [10.5281/zenodo.22750182](https://doi.org/10.5281/zenodo.22750182), from GitHub release [`v0.2.0`](https://github.com/pandakingpunc/cosmic-futures-laboratory/releases/tag/v0.2.0), source revision `2679395`. The concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411) always resolves to the latest archived version.
+Version **0.2.0** was archived on Zenodo on **2026-09-14**, with version DOI [10.5281/zenodo.22750182](https://doi.org/10.5281/zenodo.22750182), from GitHub release [`v0.2.0`](https://github.com/pandakingpunc/cosmic-futures-laboratory/releases/tag/v0.2.0), source revision `2679395`.
 
 Version **0.1.0** was archived on Zenodo on **2026-09-05**, with version DOI [10.5281/zenodo.22343412](https://doi.org/10.5281/zenodo.22343412). The archive corresponds to GitHub tag [`v0.1.0.0`](https://github.com/pandakingpunc/cosmic-futures-laboratory/releases/tag/v0.1.0.0), source revision `eaeedceceff2856f9c70743eb538c28dc10e9cde`. Tags `v0.1.0` and `v0.1.0.0` contain the same source; the software version is `0.1.0`.
 
 Recommended citation for the latest archived version:
 
-> Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.2.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22750182
+> Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.3.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.22953979
 
-Cite version 0.1.0 with its own DOI, 10.5281/zenodo.22343412, when referring to that archive.
+Cite versions 0.2.0 and 0.1.0 with their own DOIs, 10.5281/zenodo.22750182 and 10.5281/zenodo.22343412, when referring to those archives.
 
 Author metadata records **Mustafa Karatum — Independent researcher**. The repository includes MIT licensing, `CITATION.cff`, `.zenodo.json`, CI, release notes and a publication checklist. Follow [the release guide](docs/releasing.md) for subsequent versions and DOI handling. Run `npm run release:check` before tagging a release; it fails on any version, date or DOI inconsistency.
 

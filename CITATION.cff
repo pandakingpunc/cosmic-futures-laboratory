@@ -6,6 +6,7 @@ title: 'Cosmic Futures Laboratory: a numerical laboratory for conditional cosmol
 type: software
 repository-code: 'https://github.com/pandakingpunc/cosmic-futures-laboratory'
 version: 0.3.0
+doi: 10.5281/zenodo.22953979
 date-released: '2026-09-25'
 identifiers:
   - type: doi
@@ -17,6 +18,9 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.22750182
     description: Version DOI of the archived 0.2.0 release
+  - type: doi
+    value: 10.5281/zenodo.22953979
+    description: Version DOI of the archived 0.3.0 release
 license: MIT
 authors:
   - family-names: Karatum

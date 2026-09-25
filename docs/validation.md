@@ -2,6 +2,8 @@
 
 ## Version 0.3.0 — validated 2026-09-25
 
+Archived on Zenodo on 2026-09-25 from GitHub release `v0.3.0` (source revision `e1dedfc`) with version DOI [10.5281/zenodo.22953979](https://doi.org/10.5281/zenodo.22953979), under concept DOI 10.5281/zenodo.22343411. For that commit, [CI](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/runs/36101174214) passed the tests on Ubuntu and Windows, the validate job and the SciPy job, and the [release-tag workflow](https://github.com/pandakingpunc/cosmic-futures-laboratory/actions/runs/36101349555) passed.
+
 Validated locally on 2026-09-25 with Node.js 24.19.0 on Windows 11 (AMD Ryzen 5 5600) and the pinned dependency tree, before GitHub publication. The CI workflow repeats the tests on Ubuntu and Windows when the source is pushed. These checks establish specific numerical and software behaviour; they are not external scientific peer review.
 
 ### Gates
@@ -17,7 +19,7 @@ Validated locally on 2026-09-25 with Node.js 24.19.0 on Windows 11 (AMD Ryzen 5 
 - `python scripts/validate_scipy.py --check` passes: the independent SciPy reference matches `docs/scipy-validation.json` to 10⁻¹².
 - `python scripts/pow_reference.py --check` passes: Python's `decimal` module reproduces all 2,451 exact reference powers of `tests/reference/pow.json`.
 - `npm run examples` and `npm run golden:update` regenerate byte-identical files. Example timestamps come from `SOURCE_DATE_EPOCH` or the `CITATION.cff` release date.
-- `npm run release:check` passes for 0.3.0, with no DOI recorded for this version.
+- `npm run release:check` passes for 0.3.0: before tagging with no DOI recorded, and after archival with the version DOI recorded.
 - Production builds: see [Production builds for 0.3.0](#production-builds-for-030).
 
 ### Engine restructuring (bit-identical)
