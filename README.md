@@ -158,7 +158,7 @@ docs/                   Methodology, limits, provenance, validation, publication
 
 ## GitHub and Zenodo release
 
-Version **0.3.0** is prepared for release (dated 2026-09-24 in the citation files) but not yet archived. Zenodo will assign its version DOI when the GitHub release `v0.3.0` is published; the DOI is then recorded in `CITATION.cff`, this README and `CHANGELOG.md`. Until then, refer to 0.3.0 through the concept DOI:
+Version **0.3.0** is prepared for release (dated 2026-09-25 in the citation files) but not yet archived. Zenodo will assign its version DOI when the GitHub release `v0.3.0` is published; the DOI is then recorded in `CITATION.cff`, this README and `CHANGELOG.md`. Until then, refer to 0.3.0 through the concept DOI:
 
 > Karatum, M. (2026). *Cosmic Futures Laboratory: a numerical laboratory for conditional cosmological futures* (Version 0.3.0) [Computer software]. https://doi.org/10.5281/zenodo.22343411
 

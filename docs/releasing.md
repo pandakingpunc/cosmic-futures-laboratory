@@ -2,9 +2,9 @@
 
 The project owner is **Mustafa Karatum**, GitHub username **pandakingpunc**, an **Independent researcher** with no institutional affiliation or ORCID declared. Both citation files contain this supplied metadata; ORCID is omitted. The public repository is [pandakingpunc/cosmic-futures-laboratory](https://github.com/pandakingpunc/cosmic-futures-laboratory).
 
-## Version 0.3.0 (prepared 2026-09-24, not yet tagged)
+## Version 0.3.0 (prepared 2026-09-25, not yet tagged)
 
-- `package.json`, both `package-lock.json` root versions, `VERSION` in `src/science/types.ts`, `CITATION.cff` and `.zenodo.json` say `0.3.0`. `CITATION.cff` `date-released`, `.zenodo.json` `publication_date` and the `CHANGELOG.md` heading say `2026-09-24`. `npm run release:check` passes.
+- `package.json`, both `package-lock.json` root versions, `VERSION` in `src/science/types.ts`, `CITATION.cff` and `.zenodo.json` say `0.3.0`. `CITATION.cff` `date-released`, `.zenodo.json` `publication_date` and the `CHANGELOG.md` heading say `2026-09-25`. `npm run release:check` passes.
 - The 0.2.0 version DOI was removed from the top-level `doi` field of `CITATION.cff`; the earlier version DOIs stay under `identifiers`. No 0.3.0 DOI is written anywhere, because Zenodo has not assigned one.
 - If the release is published on a later day, update the three dates together. The example timestamps derive from `CITATION.cff`, so then also run `npm run examples` and `python scripts/validate_scipy.py` (without `--check`, to refresh `docs/scipy-validation.json`). Run `npm run check` and `npm run release:check` before tagging.
 - To publish: push `main`, confirm CI passes on Ubuntu and Windows, tag `v0.3.0` on that commit, and publish a GitHub release for the tag. After Zenodo archives it, record the new version DOI in `CITATION.cff` (top-level `doi` plus an `identifiers` entry), `CHANGELOG.md`, the README citation and this guide.

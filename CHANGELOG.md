@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 — 2026-09-24
+## 0.3.0 — 2026-09-25
 
 Prepared for release; not yet archived. Zenodo assigns the version DOI when the GitHub release is published, and it is recorded afterwards (see `docs/releasing.md`). Until then, cite the concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411). This release has not undergone external scientific peer review.
 
