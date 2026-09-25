@@ -9,7 +9,7 @@ Source repository: [pandakingpunc/cosmic-futures-laboratory](https://github.com/
 
 This is version **0.3.0, a research software preview**. Its core is checked in several independent ways:
 
-- 197 automated tests: analytic benchmarks, a bit-exact golden master of every example output, property-based fuzzing and regression tests for each defect found by an independent audit;
+- 203 automated tests: analytic benchmarks, a bit-exact golden master of every example output, property-based fuzzing and regression tests for each defect found by an independent audit;
 - line coverage above 99%;
 - an independent SciPy reference.
 
@@ -132,7 +132,9 @@ npm run examples
 python scripts/validate_scipy.py --check
 ```
 
-`--check` recomputes the SciPy reference and compares it with `docs/scipy-validation.json` without writing; omit it to rewrite the record.
+`--check` recomputes the SciPy reference and compares it with `docs/scipy-validation.json` without writing; omit it to rewrite the record. Likewise, `python scripts/pow_reference.py --check` recomputes the exact reference powers of `tests/reference/pow.json` with Python's `decimal` module.
+
+With Node.js 24, results are bit-identical on Linux and Windows. CI recomputes every golden output on both, and `tests/pow.test.ts` compares SHA-256 digests of 100,000 powers and of the engine's `Math` functions with committed values. Browsers with a newer JavaScript engine, and the HTTP API of the Cloudflare Workers build, reproduce them only approximately; the Vercel build runs the API on Node.js 24 (see `docs/scope.md`).
 
 ## Project structure
 
@@ -152,7 +154,7 @@ docs/                   Methodology, limits, provenance, validation, publication
 .github/                CI, Dependabot and contribution templates
 ```
 
-`npm run check:arch` enforces the dependency direction core → model → solver → orchestration → analysis → dispatch → worker/index, and keeps UI code out of `src/science`.
+`npm run check:arch` enforces the dependency direction core → model → solver → orchestration → analysis → dispatch → worker/index, and keeps UI code out of `src/science`. It also rejects `**` and `Math.pow` there and in the interface code: V8 evaluates them with the operating system's C library, which rounds differently on Linux and Windows, so the engine uses the platform-independent `pow10` and `powPortable` from `src/science/core/pow.ts`. For the same reason the engine uses `tanhPortable` instead of `Math.tanh`.
 
 ## GitHub and Zenodo release
 

@@ -4,7 +4,7 @@
 
 Prepared for release; not yet archived. Zenodo assigns the version DOI when the GitHub release is published, and it is recorded afterwards (see `docs/releasing.md`). Until then, cite the concept DOI [10.5281/zenodo.22343411](https://doi.org/10.5281/zenodo.22343411). This release has not undergone external scientific peer review.
 
-This version rebuilds the engine as layered modules with bit-identical results, fixes 73 defects confirmed by an independent audit, and adds exact event location, de Sitter thermodynamics and a proof-based continuation of CPL dark-energy laws. Every change to a numerical output is listed under **Changed (numerical outputs)**.
+This version rebuilds the engine as layered modules with bit-identical results, makes every output identical on Linux and Windows with Node.js 24, fixes 73 defects confirmed by an independent audit, and adds exact event location, de Sitter thermodynamics and a proof-based continuation of CPL dark-energy laws. Every change to a numerical output is listed under **Changed (numerical outputs)**.
 
 ### Added — science
 
@@ -29,12 +29,17 @@ This version rebuilds the engine as layered modules with bit-identical results, 
 ### Added — engineering and verification
 
 - **Layered engine.** The engine is split into modules (`src/science/core`, `model`, `solver`, plus `classify`, `vacuum`, `continuation` and an orchestrating `engine.ts`). `npm run check:arch` enforces the layer order and forbids UI imports. `src/science/index.ts` is the public library entry.
-- **Faster integration, identical results.** DOPRI5 now uses loops with the same summation order and first-same-as-last stage reuse. Default runs, ensembles and sweeps are about 2.5–3× faster. A differential check of 21,000 configurations found zero bit differences against 0.2.0.
+- **Faster integration, identical results.** DOPRI5 now uses loops with the same summation order and first-same-as-last stage reuse. Default runs, ensembles and sweeps are about 2–2.5× faster than 0.2.0 on the same machine, 1000-sample runs about 3×, including the cost of the platform-independent powers below (`docs/validation.md`, Timings). For this restructuring, a differential check of 21,000 configurations on Windows found zero bit differences against 0.2.0; it predates the platform-independent powers below.
+- **Platform-independent powers.** V8 evaluates `**` and `Math.pow` with the operating system's C library, which rounds differently on Linux and Windows, so CI failed on Ubuntu for six golden cases. All 34 power operations in `src/science`, and the interface's "Derive Ωr" action, now call `pow10` or `powPortable` from `src/science/core/pow.ts`. These use only IEEE 754 arithmetic (+, −, ×, ÷, √), which rounds identically on every platform, and exact operations such as `Math.round`; they call no `Math.exp`, `Math.log` or `Math.pow`. Logarithms and exponentials are evaluated in double-double arithmetic around a table of e^(j/64) built at load time.
+  - The results are nearly correctly rounded. All 2,451 exact reference powers from Python's `decimal` module (`scripts/pow_reference.py`, rechecked in CI) are correctly rounded, including subnormal results and results that round to zero. A sweep of 168,000 further inputs against 80-digit `decimal` found one result 0.50001 ulp from the exact value. Exact ties between two doubles, which need special inputs such as integer powers of powers of two, may round to either neighbour.
+  - Custom w(a) equations evaluate tanh with `tanhPortable`, fdlibm's formula on `Math.expm1`. It gives the bits of `Math.tanh` in Node.js 24, whereas newer V8 versions take `Math.tanh` from the operating system's C library.
+  - `npm run check:arch` now rejects `**`, `**=` and `Math.pow` in `src/science`, `components/` and `app/`, and `Math.tanh` in `src/science`, in every script file type.
+  - SHA-256 digests of 100,000 powers and of 180,000 results of the engine's `Math` functions are committed in `tests/pow.test.ts`, so the Ubuntu and Windows CI jobs must agree bit for bit.
 - **Golden master.** Every example result, the baseline report and a corpus of 16 extra fingerprinted cases (`tests/golden/`) must reproduce exactly. Example generation is deterministic: `SOURCE_DATE_EPOCH`, or the `CITATION.cff` release date. CI fails when committed examples drift.
 - **Tests.**
-  - Tests now run on `node:test`, split by topic: 197 tests, up from 45.
+  - Tests now run on `node:test`, split by topic: 203 tests, up from 45.
   - Property/fuzz invariants (`tests/properties.test.ts`, `npm run fuzz`) and regression tests named after each audit finding.
-  - `npm run coverage` measures the real TypeScript sources (99% of lines, 95% of branches, 100% of functions; thresholds 98/94/98).
+  - `npm run coverage` measures the real TypeScript sources (99.3% of lines, 95.8% of branches, 100% of functions; thresholds 98/94/98).
 - **Benchmarks.** `npm run bench` reports deterministic work counters and timings. CI gates the counters against `bench/baseline.json`.
 - **HTTP API limits.**
   - Each request gets a deterministic budget of 10⁶ derivative evaluations, at most 64 ensemble runs and at most 11×11 sweeps.
@@ -60,6 +65,9 @@ Backgrounds, step counts and statuses of the examples are unchanged except for t
 - **Absent dark energy** reports `w: null`. A contracting universe without radiation reports a null effective radiation temperature.
 - **Example presets.** Example configurations that are not an unchanged preset are labelled `custom`, which changes 14 configuration hashes. Hashes of unchanged configurations are identical.
 - **Ensembles** draw each run's vacuum-clock seed from a separate stream, and posterior mode draws only the row index. Sensitivity steps adapt to small H₀ or Ωm.
+- **Platform-independent powers.** With Node.js 24, outputs are now bit-identical on Linux and Windows. Before, Ubuntu reproduced six golden cases only to 10⁻¹²–10⁻¹⁶, and to 0.012 in log₁₀ H beside the bounce of the oscillating case, where H nearly vanishes. Against the previous Windows outputs, values change only where the Windows `pow` was not correctly rounded (by 1 ulp in each of the 30 affected powers):
+  - every committed example is unchanged;
+  - three golden-corpus cases on the time-domain branch (closed radiation and closed CPL recollapse, oscillating bounce) change by at most 3.8×10⁻¹² in log₁₀ quantities and at most 1.5×10⁻¹² relative in any value, with unchanged events, step counts and statuses.
 
 ### Fixed
 

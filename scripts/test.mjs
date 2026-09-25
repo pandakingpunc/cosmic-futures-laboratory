@@ -20,7 +20,7 @@ async function runTests() {
   if (!entries.length) throw new Error('No tests/**/*.test.ts files found.');
   if (coverage) {
     // One process loads each source module once, so the report is exact and
-    // reproducible. Measured with Node 24: 99.1% lines, 95.4% branches, 100%
+    // reproducible. Measured with Node 24: 99.3% lines, 95.8% branches, 100%
     // functions; the thresholds leave 1–2 points for incidental changes.
     // Node reports only modules a test loads, so the browser worker and the
     // re-export entry points (index.ts, integrator.ts) are not measured.

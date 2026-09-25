@@ -1,20 +1,21 @@
 # Validation record
 
-## Version 0.3.0 — validated 2026-09-24
+## Version 0.3.0 — validated 2026-09-25
 
-Validated locally on 2026-09-24 with Node.js 24.19.0 on Windows 11 (AMD Ryzen 5 5600) and the pinned dependency tree, before GitHub publication. The CI workflow repeats the tests on Ubuntu and Windows when the source is pushed. These checks establish specific numerical and software behaviour; they are not external scientific peer review.
+Validated locally on 2026-09-25 with Node.js 24.19.0 on Windows 11 (AMD Ryzen 5 5600) and the pinned dependency tree, before GitHub publication. The CI workflow repeats the tests on Ubuntu and Windows when the source is pushed. These checks establish specific numerical and software behaviour; they are not external scientific peer review.
 
 ### Gates
 
-- `npm test`: **197 tests** pass under `node:test`. They include:
+- `npm test`: **203 tests** pass under `node:test`. They include:
   - the golden master: all 16 example results, the baseline report and 16 fingerprinted corpus cases, compared exactly;
   - property/fuzz invariants: 300 random configurations and 20,000 expressions per run;
   - a regression test named after each fixed audit finding;
   - analytic benchmarks, API and release-metadata checks.
-- `npm run coverage`: 99.22% of lines, 95.64% of branches and 100% of functions of the measured TypeScript sources, against thresholds of 98/94/98. Node measures only modules that a test loads, so the browser worker and the re-export entries are not counted.
-- `npm run typecheck`, `npm run lint`, `npm run format:check` and `npm run check:arch` (58 modules in their layers) pass.
+- `npm run coverage`: 99.27% of lines, 95.80% of branches and 100% of functions of the measured TypeScript sources, against thresholds of 98/94/98. Node measures only modules that a test loads, so the browser worker and the re-export entries are not counted.
+- `npm run typecheck`, `npm run lint`, `npm run format:check` and `npm run check:arch` (59 modules checked) pass.
 - `npm run bench -- --check-counters --counters-only`: the work counters are within 1% of `bench/baseline.json`.
 - `python scripts/validate_scipy.py --check` passes: the independent SciPy reference matches `docs/scipy-validation.json` to 10⁻¹².
+- `python scripts/pow_reference.py --check` passes: Python's `decimal` module reproduces all 2,451 exact reference powers of `tests/reference/pow.json`.
 - `npm run examples` and `npm run golden:update` regenerate byte-identical files. Example timestamps come from `SOURCE_DATE_EPOCH` or the `CITATION.cff` release date.
 - `npm run release:check` passes for 0.3.0, with no DOI recorded for this version.
 - Production builds: see [Production builds for 0.3.0](#production-builds-for-030).
@@ -27,7 +28,42 @@ The 0.2.0 engine was split into layered modules and its Dormand–Prince step re
 - 370 ensemble, sensitivity, sweep and dispatcher runs, plus a 256-run ensemble and a 15×15 sweep for both presets;
 - about 10.8 million reused first stages and 4.8 million reused Newton slopes, each recomputed and compared.
 
-Removing the stage-reuse reset after an intervention makes the golden corpus fail.
+Removing the stage-reuse reset after an intervention makes the golden corpus fail. These comparisons ran on Windows, before powers were made platform-independent (next section).
+
+### Platform-independent powers
+
+The first CI run of 0.3.0 failed on Ubuntu only, with Node.js 24 on Ubuntu and Windows. Three examples and three golden-corpus cases differed from the committed Windows outputs:
+
+- in the last digits (10⁻¹²–10⁻¹⁶);
+- by 0.012 in log₁₀ H beside the bounce of `oscillating-bounce`, where H nearly vanishes.
+
+A temporary probe workflow ran Node.js 24.19.0, 24.20.0 and 24.21.0 on both systems and compared hashes of 200,000 results per `Math` function:
+
+- `Math.pow` and `**` with non-integer exponents differed between Linux and Windows for every Node.js version;
+- `exp`, `expm1`, `log`, `log10`, `log2`, `log1p`, `sqrt`, `cbrt`, the trigonometric, inverse trigonometric and hyperbolic functions and `hypot` were bit-identical.
+
+This holds for Node.js 24 (V8 13.6). A review of newer V8 sources and of Chrome 153 found that `Math.tanh` now calls the operating system's C library, and that `exp`, `expm1`, `log`, `log1p`, `log10`, `sin` and `cos` call a compiled-in LLVM libc: the same on every system, but not the same bits as Node.js 24 (see [scope](scope.md)).
+
+All 34 power operations of `src/science` and the interface's "Derive Ωr" action now use `src/science/core/pow.ts`, which calls no `Math` function besides `Math.round`, `Math.floor`, `Math.abs` and `Math.sqrt` (see the [methodology](methodology.md#floating-point-reproducibility)). It is checked as follows:
+
+- **Reference powers.** All 2,451 powers in `tests/reference/pow.json` (1,306 of `pow10`, 1,145 of `powPortable`) come out correctly rounded; the test compares every row bit for bit. They were computed with Python's `decimal` module at 60 digits, and `python scripts/pow_reference.py --check` recomputes them. They include:
+  - all 632 integer powers 10⁻³²³ to 10³⁰⁸;
+  - 370 subnormal results, 91 of them in the top subnormal binade [2⁻¹⁰²³, 2⁻¹⁰²²), and 13 results just below 2⁻¹⁰⁷⁵ that round to zero;
+  - integer powers (a², a³, a⁴, a⁵, a¹⁷, a⁻², a⁻³, a⁻¹⁷) with subnormal results, and the 12 subnormal cases reported by the review of the first implementation (13 rows: one also with a negative base);
+  - results near the largest double, and bases within 3×10⁻¹⁵ of 1 with exponents up to 1.6×10¹⁷.
+- **Wider sweep.** During development, 168,000 further inputs were compared with Python's `decimal` at 80 digits over the full range of both functions, subnormal results included. One result is not correctly rounded: `powPortable(1.0105168357308432, -6078.687967329496)`, 0.50001 ulp from the exact value. A later review found that exact ties are not always rounded to even on the exp(b·ln a) path: of 245 ties among 122,115 integer powers of dyadic bases, 123 took the other neighbour (see the [methodology](methodology.md#floating-point-reproducibility)).
+- **Special cases.** They agree with the `**` operator on a 20×20 grid of NaN, ±0, ±∞, ±1, subnormal and extreme values. Squares with subnormal results equal the correctly rounded product a·a.
+- **Committed digests.** SHA-256 digests of 100,000 powers, covering the integer, exp/log, overflow, underflow and subnormal paths, and of 180,000 results of the engine's `Math` functions are committed. The power inputs use only exact operations (seeded integer random numbers, `Math.round`, +, −, ×, ÷), so only `pow.ts` can change the first digest. CI must reproduce both on Ubuntu and Windows.
+- **tanh.** Custom w(a) equations evaluate tanh with `tanhPortable`, fdlibm's formula on `Math.expm1`. It equalled Node.js 24's `Math.tanh` bit for bit on 1,018,025 inputs (random values, random bit patterns and dense scans around the branch points 2⁻²⁸, 1 and 22); `tests/pow.test.ts` compares 20,000 more.
+- **Architecture check.** `npm run check:arch` rejects `**`, `**=` and `Math.pow` (also as `Math['pow']` or destructured in a declaration) in `src/science`, `components/` and `app/`, and `Math.tanh` in `src/science`, in `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs` and `.cjs` files.
+
+Against the previous Windows outputs, every committed example is unchanged. Instrumenting every power call shows why. Over the examples and the golden corpus, 30 distinct powers differ between the Windows `**` and `powPortable`, each by 1 ulp, and in all 30 `powPortable` gives the correctly rounded value (Python `decimal`). In the example runs, 11 such differences did not reach any output. Three golden-corpus cases on the time-domain branch change, where integer powers of the scale factor (a³, a⁴ and a⁶) were misrounded:
+
+- `closed-radiation-recollapse`: 12 values in its last three samples, by at most 3.8×10⁻¹² (log₁₀ ρr; 2.5×10⁻¹³ relative);
+- `cpl-closed-recollapse`: 14 values in its last two samples, by at most 5.0×10⁻¹³ in log₁₀ quantities; the largest relative change, 1.5×10⁻¹², is in an Ωde of 8×10⁻¹⁸;
+- `oscillating-bounce`: 5 values of one sample, by at most 1.9×10⁻¹⁴ (in q; 3.3×10⁻¹⁵ relative).
+
+Their events, step counts and statuses are unchanged.
 
 ### Independent audit
 
@@ -45,14 +81,14 @@ Median of 7 runs after 2 warm-ups (`npm run bench`), single Node.js process. The
 
 | Workload | 0.2.0 | 0.3.0 |
 | --- | ---: | ---: |
-| Default run, 240 samples to 10¹⁰⁰ yr | 10.7 ms | 5.6 ms |
-| 1000 samples to 10¹¹ yr | 21.3 ms | 7.9 ms |
-| Ensemble, 64 realizations | 281 ms | 139 ms |
-| Sweep, 9×9 grid | 376 ms | 233 ms |
-| Sensitivity | 10.9 ms | 6.5 ms |
-| DESI 2026 CPL preset | 16.6 ms, stops at 10¹⁸ yr | 10.6 ms, resolved to 10¹⁰⁰ yr |
+| Default run, 240 samples to 10¹⁰⁰ yr | 10.7 ms | 5.3 ms |
+| 1000 samples to 10¹¹ yr | 21.3 ms | 7.2 ms |
+| Ensemble, 64 realizations | 281 ms | 126 ms |
+| Sweep, 9×9 grid | 376 ms | 154 ms |
+| Sensitivity | 10.9 ms | 5.8 ms |
+| DESI 2026 CPL preset | 16.6 ms, stops at 10¹⁸ yr | 9.7 ms, resolved to 10¹⁰⁰ yr |
 
-The 0.2.0 column was measured on the same machine at the start of this release cycle. Exact event location and the CPL continuation add work, which is why the ensemble and sweep gains are smaller than the ~2.6× measured for the restructuring alone.
+The 0.2.0 column was measured on the same machine at the start of this release cycle, the 0.3.0 column on 2026-09-25 with the platform-independent powers. Exact event location and the CPL continuation add work, which is why the ensemble and sweep gains are smaller than the ~2.6× measured for the restructuring alone. The portable powers cost some time: in an alternating comparison with the C library's `**` in one process (31 repetitions, two runs), workload times changed by −10% to +18%, median +9%.
 
 ### Production builds for 0.3.0
 

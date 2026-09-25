@@ -3,13 +3,14 @@
 Discuss a concrete scientific or usability problem before large changes. Keep the application, comments, documentation, reports and citation metadata in English. Follow the [code of conduct](CODE_OF_CONDUCT.md).
 
 1. Create a branch and install dependencies with `npm ci`.
-2. Keep numerical equations in `src/science`, observational facts in `data/observations`, and interface behavior in `components/lab`. Modules in `src/science` import only from their own or lower layers (core, model, solver, engine, analysis, dispatch, worker/entry); `scripts/check-architecture.mjs` documents the layers.
+2. Keep numerical equations in `src/science`, observational facts in `data/observations`, and interface behavior in `components/lab`. Modules in `src/science` import only from their own or lower layers (core, model, solver, engine, analysis, dispatch, worker/entry); `scripts/check-architecture.mjs` documents the layers. Compute powers there, and in interface code that prepares engine input, with `pow10` or `powPortable` from `src/science/core/pow.ts`, and tanh with `tanhPortable` from `src/science/core/numeric.ts`: `**`, `Math.pow` and, in newer V8 versions, `Math.tanh` round differently on Linux and Windows, and the architecture check rejects them.
 3. Cite primary sources for new physical assumptions. Specify the fit combination, confidence convention, units, validity domain and any transformations.
 4. Add an independent analytic or numerical benchmark for scientific changes. A test that repeats the implementation is insufficient. Test limiting cases, conservation and termination conditions.
 5. Before pushing, run `npm run check`. It runs the tests (including the golden-master comparison), type checking, lint, the architecture check, the solver work-counter check, the formatting check and example regeneration; `git diff examples/` must then be empty unless you changed numerical behaviour on purpose. Fix formatting with `npm run format`. CI also runs:
    - `npm run coverage`, which fails below its line, branch and function thresholds;
    - `npm run build`, `npm run build:vercel` and `npm run validate:vercel`;
    - `python scripts/validate_scipy.py --check`, the independent SciPy comparison (install `requirements-validation.txt` in a virtual environment first);
+   - `python scripts/pow_reference.py --check`, which recomputes the exact powers in `tests/reference/pow.json` with Python's `decimal` module (standard library only);
    - the tests on Windows as well as Linux.
 6. After a deliberate numerical change, run `npm run examples` and `npm run golden:update`, and explain every changed output in the pull request. After a deliberate algorithmic change, `npm run bench` reports timings and work counters; run `npm run bench -- --update-baseline` and commit `bench/baseline.json`. When background equations change, run `python scripts/validate_scipy.py` to update `docs/scipy-validation.json`.
 7. Update methodology, limitations and the changelog. Describe what was checked and any unresolved domain limits in the pull request.
