@@ -27,7 +27,7 @@
     "check": "npm test && npm run typecheck && npm run lint && npm run check:arch && npm run bench -- --check-counters --counters-only && npm run format:check && npm run examples"
   },
   "dependencies": {
-    "@base-ui/react": "1.7.0",
+    "@base-ui/react": "1.8.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "1.31.0",
